@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Frontend\Tests\Unit\ContentObject;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2009-2011 Oliver Hader <oliver@typo3.org>
+ *  (c) 2009-2013 Oliver Hader <oliver@typo3.org>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -37,7 +37,7 @@ class ContentObjectRendererTest extends \TYPO3\CMS\Core\Tests\UnitTestCase {
 	protected $cObj = NULL;
 
 	/**
-	 * @var \PHPUnit_Framework_MockObject_MockObject|\TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController
+	 * @var \PHPUnit_Framework_MockObject_MockObject|\TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController|\TYPO3\CMS\Core\Tests\AccessibleObjectInterface
 	 */
 	protected $tsfe = NULL;
 
@@ -51,11 +51,11 @@ class ContentObjectRendererTest extends \TYPO3\CMS\Core\Tests\UnitTestCase {
 	 */
 	public function setUp() {
 		$this->template = $this->getMock('TYPO3\\CMS\\Core\\TypoScript\\TemplateService', array('getFileName', 'linkData'));
-		$this->tsfe = $this->getMock('TYPO3\\CMS\\Frontend\\Controller\\TypoScriptFrontendController', array(), array(), '', FALSE);
+		$this->tsfe = $this->getAccessibleMock('TYPO3\\CMS\\Frontend\\Controller\\TypoScriptFrontendController', array('dummy'), array(), '', FALSE);
 		$this->tsfe->tmpl = $this->template;
 		$this->tsfe->config = array();
 		$this->tsfe->page = array();
-		$sysPageMock = $this->getMock('TYPO3\\CMS\\Frontend\\Page\\PageRepository');
+		$sysPageMock = $this->getMock('TYPO3\\CMS\\Frontend\\Page\\PageRepository', array('getRawRecord'));
 		$this->tsfe->sys_page = $sysPageMock;
 		$GLOBALS['TSFE'] = $this->tsfe;
 		$GLOBALS['TSFE']->csConvObj = new \TYPO3\CMS\Core\Charset\CharsetConverter();
@@ -784,6 +784,18 @@ class ContentObjectRendererTest extends \TYPO3\CMS\Core\Tests\UnitTestCase {
 	}
 
 	/**
+	 * Checks if stdWrap.cropHTML handles linebreaks correctly (by ignoring them)
+	 *
+	 * @test
+	 */
+	public function cropHtmlWorksWithLinebreaks() {
+		$subject = "Lorem ipsum dolor sit amet,\nconsetetur sadipscing elitr,\nsed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam";
+		$expected = "Lorem ipsum dolor sit amet,\nconsetetur sadipscing elitr,\nsed diam nonumy eirmod tempor invidunt ut labore et dolore magna";
+		$result = $this->cObj->cropHTML($subject, '121');
+		$this->assertEquals($expected, $result);
+	}
+
+	/**
 	 * Test for the stdWrap function "round"
 	 *
 	 * @param float $float
@@ -831,7 +843,7 @@ class ContentObjectRendererTest extends \TYPO3\CMS\Core\Tests\UnitTestCase {
 				),
 				'__Alien___',
 			),
-			'pad string with padWith _ and type both and length 6' => array(
+			'pad string with padWith ___ and type both and length 6' => array(
 				'Alien',
 				array(
 					'length' => '6',
@@ -839,6 +851,44 @@ class ContentObjectRendererTest extends \TYPO3\CMS\Core\Tests\UnitTestCase {
 					'type' => 'both',
 				),
 				'Alien_',
+			),
+			'pad string with padWith _ and type both and length 12, using stdWrap for length' => array(
+				'Alien',
+				array(
+					'length' => '1',
+					'length.' => array(
+						'wrap' => '|2',
+					),
+					'padWith' => '_',
+					'type' => 'both',
+				),
+				'___Alien____',
+			),
+			'pad string with padWith _ and type both and length 12, using stdWrap for padWidth' => array(
+				'Alien',
+				array(
+					'length' => '12',
+					'padWith' => '_',
+					'padWith.' => array(
+						'wrap' => '-|=',
+					),
+					'type' => 'both',
+				),
+				'-_=Alien-_=-',
+			),
+			'pad string with padWith _ and type both and length 12, using stdWrap for type' => array(
+				'Alien',
+				array(
+					'length' => '12',
+					'padWith' => '_',
+					'type' => 'both',
+					// make type become "left"
+					'type.' => array(
+						'substring' => '2,1',
+						'wrap' => 'lef|',
+					),
+				),
+				'_______Alien',
 			),
 		);
 	}
@@ -1010,7 +1060,34 @@ class ContentObjectRendererTest extends \TYPO3\CMS\Core\Tests\UnitTestCase {
 					)
 				),
 				'There is an animal, an animal and an animal around the block! Yeah!'
-			)
+			),
+			'replacement with optionSplit, normal pattern' => array(
+				'There_is_a_cat,_a_dog_and_a_tiger_in_da_hood!_Yeah!',
+				array(
+					'replacement.' => array(
+						'10.' => array(
+							'search' => '_',
+							'replace' => '1 || 2 || 3',
+							'useOptionSplitReplace' => '1'
+						),
+					)
+				),
+				'There1is2a3cat,3a3dog3and3a3tiger3in3da3hood!3Yeah!'
+			),
+			'replacement with optionSplit, using regex' => array(
+				'There is a cat, a dog and a tiger in da hood! Yeah!',
+				array(
+					'replacement.' => array(
+						'10.' => array(
+							'search' => '#(a) (Cat|Dog|Tiger)#i',
+							'replace' => '${1} tiny ${2} || ${1} midsized ${2} || ${1} big ${2}',
+							'useOptionSplitReplace' => '1',
+							'useRegExp' => '1'
+						)
+					)
+				),
+				'There is a tiny cat, a midsized dog and a big tiger in da hood! Yeah!'
+			),
 		);
 		return $data;
 	}
@@ -1175,9 +1252,9 @@ class ContentObjectRendererTest extends \TYPO3\CMS\Core\Tests\UnitTestCase {
 	 * @dataProvider stdWrap_strftimeReturnsFormattedStringDataProvider
 	 */
 	public function stdWrap_strftimeReturnsFormattedString($content, $conf) {
-			// Set exec_time to a hard timestamp (backed up by $this->backupGlobals = TRUE)
+			// Set exec_time to a hard timestamp
 		$GLOBALS['EXEC_TIME'] = 1346500800;
-			// Save current timezone and set to UTC to make the system unter test behave
+			// Save current timezone and set to UTC to make the system under test behave
 			// the same in all server timezone settings
 		$timezoneBackup = date_default_timezone_get();
 		date_default_timezone_set('UTC');
@@ -1203,6 +1280,8 @@ class ContentObjectRendererTest extends \TYPO3\CMS\Core\Tests\UnitTestCase {
 	}
 
 	/**
+	 * Data provider for stdWrap_ifNullDeterminesNullValues test
+	 *
 	 * @return array
 	 */
 	public function stdWrap_ifNullDeterminesNullValuesDataProvider() {
@@ -1222,6 +1301,550 @@ class ContentObjectRendererTest extends \TYPO3\CMS\Core\Tests\UnitTestCase {
 				'0',
 			),
 		);
+	}
+
+	/**
+	 * @param $content
+	 * @param array $configuration
+	 * @param $expected
+	 * @dataProvider stdWrap_noTrimWrapAcceptsSplitCharDataProvider
+	 * @test
+	 */
+	public function stdWrap_noTrimWrapAcceptsSplitChar($content, array $configuration, $expected) {
+		$result = $this->cObj->stdWrap_noTrimWrap($content, $configuration);
+		$this->assertEquals($expected, $result);
+	}
+
+	/**
+	 * Data provider for stdWrap_noTrimWrapAcceptsSplitChar test
+	 *
+	 * @return array
+	 */
+	public function stdWrap_noTrimWrapAcceptsSplitCharDataProvider() {
+		return array(
+			'No char given' => array(
+				'middle',
+				array(
+					'noTrimWrap' => '| left | right |',
+				),
+				' left middle right '
+			),
+			'Zero char given' => array(
+				'middle',
+				array(
+					'noTrimWrap' => '0 left 0 right 0',
+					'noTrimWrap.' => array('splitChar' => '0'),
+
+				),
+				' left middle right '
+			),
+			'Default char given' => array(
+				'middle',
+				array(
+					'noTrimWrap' => '| left | right |',
+					'noTrimWrap.' => array('splitChar' => '|'),
+				),
+				' left middle right '
+			),
+			'Split char is a' => array(
+				'middle',
+				array(
+					'noTrimWrap' => 'a left a right a',
+					'noTrimWrap.' => array('splitChar' => 'a'),
+				),
+				' left middle right '
+			),
+			'Split char is multi-char (ab)' => array(
+				'middle',
+				array(
+					'noTrimWrap' => 'ab left ab right ab',
+					'noTrimWrap.' => array('splitChar' => 'ab'),
+				),
+				' left middle right '
+			),
+			'Split char accepts stdWrap' => array(
+				'middle',
+				array(
+					'noTrimWrap' => 'abc left abc right abc',
+					'noTrimWrap.' => array(
+						'splitChar' => 'b',
+						'splitChar.' => array('wrap' => 'a|c'),
+					),
+				),
+				' left middle right '
+			),
+		);
+	}
+
+	/**
+	 * @param array $expectedTags
+	 * @param array $configuration
+	 * @test
+	 * @dataProvider stdWrap_addPageCacheTagsAddsPageTagsDataProvider
+	 */
+	public function stdWrap_addPageCacheTagsAddsPageTags(array $expectedTags, array $configuration) {
+		$this->cObj->stdWrap_addPageCacheTags('', $configuration);
+		$this->assertEquals($expectedTags, $this->tsfe->_get('pageCacheTags'));
+	}
+
+	/**
+	 * @return array
+	 */
+	public function stdWrap_addPageCacheTagsAddsPageTagsDataProvider() {
+		return array(
+			'No Tag' => array(
+				array(),
+				array('addPageCacheTags' => ''),
+			),
+			'Two expectedTags' => array(
+				array('tag1', 'tag2'),
+				array('addPageCacheTags' => 'tag1,tag2'),
+			),
+			'Two expectedTags plus one with stdWrap' => array(
+				array('tag1', 'tag2', 'tag3'),
+				array(
+					'addPageCacheTags' => 'tag1,tag2',
+					'addPageCacheTags.' => array('wrap' => '|,tag3')
+				),
+			),
+		);
+	}
+
+
+	/////////////////////////////
+	// Tests concerning getData()
+	/////////////////////////////
+
+	/**
+	 * @return array
+	 */
+	public function getDataWithTypeGpDataProvider() {
+		return array(
+			'Value in get-data' => array('onlyInGet', 'GetValue'),
+			'Value in post-data' => array('onlyInPost', 'PostValue'),
+			'Value in post-data overriding get-data' => array('inGetAndPost', 'ValueInPost'),
+		);
+	}
+
+	/**
+	 * Checks if getData() works with type "gp"
+	 *
+	 * @test
+	 * @dataProvider getDataWithTypeGpDataProvider
+	 */
+	public function getDataWithTypeGp($key, $expectedValue) {
+		$_GET = array(
+			'onlyInGet' => 'GetValue',
+			'inGetAndPost' => 'ValueInGet',
+		);
+		$_POST = array(
+			'onlyInPost' => 'PostValue',
+			'inGetAndPost' => 'ValueInPost',
+		);
+		$this->assertEquals($expectedValue, $this->cObj->getData('gp:' . $key));
+	}
+
+	/**
+	 * Checks if getData() works with type "tsfe"
+	 *
+	 * @test
+	 */
+	public function getDataWithTypeTsfe() {
+		$this->assertEquals($GLOBALS['TSFE']->renderCharset, $this->cObj->getData('tsfe:renderCharset'));
+	}
+
+	/**
+	 * Checks if getData() works with type "getenv"
+	 *
+	 * @test
+	 */
+	public function getDataWithTypeGetenv() {
+		$envName = uniqid('frontendtest');
+		$value = uniqid('someValue');
+		putenv($envName . '=' . $value);
+		$this->assertEquals($value, $this->cObj->getData('getenv:' . $envName));
+	}
+
+	/**
+	 * Checks if getData() works with type "getindpenv"
+	 *
+	 * @test
+	 */
+	public function getDataWithTypeGetindpenv() {
+		$this->assertEquals(PATH_thisScript, $this->cObj->getData('getindpenv:SCRIPT_FILENAME'));
+	}
+
+	/**
+	 * Checks if getData() works with type "getindpenv"
+	 *
+	 * @test
+	 */
+	public function getDataWithTypeField() {
+		$key = 'someKey';
+		$value = 'someValue';
+		$field = array($key => $value);
+
+		$this->assertEquals($value, $this->cObj->getData('field:' . $key, $field));
+	}
+
+	/**
+	 * Checks if getData() works with type "file"
+	 *
+	 * @test
+	 */
+	public function getDataWithTypeFile() {
+		$uid = rand();
+		$properties = array(
+			uniqid() => uniqid(),
+			uniqid() => uniqid(),
+			'uid' => $uid
+		);
+		$file = new \TYPO3\CMS\Core\Resource\File($properties);
+		$this->cObj->setCurrentFile($file);
+
+		$this->assertEquals($uid, $this->cObj->getData('file:current:uid'));
+	}
+
+	/**
+	 * Checks if getData() works with type "parameters"
+	 *
+	 * @test
+	 */
+	public function getDataWithTypeParameters() {
+		$key = uniqid('someKey');
+		$value = uniqid('someValue');
+		$this->cObj->parameters[$key] = $value;
+
+		$this->assertEquals($value, $this->cObj->getData('parameters:' . $key));
+	}
+
+	/**
+	 * Checks if getData() works with type "register"
+	 *
+	 * @test
+	 */
+	public function getDataWithTypeRegister() {
+		$key = uniqid('someKey');
+		$value = uniqid('someValue');
+		$GLOBALS['TSFE']->register[$key] = $value;
+
+		$this->assertEquals($value, $this->cObj->getData('register:' . $key));
+	}
+
+	/**
+	 * Checks if getData() works with type "level"
+	 *
+	 * @test
+	 */
+	public function getDataWithTypeLevel() {
+		$rootline = array(
+			0 => array('uid' => 1, 'title' => 'title1'),
+			1 => array('uid' => 2, 'title' => 'title2'),
+			2 => array('uid' => 3, 'title' => 'title3'),
+		);
+
+		$GLOBALS['TSFE']->tmpl->rootLine = $rootline;
+		$this->assertEquals(2, $this->cObj->getData('level'));
+	}
+
+	/**
+	 * Checks if getData() works with type "global"
+	 *
+	 * @test
+	 */
+	public function getDataWithTypeGlobal() {
+		$this->assertEquals($GLOBALS['TSFE']->renderCharset, $this->cObj->getData('global:TSFE|renderCharset'));
+	}
+
+	/**
+	 * Checks if getData() works with type "leveltitle"
+	 *
+	 * @test
+	 */
+	public function getDataWithTypeLeveltitle() {
+		$rootline = array(
+			0 => array('uid' => 1, 'title' => 'title1'),
+			1 => array('uid' => 2, 'title' => 'title2'),
+			2 => array('uid' => 3, 'title' => ''),
+		);
+
+		$GLOBALS['TSFE']->tmpl->rootLine = $rootline;
+		$this->assertEquals('', $this->cObj->getData('leveltitle:-1'));
+		// since "title3" is not set, it will slide to "title2"
+		$this->assertEquals('title2', $this->cObj->getData('leveltitle:-1,slide'));
+	}
+
+	/**
+	 * Checks if getData() works with type "levelmedia"
+	 *
+	 * @test
+	 */
+	public function getDataWithTypeLevelmedia() {
+		$rootline = array(
+			0 => array('uid' => 1, 'title' => 'title1', 'media' => 'media1'),
+			1 => array('uid' => 2, 'title' => 'title2', 'media' => 'media2'),
+			2 => array('uid' => 3, 'title' => 'title3', 'media' => ''),
+		);
+
+		$GLOBALS['TSFE']->tmpl->rootLine = $rootline;
+		$this->assertEquals('', $this->cObj->getData('levelmedia:-1'));
+		// since "title3" is not set, it will slide to "title2"
+		$this->assertEquals('media2', $this->cObj->getData('levelmedia:-1,slide'));
+	}
+
+	/**
+	 * Checks if getData() works with type "leveluid"
+	 *
+	 * @test
+	 */
+	public function getDataWithTypeLeveluid() {
+		$rootline = array(
+			0 => array('uid' => 1, 'title' => 'title1'),
+			1 => array('uid' => 2, 'title' => 'title2'),
+			2 => array('uid' => 3, 'title' => 'title3'),
+		);
+
+		$GLOBALS['TSFE']->tmpl->rootLine = $rootline;
+		$this->assertEquals(3, $this->cObj->getData('leveluid:-1'));
+		// every element will have a uid - so adding slide doesn't really make sense, just for completeness
+		$this->assertEquals(3, $this->cObj->getData('leveluid:-1,slide'));
+	}
+
+	/**
+	 * Checks if getData() works with type "levelfield"
+	 *
+	 * @test
+	 */
+	public function getDataWithTypeLevelfield() {
+		$rootline = array(
+			0 => array('uid' => 1, 'title' => 'title1', 'testfield' => 'field1'),
+			1 => array('uid' => 2, 'title' => 'title2', 'testfield' => 'field2'),
+			2 => array('uid' => 3, 'title' => 'title3', 'testfield' => ''),
+		);
+
+		$GLOBALS['TSFE']->tmpl->rootLine = $rootline;
+		$this->assertEquals('', $this->cObj->getData('levelfield:-1,testfield'));
+		$this->assertEquals('field2', $this->cObj->getData('levelfield:-1,testfield,slide'));
+	}
+
+	/**
+	 * Checks if getData() works with type "fullrootline"
+	 *
+	 * @test
+	 */
+	public function getDataWithTypeFullrootline() {
+		$rootline1 = array(
+			0 => array('uid' => 1, 'title' => 'title1', 'testfield' => 'field1'),
+		);
+		$rootline2 = array(
+			0 => array('uid' => 1, 'title' => 'title1', 'testfield' => 'field1'),
+			1 => array('uid' => 2, 'title' => 'title2', 'testfield' => 'field2'),
+			2 => array('uid' => 3, 'title' => 'title3', 'testfield' => 'field3'),
+		);
+
+		$GLOBALS['TSFE']->tmpl->rootLine = $rootline1;
+		$GLOBALS['TSFE']->rootLine = $rootline2;
+		$this->assertEquals('field2', $this->cObj->getData('fullrootline:-1,testfield'));
+	}
+
+	/**
+	 * Checks if getData() works with type "date"
+	 *
+	 * @test
+	 */
+	public function getDataWithTypeDate() {
+		$format = 'Y-M-D';
+		$defaultFormat = 'd/m Y';
+
+		$this->assertEquals(date($format, $GLOBALS['EXEC_TIME']), $this->cObj->getData('date:' . $format));
+		$this->assertEquals(date($defaultFormat, $GLOBALS['EXEC_TIME']), $this->cObj->getData('date'));
+	}
+
+	/**
+	 * Checks if getData() works with type "page"
+	 *
+	 * @test
+	 */
+	public function getDataWithTypePage() {
+		$uid = rand();
+		$GLOBALS['TSFE']->page['uid'] = $uid;
+		$this->assertEquals($uid, $this->cObj->getData('page:uid'));
+	}
+
+	/**
+	 * Checks if getData() works with type "current"
+	 *
+	 * @test
+	 */
+	public function getDataWithTypeCurrent() {
+		$key = uniqid('someKey');
+		$value = uniqid('someValue');
+		$this->cObj->data[$key] = $value;
+		$this->cObj->currentValKey = $key;
+		$this->assertEquals($value, $this->cObj->getData('current'));
+	}
+
+	/**
+	 * Checks if getData() works with type "db"
+	 *
+	 * @test
+	 */
+	public function getDataWithTypeDb() {
+		$dummyRecord = array('uid' => 5, 'title' => 'someTitle');
+
+		$GLOBALS['TSFE']->sys_page->expects($this->atLeastOnce())->method('getRawRecord')->with('tt_content', '106')->will($this->returnValue($dummyRecord));
+		$this->assertEquals($dummyRecord['title'], $this->cObj->getData('db:tt_content:106:title'));
+	}
+
+	/**
+	 * Checks if getData() works with type "lll"
+	 *
+	 * @test
+	 */
+	public function getDataWithTypeLll() {
+		$key = uniqid('someKey');
+		$value = uniqid('someValue');
+		$language = uniqid('someLanguage');
+		$GLOBALS['TSFE']->LL_labels_cache[$language]['LLL:' . $key] = $value;
+		$GLOBALS['TSFE']->lang = $language;
+
+		$this->assertEquals($value, $this->cObj->getData('lll:' . $key));
+	}
+
+	/**
+	 * Checks if getData() works with type "path"
+	 *
+	 * @test
+	 */
+	public function getDataWithTypePath() {
+		$filenameIn = uniqid('someValue');
+		$filenameOut = uniqid('someValue');
+		$this->template->expects($this->atLeastOnce())->method('getFileName')->with($filenameIn)->will($this->returnValue($filenameOut));
+		$this->assertEquals($filenameOut, $this->cObj->getData('path:' . $filenameIn));
+	}
+
+	/**
+	 * Checks if getData() works with type "parentRecordNumber"
+	 *
+	 * @test
+	 */
+	public function getDataWithTypeParentRecordNumber() {
+		$recordNumber = rand();
+		$this->cObj->parentRecordNumber = $recordNumber;
+		$this->assertEquals($recordNumber, $this->cObj->getData('cobj:parentRecordNumber'));
+	}
+
+	/**
+	 * Checks if getData() works with type "debug:rootLine"
+	 *
+	 * @test
+	 */
+	public function getDataWithTypeDebugRootline() {
+		$rootline = array(
+			0 => array('uid' => 1, 'title' => 'title1'),
+			1 => array('uid' => 2, 'title' => 'title2'),
+			2 => array('uid' => 3, 'title' => ''),
+		);
+		$expectedResult = '0uid1titletitle11uid2titletitle22uid3title';
+		$GLOBALS['TSFE']->tmpl->rootLine = $rootline;
+
+		$result = $this->cObj->getData('debug:rootLine');
+		$cleanedResult = strip_tags($result);
+		$cleanedResult = str_replace("\r", '', $cleanedResult);
+		$cleanedResult = str_replace("\n", '', $cleanedResult);
+		$cleanedResult = str_replace("\t", '', $cleanedResult);
+		$cleanedResult = str_replace(' ', '', $cleanedResult);
+
+		$this->assertEquals($expectedResult, $cleanedResult);
+	}
+
+	/**
+	 * Checks if getData() works with type "debug:fullRootLine"
+	 *
+	 * @test
+	 */
+	public function getDataWithTypeDebugFullRootline() {
+		$rootline = array(
+			0 => array('uid' => 1, 'title' => 'title1'),
+			1 => array('uid' => 2, 'title' => 'title2'),
+			2 => array('uid' => 3, 'title' => ''),
+		);
+		$expectedResult = '0uid1titletitle11uid2titletitle22uid3title';
+		$GLOBALS['TSFE']->rootLine = $rootline;
+
+		$result = $this->cObj->getData('debug:fullRootLine');
+		$cleanedResult = strip_tags($result);
+		$cleanedResult = str_replace("\r", '', $cleanedResult);
+		$cleanedResult = str_replace("\n", '', $cleanedResult);
+		$cleanedResult = str_replace("\t", '', $cleanedResult);
+		$cleanedResult = str_replace(' ', '', $cleanedResult);
+
+		$this->assertEquals($expectedResult, $cleanedResult);
+	}
+
+	/**
+	 * Checks if getData() works with type "debug:data"
+	 *
+	 * @test
+	 */
+	public function getDataWithTypeDebugData() {
+		$key = uniqid('someKey');
+		$value = uniqid('someValue');
+		$this->cObj->data = array($key => $value);
+
+		$expectedResult = $key . $value;
+
+		$result = $this->cObj->getData('debug:data');
+		$cleanedResult = strip_tags($result);
+		$cleanedResult = str_replace("\r", '', $cleanedResult);
+		$cleanedResult = str_replace("\n", '', $cleanedResult);
+		$cleanedResult = str_replace("\t", '', $cleanedResult);
+		$cleanedResult = str_replace(' ', '', $cleanedResult);
+
+		$this->assertEquals($expectedResult, $cleanedResult);
+	}
+
+	/**
+	 * Checks if getData() works with type "debug:register"
+	 *
+	 * @test
+	 */
+	public function getDataWithTypeDebugRegister() {
+		$key = uniqid('someKey');
+		$value = uniqid('someValue');
+		$GLOBALS['TSFE']->register = array($key => $value);
+
+		$expectedResult = $key . $value;
+
+		$result = $this->cObj->getData('debug:register');
+		$cleanedResult = strip_tags($result);
+		$cleanedResult = str_replace("\r", '', $cleanedResult);
+		$cleanedResult = str_replace("\n", '', $cleanedResult);
+		$cleanedResult = str_replace("\t", '', $cleanedResult);
+		$cleanedResult = str_replace(' ', '', $cleanedResult);
+
+		$this->assertEquals($expectedResult, $cleanedResult);
+	}
+
+	/**
+	 * Checks if getData() works with type "data:page"
+	 *
+	 * @test
+	 */
+	public function getDataWithTypeDebugPage() {
+		$uid = rand();
+		$GLOBALS['TSFE']->page = array('uid' => $uid);
+
+		$expectedResult = 'uid' . $uid;
+
+		$result = $this->cObj->getData('debug:page');
+		$cleanedResult = strip_tags($result);
+		$cleanedResult = str_replace("\r", '', $cleanedResult);
+		$cleanedResult = str_replace("\n", '', $cleanedResult);
+		$cleanedResult = str_replace("\t", '', $cleanedResult);
+		$cleanedResult = str_replace(' ', '', $cleanedResult);
+
+		$this->assertEquals($expectedResult, $cleanedResult);
 	}
 }
 

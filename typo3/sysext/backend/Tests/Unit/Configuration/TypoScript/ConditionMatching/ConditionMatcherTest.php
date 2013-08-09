@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Backend\Tests\Unit\Configuration\TypoScript\ConditionMatchin
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2009-2011 Oliver Hader <oliver@typo3.org>
+ *  (c) 2009-2013 Oliver Hader <oliver@typo3.org>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -412,6 +412,15 @@ class ConditionMatcherTest extends \TYPO3\CMS\Core\Tests\UnitTestCase {
 	public function globalVarConditionMatchesOnNotEqualExpression() {
 		$this->assertTrue($this->matchCondition->match('[globalVar = LIT:10 != 20]'));
 		$this->assertTrue($this->matchCondition->match('[globalVar = LIT:10.1 != 10.2]'));
+	}
+
+	/**
+	 * Tests whether numerical comparison does not match.
+	 *
+	 * @test
+	 */
+	public function globalVarConditionDoesNotMatchOnNotEqualExpression() {
+		$this->assertFalse($this->matchCondition->match('[globalVar = LIT:10 != 10]'));
 	}
 
 	/**

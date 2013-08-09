@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Core\Log;
 /***************************************************************
  * Copyright notice
  *
- * (c) 2011-2012 Ingo Renner (ingo@typo3.org)
+ * (c) 2011-2013 Ingo Renner (ingo@typo3.org)
  * All rights reserved
  *
  * This script is part of the TYPO3 project. The TYPO3 project is
@@ -139,12 +139,26 @@ class LogLevel {
 	 *
 	 * @param integer $level log level to validate
 	 * @return void
-	 * @throws \RangeException if the given log level is invalid
+	 * @throws \Psr\Log\InvalidArgumentException if the given log level is invalid
 	 */
 	static public function validateLevel($level) {
 		if (!self::isValidLevel($level)) {
-			throw new \RangeException('Invalid Log Level.', 1321637121);
+			throw new \Psr\Log\InvalidArgumentException('Invalid Log Level.', 1321637121);
 		}
+	}
+
+	/**
+	 * Normalizes level by converting it from string to integer
+	 *
+	 * @param string $level
+	 * @return integer|string
+	 */
+	static public function normalizeLevel($level) {
+		if (is_string($level) && defined(__CLASS__ . '::' . strtoupper($level))) {
+			$level = constant(__CLASS__ . '::' . strtoupper($level));
+		}
+
+		return $level;
 	}
 
 }

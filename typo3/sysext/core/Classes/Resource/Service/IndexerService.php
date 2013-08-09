@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Core\Resource\Service;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2011 Andreas Wolf <andreas.wolf@ikt-werk.de>
+ *  (c) 2011-2013 Andreas Wolf <andreas.wolf@ikt-werk.de>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -97,6 +97,7 @@ class IndexerService implements \TYPO3\CMS\Core\SingletonInterface {
 		// If the file is already indexed, then the file information will
 		// be updated on the existing record
 		if ($fileObject->isIndexed()) {
+			$fileInfo['deleted'] = 0;
 			$GLOBALS['TYPO3_DB']->exec_UPDATEquery('sys_file', sprintf('uid = %d', $fileObject->getUid()), $fileInfo);
 		} else {
 			// Check if a file has been moved outside of FAL -- we have some
@@ -122,10 +123,15 @@ class IndexerService implements \TYPO3\CMS\Core\SingletonInterface {
 			if ($movedFile === FALSE) {
 				// Crdate and tstamp should not be present when updating
 				// the file object, as they only relate to the index record
-				$indexRecord = array_merge($fileInfo, array(
+				$additionalInfo = array(
 					'crdate' => $GLOBALS['EXEC_TIME'],
 					'tstamp' => $GLOBALS['EXEC_TIME']
-				));
+				);
+				if (TYPO3_MODE === 'BE') {
+					$additionalInfo['cruser_id'] = intval($GLOBALS['BE_USER']->user['uid']);
+				}
+				$indexRecord = array_merge($fileInfo, $additionalInfo);
+
 				$GLOBALS['TYPO3_DB']->exec_INSERTquery('sys_file', $indexRecord);
 				$fileInfo['uid'] = $GLOBALS['TYPO3_DB']->sql_insert_id();
 			}
@@ -167,7 +173,7 @@ class IndexerService implements \TYPO3\CMS\Core\SingletonInterface {
 	 * currently this is done in a simple way, however could be changed to be more performant
 	 *
 	 * @param \TYPO3\CMS\Core\Resource\Folder $folder
-	 * @return int The number of indexed files.
+	 * @return integer The number of indexed files.
 	 */
 	public function indexFilesInFolder(\TYPO3\CMS\Core\Resource\Folder $folder) {
 		$numberOfIndexedFiles = 0;

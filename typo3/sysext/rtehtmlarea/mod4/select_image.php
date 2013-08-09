@@ -2,8 +2,8 @@
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 1999-2011 Kasper Skårhøj (kasper@typo3.com)
- *  (c) 2004-2011 Stanislas Rolland <typo3(arobas)jbr.ca>
+ *  (c) 1999-2013 Kasper Skårhøj (kasper@typo3.com)
+ *  (c) 2004-2013 Stanislas Rolland <typo3(arobas)jbr.ca>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -33,11 +33,11 @@
  */
 error_reporting(E_ALL & ~(E_STRICT | E_NOTICE | E_DEPRECATED));
 unset($MCONF);
-require 'conf.php';
+require __DIR__ . '/conf.php';
 require $BACK_PATH . 'init.php';
-$LANG->includeLLFile('EXT:lang/locallang_TYPO3\\CMS\\Recordlist\\Browser\\ElementBrowser.xml');
-$LANG->includeLLFile('EXT:rtehtmlarea/mod4/locallang.xml');
-$LANG->includeLLFile('EXT:rtehtmlarea/htmlarea/locallang_dialogs.xml');
+$LANG->includeLLFile('EXT:lang/locallang_TYPO3\\CMS\\Recordlist\\Browser\\ElementBrowser.xlf');
+$LANG->includeLLFile('EXT:rtehtmlarea/mod4/locallang.xlf');
+$LANG->includeLLFile('EXT:rtehtmlarea/htmlarea/locallang_dialogs.xlf');
 /*
  * @deprecated since 6.0, the classname tx_rtehtmlarea_SC_select_image and this file is obsolete
  * and will be removed with 6.2. The class was renamed and is now located at:

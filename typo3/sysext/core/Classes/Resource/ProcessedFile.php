@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Core\Resource;
 /***************************************************************
  * Copyright notice
  *
- * (c) 2012 Benjamin Mack <benni@typo3.org>
+ * (c) 2012-2013 Benjamin Mack <benni@typo3.org>
  * All rights reserved
  *
  * This script is part of the TYPO3 project. The TYPO3 project is
@@ -62,7 +62,7 @@ class ProcessedFile extends AbstractFile {
 	const CONTEXT_IMAGEPREVIEW = 'Image.Preview';
 	/**
 	 * Standard processing context for the frontend, that was previously
-	 * in tslib_cObj::getImgResource which only takes cropping, masking and scaling
+	 * in \TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer::getImgResource which only takes cropping, masking and scaling
 	 * into account
 	 */
 	const CONTEXT_IMAGECROPSCALEMASK = 'Image.CropScaleMask';
@@ -191,9 +191,13 @@ class ProcessedFile extends AbstractFile {
 			throw new \RuntimeException('Cannot update original file!', 1350582054);
 		}
 		// TODO this should be more generic (in fact it only works for local file paths)
-		$this->storage->addFile($filePath, $this->storage->getProcessingFolder(), $this->name, 'replace');
+		$addedFile = $this->storage->addFile($filePath, $this->storage->getProcessingFolder(), $this->name, 'replace');
+		$addedFile->setIndexable(FALSE);
+
 		// Update some related properties
+		$this->identifier = $addedFile->getIdentifier();
 		$this->originalFileSha1 = $this->originalFile->getSha1();
+		$this->updateProperties($addedFile->getProperties());
 		$this->deleted = FALSE;
 		$this->updated = TRUE;
 	}

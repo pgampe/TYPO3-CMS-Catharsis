@@ -4,7 +4,7 @@ namespace TYPO3\CMS\IndexedSearch\Controller;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2004-2011 Dimitri Ebert (dimitri.ebert@dkd.de)
+ *  (c) 2004-2013 Dimitri Ebert (dimitri.ebert@dkd.de)
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -23,15 +23,11 @@ namespace TYPO3\CMS\IndexedSearch\Controller;
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
+
 /**
  * Module extension (addition to function menu) 'Indexed search statistics' for the 'indexed_search' extension.
  *
- * @author 	Dimitri Ebert <dimitri.ebert@dkd.de>
- */
-/**
- * Module extension (addition to function menu) 'Indexed search statistics' for the 'indexed_search' extension.
- *
- * @author 	Dimitri Ebert <dimitri.ebert@dkd.de>
+ * @author Dimitri Ebert <dimitri.ebert@dkd.de>
  */
 class IndexingStatisticsController extends \TYPO3\CMS\Backend\Module\AbstractFunctionModule {
 

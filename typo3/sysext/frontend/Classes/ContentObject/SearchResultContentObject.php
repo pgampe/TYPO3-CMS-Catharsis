@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Frontend\ContentObject;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 1999-2011 Kasper Skårhøj (kasperYYYY@typo3.com)
+ *  (c) 1999-2013 Kasper Skårhøj (kasperYYYY@typo3.com)
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -455,7 +455,7 @@ class SearchResultContentObject extends \TYPO3\CMS\Frontend\ContentObject\Abstra
 	 * @param string $endClause Some extra conditions that the search must match.
 	 * @return boolean Returns TRUE no matter what - sweet isn't it!
 	 * @access private
-	 * @see 	tslib_cObj::SEARCHRESULT()
+	 * @see \TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer::SEARCHRESULT()
 	 * @todo Define visibility
 	 */
 	public function build_search_query($endClause) {

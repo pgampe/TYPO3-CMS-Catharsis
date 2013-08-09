@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Extbase\Mvc\Web;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010-2012 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
+ *  (c) 2010-2013 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
  *  Extbase is a backport of TYPO3 Flow. All credits go to the TYPO3 Flow team.
  *  All rights reserved
  *
@@ -34,6 +34,7 @@ class RequestBuilder implements \TYPO3\CMS\Core\SingletonInterface {
 
 	/**
 	 * @var \TYPO3\CMS\Extbase\Object\ObjectManagerInterface
+	 * @inject
 	 */
 	protected $objectManager;
 
@@ -81,38 +82,21 @@ class RequestBuilder implements \TYPO3\CMS\Core\SingletonInterface {
 
 	/**
 	 * @var \TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface
+	 * @inject
 	 */
 	protected $configurationManager;
 
 	/**
 	 * @var \TYPO3\CMS\Extbase\Service\ExtensionService
+	 * @inject
 	 */
 	protected $extensionService;
 
 	/**
-	 * @param \TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface $configurationManager
+	 * @var \TYPO3\CMS\Extbase\Service\EnvironmentService
+	 * @inject
 	 */
-	public function injectConfigurationManager(\TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface $configurationManager) {
-		$this->configurationManager = $configurationManager;
-	}
-
-	/**
-	 * Injects the object manager
-	 *
-	 * @param \TYPO3\CMS\Extbase\Object\ObjectManagerInterface $objectManager
-	 * @return void
-	 */
-	public function injectObjectManager(\TYPO3\CMS\Extbase\Object\ObjectManagerInterface $objectManager) {
-		$this->objectManager = $objectManager;
-	}
-
-	/**
-	 * @param \TYPO3\CMS\Extbase\Service\ExtensionService $extensionService
-	 * @return void
-	 */
-	public function injectExtensionService(\TYPO3\CMS\Extbase\Service\ExtensionService $extensionService) {
-		$this->extensionService = $extensionService;
-	}
+	protected $environmentService;
 
 	/**
 	 * @throws \TYPO3\CMS\Extbase\Mvc\Exception
@@ -169,7 +153,7 @@ class RequestBuilder implements \TYPO3\CMS\Core\SingletonInterface {
 		$request->setControllerActionName($actionName);
 		$request->setRequestUri(\TYPO3\CMS\Core\Utility\GeneralUtility::getIndpEnv('TYPO3_REQUEST_URL'));
 		$request->setBaseUri(\TYPO3\CMS\Core\Utility\GeneralUtility::getIndpEnv('TYPO3_SITE_URL'));
-		$request->setMethod(isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : NULL);
+		$request->setMethod($this->environmentService->getServerRequestMethod());
 		if (is_string($parameters['format']) && strlen($parameters['format'])) {
 			$request->setFormat(filter_var($parameters['format'], FILTER_SANITIZE_STRING));
 		} else {
@@ -217,7 +201,7 @@ class RequestBuilder implements \TYPO3\CMS\Core\SingletonInterface {
 	 * If no action is specified, the defaultActionName will be returned.
 	 * If that's not available or the specified action is not defined in the current plugin, an exception is thrown.
 	 *
-	 * @param $controllerName
+	 * @param string $controllerName
 	 * @param array $parameters
 	 * @throws \TYPO3\CMS\Extbase\Mvc\Exception\InvalidActionNameException
 	 * @throws \TYPO3\CMS\Extbase\Mvc\Exception

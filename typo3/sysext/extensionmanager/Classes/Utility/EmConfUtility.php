@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Extensionmanager\Utility;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2012 Susanne Moog <susanne.moog@typo3.org>
+ *  (c) 2012-2013 Susanne Moog <susanne.moog@typo3.org>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -103,7 +103,7 @@ $EM_CONF[$_EXTKEY] = ' . $emConf . ';
 				}
 			}
 			if (!isset($emConf['constraints']) || !isset($emConf['constraints']['conflicts'])) {
-				$emConf['constraints']['conflicts'] = $this->dependencyToString($emConf['conflicts']);
+				$emConf['constraints']['conflicts'] = $this->stringToDependency($emConf['conflicts']);
 			}
 			if (!isset($emConf['constraints']) || !isset($emConf['constraints']['suggests'])) {
 				$emConf['constraints']['suggests'] = array();

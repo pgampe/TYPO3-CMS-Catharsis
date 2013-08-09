@@ -2,7 +2,7 @@
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 1999-2011 Kasper Skårhøj (kasperYYYY@typo3.com)
+ *  (c) 1999-2013 Kasper Skårhøj (kasperYYYY@typo3.com)
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -26,8 +26,6 @@
  ***************************************************************/
 /**
  * Contains a class with functions for page related statistics added to the backend Info module
- *
- * Revised for TYPO3 3.6 5/2003 by Kasper Skårhøj
  *
  * @author Kasper Skårhøj <kasperYYYY@typo3.com>
  */

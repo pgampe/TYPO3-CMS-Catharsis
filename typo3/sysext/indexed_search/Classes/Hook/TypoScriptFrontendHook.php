@@ -4,7 +4,7 @@ namespace TYPO3\CMS\IndexedSearch\Hook;
 /***************************************************************
  *  Copyright notice
  *
- * (c) 2009-2011 Oliver Hader <oliver@typo3.org>
+ * (c) 2009-2013 Oliver Hader <oliver@typo3.org>
  * All rights reserved
  *
  * This script is part of the TYPO3 project. The TYPO3 project is
@@ -24,7 +24,7 @@ namespace TYPO3\CMS\IndexedSearch\Hook;
  * This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 /**
- * Hooks for tslib_fe (TSFE).
+ * Hooks for \TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController (TSFE).
  *
  * @author 		Oliver Hader <oliver@typo3.org>
  */

@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Extbase\Persistence\Generic;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010-2012 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
+ *  (c) 2010-2013 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
  *  Extbase is a backport of TYPO3 Flow. All credits go to the TYPO3 Flow team.
  *  All rights reserved
  *
@@ -102,6 +102,7 @@ interface QuerySettingsInterface {
 	 * enable fields are taken into account, regardless of the enableFieldsToBeIgnored setting.
 	 *
 	 * @param boolean $ignoreEnableFields
+	 * @return \TYPO3\CMS\Extbase\Persistence\Generic\QuerySettingsInterface instance of $this to allow method chaining
 	 * @see setEnableFieldsToBeIgnored()
 	 * @api
 	 */
@@ -124,7 +125,7 @@ interface QuerySettingsInterface {
 	 * by this column. This setting is only taken into account if $this->ignoreEnableFields = TRUE.
 	 *
 	 * @param array $enableFieldsToBeIgnored
-	 * @return void
+	 * @return \TYPO3\CMS\Extbase\Persistence\Generic\QuerySettingsInterface instance of $this to allow method chaining
 	 * @see setIgnoreEnableFields()
 	 * @api
 	 */
@@ -143,7 +144,7 @@ interface QuerySettingsInterface {
 	 * Sets the flag if the query should return objects that are deleted.
 	 *
 	 * @param boolean $includeDeleted
-	 * @return void
+	 * @return \TYPO3\CMS\Extbase\Persistence\Generic\QuerySettingsInterface instance of $this to allow method chaining
 	 * @api
 	 */
 	public function setIncludeDeleted($includeDeleted);

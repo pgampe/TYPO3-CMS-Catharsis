@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Saltedpasswords\Salt;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2009-2011 Marcus Krause <marcus#exp2009@t3sec.info>
+ *  (c) 2009-2013 Marcus Krause <marcus#exp2009@t3sec.info>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -26,10 +26,7 @@ namespace TYPO3\CMS\Saltedpasswords\Salt;
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
-/**
- * Contains class "tx_saltedpasswords_salts_md5"
- * that provides MD5 salted hashing.
- */
+
 /**
  * Class that implements MD5 salted hashing based on PHP's
  * crypt() function.
@@ -38,7 +35,6 @@ namespace TYPO3\CMS\Saltedpasswords\Salt;
  * on most of the systems.
  *
  * @author Marcus Krause <marcus#exp2009@t3sec.info>
- * @since 2009-09-06
  */
 class Md5Salt extends \TYPO3\CMS\Saltedpasswords\Salt\AbstractSalt implements \TYPO3\CMS\Saltedpasswords\Salt\SaltInterface {
 

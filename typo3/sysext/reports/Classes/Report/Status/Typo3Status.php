@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Reports\Report\Status;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2009-2011 Ingo Renner <ingo@typo3.org>
+ *  (c) 2009-2013 Ingo Renner <ingo@typo3.org>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -34,7 +34,6 @@ class Typo3Status implements \TYPO3\CMS\Reports\StatusProviderInterface {
 	 * Returns the status for this report
 	 *
 	 * @return array List of statuses
-	 * @see typo3/sysext/reports/interfaces/tx_reports_StatusProvider::getStatus()
 	 */
 	public function getStatus() {
 		$statuses = array(

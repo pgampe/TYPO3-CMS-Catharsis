@@ -78,7 +78,7 @@ class Response extends \TYPO3\CMS\Extbase\Mvc\Response {
 		100 => 'Continue',
 		101 => 'Switching Protocols',
 		102 => 'Processing',
-		# RFC 2518
+		// RFC 2518
 		200 => 'OK',
 		201 => 'Created',
 		202 => 'Accepted',
@@ -121,6 +121,12 @@ class Response extends \TYPO3\CMS\Extbase\Mvc\Response {
 		507 => 'Insufficient Storage',
 		509 => 'Bandwidth Limit Exceeded'
 	);
+
+	/**
+	 * @var \TYPO3\CMS\Extbase\Service\EnvironmentService
+	 * @inject
+	 */
+	protected $environmentService;
 
 	/**
 	 * Sets the HTTP status code and (optionally) a customized message.
@@ -240,9 +246,9 @@ class Response extends \TYPO3\CMS\Extbase\Mvc\Response {
 			throw new \InvalidArgumentException('The additiona header data must be of type String, ' . gettype($additionalHeaderData) . ' given.', 1237370877);
 		}
 		if ($this->request->isCached()) {
-			if (TYPO3_MODE === 'FE') {
+			if ($this->environmentService->isEnvironmentInFrontendMode()) {
 				$pageRenderer = $GLOBALS['TSFE']->getPageRenderer();
-			} elseif (TYPO3_MODE === 'BE') {
+			} elseif ($this->environmentService->isEnvironmentInBackendMode()) {
 				$pageRenderer = $GLOBALS['TBE_TEMPLATE']->getPageRenderer();
 			}
 			$pageRenderer->addHeaderData($additionalHeaderData);
@@ -273,6 +279,19 @@ class Response extends \TYPO3\CMS\Extbase\Mvc\Response {
 	 */
 	public function getRequest() {
 		return $this->request;
+	}
+
+	/**
+	 * Sends additional headers and returns the content
+	 *
+	 * @return null|string
+	 */
+	public function shutdown() {
+		if (count($this->getAdditionalHeaderData()) > 0) {
+			$GLOBALS['TSFE']->additionalHeaderData[] = implode(chr(10), $this->getAdditionalHeaderData());
+		}
+		$this->sendHeaders();
+		return parent::shutdown();
 	}
 }
 

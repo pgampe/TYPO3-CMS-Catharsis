@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Core\Tree\TableConfiguration;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010-2011 Steffen Ritter <info@steffen-ritter.net>
+ *  (c) 2010-2013 Steffen Ritter <info@steffen-ritter.net>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -58,7 +58,7 @@ class DatabaseTreeDataProvider extends \TYPO3\CMS\Core\Tree\TableConfiguration\A
 	/**
 	 * @var integer
 	 */
-	protected $lookupMode = \TYPO3\CMS\Core\Tree\TableConfiguration\DatabaseTreeDataProvider::MODE_CHILDREN;
+	protected $lookupMode = self::MODE_CHILDREN;
 
 	/**
 	 * @var string
@@ -360,24 +360,24 @@ class DatabaseTreeDataProvider extends \TYPO3\CMS\Core\Tree\TableConfiguration\A
 	protected function getChildrenUidsFromParentRelation(array $row) {
 		$uid = $row['uid'];
 		switch ((string) $this->columnConfiguration['type']) {
-		case 'inline':
+			case 'inline':
 
-		case 'select':
-			if ($this->columnConfiguration['MM']) {
-				/** @var $dbGroup \TYPO3\CMS\Core\Database\RelationHandler */
-				$dbGroup = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Core\\Database\\RelationHandler');
-				// Dummy field for setting "look from other site"
-				$this->columnConfiguration['MM_oppositeField'] = 'children';
-				$dbGroup->start($row[$this->getLookupField()], $this->getTableName(), $this->columnConfiguration['MM'], $uid, $this->getTableName(), $this->columnConfiguration);
-				$relatedUids = $dbGroup->tableArray[$this->getTableName()];
-			} elseif ($this->columnConfiguration['foreign_field']) {
-				$relatedUids = $this->listFieldQuery($this->columnConfiguration['foreign_field'], $uid);
-			} else {
+			case 'select':
+				if ($this->columnConfiguration['MM']) {
+					/** @var $dbGroup \TYPO3\CMS\Core\Database\RelationHandler */
+					$dbGroup = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Core\\Database\\RelationHandler');
+					// Dummy field for setting "look from other site"
+					$this->columnConfiguration['MM_oppositeField'] = 'children';
+					$dbGroup->start($row[$this->getLookupField()], $this->getTableName(), $this->columnConfiguration['MM'], $uid, $this->getTableName(), $this->columnConfiguration);
+					$relatedUids = $dbGroup->tableArray[$this->getTableName()];
+				} elseif ($this->columnConfiguration['foreign_field']) {
+					$relatedUids = $this->listFieldQuery($this->columnConfiguration['foreign_field'], $uid);
+				} else {
+					$relatedUids = $this->listFieldQuery($this->getLookupField(), $uid);
+				}
+				break;
+			default:
 				$relatedUids = $this->listFieldQuery($this->getLookupField(), $uid);
-			}
-			break;
-		default:
-			$relatedUids = $this->listFieldQuery($this->getLookupField(), $uid);
 		}
 		return $relatedUids;
 	}
@@ -393,25 +393,25 @@ class DatabaseTreeDataProvider extends \TYPO3\CMS\Core\Tree\TableConfiguration\A
 		$uid = $row['uid'];
 		$value = $row[$this->getLookupField()];
 		switch ((string) $this->columnConfiguration['type']) {
-		case 'inline':
+			case 'inline':
 
-		case 'select':
-			if ($this->columnConfiguration['MM']) {
-				/** @var $dbGroup \TYPO3\CMS\Core\Database\RelationHandler */
-				$dbGroup = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Core\\Database\\RelationHandler');
-				$dbGroup->start($value, $this->getTableName(), $this->columnConfiguration['MM'], $uid, $this->getTableName(), $this->columnConfiguration);
-				$relatedUids = $dbGroup->tableArray[$this->getTableName()];
-			} elseif ($this->columnConfiguration['foreign_field']) {
-				$records = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows('uid', $this->getTableName(), $this->columnConfiguration['foreign_field'] . '=' . intval($uid));
-				foreach ($records as $record) {
-					$relatedUids[] = $record['uid'];
+			case 'select':
+				if ($this->columnConfiguration['MM']) {
+					/** @var $dbGroup \TYPO3\CMS\Core\Database\RelationHandler */
+					$dbGroup = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Core\\Database\\RelationHandler');
+					$dbGroup->start($value, $this->getTableName(), $this->columnConfiguration['MM'], $uid, $this->getTableName(), $this->columnConfiguration);
+					$relatedUids = $dbGroup->tableArray[$this->getTableName()];
+				} elseif ($this->columnConfiguration['foreign_field']) {
+					$records = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows('uid', $this->getTableName(), $this->columnConfiguration['foreign_field'] . '=' . intval($uid));
+					foreach ($records as $record) {
+						$relatedUids[] = $record['uid'];
+					}
+				} else {
+					$relatedUids = \TYPO3\CMS\Core\Utility\GeneralUtility::intExplode(',', $value, TRUE);
 				}
-			} else {
+				break;
+			default:
 				$relatedUids = \TYPO3\CMS\Core\Utility\GeneralUtility::intExplode(',', $value, TRUE);
-			}
-			break;
-		default:
-			$relatedUids = \TYPO3\CMS\Core\Utility\GeneralUtility::intExplode(',', $value, TRUE);
 		}
 		return $relatedUids;
 	}

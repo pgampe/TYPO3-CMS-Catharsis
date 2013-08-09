@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Rtehtmlarea\Extension;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2008-2011 Stanislas Rolland <typo3(arobas)sjbr.ca>
+ *  (c) 2008-2013 Stanislas Rolland <typo3(arobas)sjbr.ca>
  *  All rights reserved
  *
  *  This script is part of the Typo3 project. The Typo3 project is
@@ -139,7 +139,7 @@ class Acronym extends \TYPO3\CMS\Rtehtmlarea\RteHtmlAreaApi {
 			$perms_clause = $GLOBALS['BE_USER']->getPagePermsClause(1);
 			$recursive = isset($this->thisConfig['buttons.'][$button . '.']['recursive']) ? intval($this->thisConfig['buttons.'][$button . '.']['recursive']) : 0;
 			if (trim($this->thisConfig['buttons.'][$button . '.']['pages'])) {
-				$pids = \TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(',', $this->thisConfig['buttons.'][$button . '.']['pages'], 1);
+				$pids = \TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(',', $this->thisConfig['buttons.'][$button . '.']['pages'], TRUE);
 				foreach ($pids as $key => $val) {
 					if (!$GLOBALS['BE_USER']->isInWebMount($val, $perms_clause)) {
 						unset($pids[$key]);

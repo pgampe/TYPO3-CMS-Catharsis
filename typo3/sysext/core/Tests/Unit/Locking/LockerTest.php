@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Core\Tests\Unit\Locking;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010-2011 Christian Kuhn <lolli@schwarzbu.ch>
+ *  (c) 2010-2013 Christian Kuhn <lolli@schwarzbu.ch>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -30,13 +30,6 @@ namespace TYPO3\CMS\Core\Tests\Unit\Locking;
  * @author Christian Kuhn <lolli@schwarzbu.ch>
  */
 class LockerTest extends \TYPO3\CMS\Core\Tests\UnitTestCase {
-
-	/**
-	 * Enable backup of global and system variables
-	 *
-	 * @var boolean
-	 */
-	protected $backupGlobals = TRUE;
 
 	///////////////////////////////
 	// tests concerning __construct
@@ -241,10 +234,6 @@ class LockerTest extends \TYPO3\CMS\Core\Tests\UnitTestCase {
 	public function releaseDoesNotRemoveFilesNotWithinTypo3TempLocksDirectory($lockMethod, $file) {
 		if (TYPO3_OS === 'WIN') {
 			$this->markTestSkipped('releaseDoesNotRemoveFilesNotWithinTypo3TempLocksDirectory() test not available on Windows.');
-		}
-		// Reflection needs php 5.3.2 or above
-		if (version_compare(phpversion(), '5.3.2', '<')) {
-			$this->markTestSkipped('releaseDoesNotRemoveFilesNotWithinTypo3TempLocksDirectory() test not available with php version smaller than 5.3.2');
 		}
 		// Create test file
 		touch($file);

@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Rtehtmlarea\Extension;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2008-2012 Stanislas Rolland <typo3(arobas)sjbr.ca>
+ *  (c) 2008-2013 Stanislas Rolland <typo3(arobas)sjbr.ca>
  *  All rights reserved
  *
  *  This script is part of the Typo3 project. The Typo3 project is
@@ -36,7 +36,7 @@ class SelectFont extends \TYPO3\CMS\Rtehtmlarea\RteHtmlAreaApi {
 	protected $pluginName = 'SelectFont';
 
 	// The name of the plugin registered by the extension
-	protected $relativePathToLocallangFile = 'extensions/SelectFont/locallang.xml';
+	protected $relativePathToLocallangFile = 'extensions/SelectFont/locallang.xlf';
 
 	// Path to this main locallang file of the extension relative to the extension dir.
 	protected $relativePathToSkin = '';
@@ -131,7 +131,7 @@ class SelectFont extends \TYPO3\CMS\Rtehtmlarea\RteHtmlAreaApi {
 				$hideItems = $this->thisConfig['buttons.'][$buttonId . '.']['removeItems'];
 			}
 			if ($this->thisConfig['buttons.'][$buttonId . '.']['addItems']) {
-				$addItems = \TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(',', $this->htmlAreaRTE->cleanList($this->thisConfig['buttons.'][$buttonId . '.']['addItems']), 1);
+				$addItems = \TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(',', $this->htmlAreaRTE->cleanList($this->thisConfig['buttons.'][$buttonId . '.']['addItems']), TRUE);
 			}
 		}
 		// Initializing the items array

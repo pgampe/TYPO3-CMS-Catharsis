@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Extbase\Utility;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010-2012 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
+ *  (c) 2010-2013 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
  *  Extbase is a backport of TYPO3 Flow. All credits go to the TYPO3 Flow team.
  *  All rights reserved
  *
@@ -42,14 +42,24 @@ class LocalizationUtility {
 	/**
 	 * Local Language content
 	 *
-	 * @var string
+	 * @var array
 	 */
 	static protected $LOCAL_LANG = array();
 
 	/**
+	 * Contains those LL keys, which have been set to (empty) in TypoScript.
+	 * This is necessary, as we cannot distinguish between a nonexisting
+	 * translation and a label that has been cleared by TS.
+	 * In both cases ['key'][0]['target'] is "".
+	 *
+	 * @var array
+	 */
+	static protected $LOCAL_LANG_UNSET = array();
+
+	/**
 	 * Local Language content charset for individual labels (overriding)
 	 *
-	 * @var string
+	 * @var array
 	 */
 	static protected $LOCAL_LANG_charset = array();
 
@@ -84,7 +94,9 @@ class LocalizationUtility {
 		} else {
 			self::initializeLocalization($extensionName);
 			// The "from" charset of csConv() is only set for strings from TypoScript via _LOCAL_LANG
-			if (!empty(self::$LOCAL_LANG[$extensionName][self::$languageKey][$key][0]['target'])) {
+			if (!empty(self::$LOCAL_LANG[$extensionName][self::$languageKey][$key][0]['target'])
+				|| isset(self::$LOCAL_LANG_UNSET[$extensionName][self::$languageKey][$key])
+			) {
 				// Local language translation for key exists
 				$value = self::$LOCAL_LANG[$extensionName][self::$languageKey][$key][0]['target'];
 				if (!empty(self::$LOCAL_LANG_charset[$extensionName][self::$languageKey][$key])) {
@@ -93,7 +105,9 @@ class LocalizationUtility {
 			} elseif (count(self::$alternativeLanguageKeys)) {
 				$languages = array_reverse(self::$alternativeLanguageKeys);
 				foreach ($languages as $language) {
-					if (!empty(self::$LOCAL_LANG[$extensionName][$language][$key][0]['target'])) {
+					if (!empty(self::$LOCAL_LANG[$extensionName][$language][$key][0]['target'])
+						|| isset(self::$LOCAL_LANG_UNSET[$extensionName][$language][$key])
+					) {
 						// Alternative language translation for key exists
 						$value = self::$LOCAL_LANG[$extensionName][$language][$key][0]['target'];
 						if (!empty(self::$LOCAL_LANG_charset[$extensionName][$language][$key])) {
@@ -103,7 +117,9 @@ class LocalizationUtility {
 					}
 				}
 			}
-			if ($value === NULL && !empty(self::$LOCAL_LANG[$extensionName]['default'][$key][0]['target'])) {
+			if ($value === NULL && (!empty(self::$LOCAL_LANG[$extensionName]['default'][$key][0]['target'])
+				|| isset(self::$LOCAL_LANG_UNSET[$extensionName]['default'][$key]))
+			) {
 				// Default language translation for key exists
 				// No charset conversion because default is English and thereby ASCII
 				$value = self::$LOCAL_LANG[$extensionName]['default'][$key][0]['target'];
@@ -122,7 +138,7 @@ class LocalizationUtility {
 	 * @param string $key The language key including the path to a custom locallang file ("LLL:path:key").
 	 * @return string The value from LOCAL_LANG or NULL if no translation was found.
 	 * @see language::sL()
-	 * @see tslib_fe::sL()
+	 * @see \TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController::sL()
 	 */
 	static protected function translateFileReference($key) {
 		if (TYPO3_MODE === 'FE') {
@@ -190,20 +206,20 @@ class LocalizationUtility {
 	}
 
 	/**
-	 * Overwrites labels that are set via typoscript.
+	 * Overwrites labels that are set via TypoScript.
 	 * TS locallang labels have to be configured like:
 	 * plugin.tx_myextension._LOCAL_LANG.languageKey.key = value
 	 *
 	 * @param string $extensionName
 	 * @return void
 	 */
-	protected function loadTypoScriptLabels($extensionName) {
-		$objectManager = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Extbase\\Object\\ObjectManager');
-		$configurationManager = $objectManager->get('TYPO3\\CMS\\Extbase\\Configuration\\ConfigurationManagerInterface');
-		$frameworkConfiguration = $configurationManager->getConfiguration(\TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface::CONFIGURATION_TYPE_FRAMEWORK);
+	static protected function loadTypoScriptLabels($extensionName) {
+		$configurationManager = static::getConfigurationManager();
+		$frameworkConfiguration = $configurationManager->getConfiguration(\TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface::CONFIGURATION_TYPE_FRAMEWORK, $extensionName);
 		if (!is_array($frameworkConfiguration['_LOCAL_LANG'])) {
 			return;
 		}
+		self::$LOCAL_LANG_UNSET[$extensionName] = array();
 		foreach ($frameworkConfiguration['_LOCAL_LANG'] as $languageKey => $labels) {
 			if (!(is_array($labels) && isset(self::$LOCAL_LANG[$extensionName][$languageKey]))) {
 				continue;
@@ -211,6 +227,9 @@ class LocalizationUtility {
 			foreach ($labels as $labelKey => $labelValue) {
 				if (is_string($labelValue)) {
 					self::$LOCAL_LANG[$extensionName][$languageKey][$labelKey][0]['target'] = $labelValue;
+					if ($labelValue === '') {
+						self::$LOCAL_LANG_UNSET[$extensionName][$languageKey][$labelKey] = '';
+					}
 					if (is_object($GLOBALS['LANG'])) {
 						self::$LOCAL_LANG_charset[$extensionName][$languageKey][$labelKey] = $GLOBALS['LANG']->csConvObj->charSetArray[$languageKey];
 					} else {
@@ -220,6 +239,9 @@ class LocalizationUtility {
 					$labelValue = self::flattenTypoScriptLabelArray($labelValue, $labelKey);
 					foreach ($labelValue as $key => $value) {
 						self::$LOCAL_LANG[$extensionName][$languageKey][$key][0]['target'] = $value;
+						if ($value === '') {
+							self::$LOCAL_LANG_UNSET[$extensionName][$languageKey][$key] = '';
+						}
 					}
 				}
 			}
@@ -268,6 +290,17 @@ class LocalizationUtility {
 			$convertedValue = $GLOBALS['LANG']->csConvObj->conv($value, $GLOBALS['LANG']->csConvObj->parse_charset($charset), $GLOBALS['LANG']->charSet, 1);
 			return $convertedValue !== NULL ? $convertedValue : $value;
 		}
+	}
+
+	/**
+	 * Returns instance of the configuration manager
+	 *
+	 * @return \TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface
+	 */
+	static protected function getConfigurationManager() {
+		$objectManager = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Extbase\\Object\\ObjectManager');
+		$configurationManager = $objectManager->get('TYPO3\\CMS\\Extbase\\Configuration\\ConfigurationManagerInterface');
+		return $configurationManager;
 	}
 }
 

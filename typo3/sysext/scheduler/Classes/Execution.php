@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Scheduler;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2005 Christian Jul Jensen (julle@typo3.org)
+ *  (c) 2005-2013 Christian Jul Jensen (julle@typo3.org)
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -72,7 +72,7 @@ class Execution {
 	 * See explanations in method setIsNewSingleExecution()
 	 *
 	 * @var 	boolean		$isNewSingleExecution
-	 * @see 	tx_scheduler_Execution::setIsNewSingleExecution()
+	 * @see \TYPO3\CMS\Scheduler\Execution::setIsNewSingleExecution()
 	 */
 	protected $isNewSingleExecution = FALSE;
 
@@ -185,7 +185,7 @@ class Execution {
 	 *
 	 * @param boolean $isNewSingleExecution Is newly created single execution?
 	 * @return 	void
-	 * @see tx_scheduler_Execution::getNextExecution()
+	 * @see \TYPO3\CMS\Scheduler\Execution::getNextExecution()
 	 */
 	public function setIsNewSingleExecution($isNewSingleExecution) {
 		$this->isNewSingleExecution = $isNewSingleExecution;

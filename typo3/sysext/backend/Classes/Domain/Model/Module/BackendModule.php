@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Backend\Domain\Model\Module;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2012 - Susanne Moog <typo3@susannemoog.de>
+ *  (c) 2012-2013 Susanne Moog <typo3@susannemoog.de>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -26,6 +26,7 @@ namespace TYPO3\CMS\Backend\Domain\Model\Module;
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
+
 /**
  * Model for menu entries
  *
@@ -243,6 +244,5 @@ class BackendModule {
 	}
 
 }
-
 
 ?>

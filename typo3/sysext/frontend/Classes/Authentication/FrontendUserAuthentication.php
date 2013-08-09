@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Frontend\Authentication;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 1999-2011 Kasper Skårhøj (kasperYYYY@typo3.com)
+ *  (c) 1999-2013 Kasper Skårhøj (kasperYYYY@typo3.com)
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -26,15 +26,7 @@ namespace TYPO3\CMS\Frontend\Authentication;
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
-/**
- * Front End session user. Login and session data
- * Included from index_ts.php
- *
- * Revised for TYPO3 3.6 June/2003 by Kasper Skårhøj
- *
- * @author Kasper Skårhøj <kasperYYYY@typo3.com>
- * @author René Fritz <r.fritz@colorcube.de>
- */
+
 /**
  * Extension class for Front End User Authentication.
  *
@@ -458,12 +450,12 @@ class FrontendUserAuthentication extends \TYPO3\CMS\Core\Authentication\Abstract
 	public function getKey($type, $key) {
 		if ($key) {
 			switch ($type) {
-			case 'user':
-				return $this->uc[$key];
-				break;
-			case 'ses':
-				return $this->sesData[$key];
-				break;
+				case 'user':
+					return $this->uc[$key];
+					break;
+				case 'ses':
+					return $this->sesData[$key];
+					break;
 			}
 		}
 	}
@@ -484,24 +476,24 @@ class FrontendUserAuthentication extends \TYPO3\CMS\Core\Authentication\Abstract
 	public function setKey($type, $key, $data) {
 		if ($key) {
 			switch ($type) {
-			case 'user':
-				if ($this->user['uid']) {
-					if ($data === NULL) {
-						unset($this->uc[$key]);
-					} else {
-						$this->uc[$key] = $data;
+				case 'user':
+					if ($this->user['uid']) {
+						if ($data === NULL) {
+							unset($this->uc[$key]);
+						} else {
+							$this->uc[$key] = $data;
+						}
+						$this->userData_change = 1;
 					}
-					$this->userData_change = 1;
-				}
-				break;
-			case 'ses':
-				if ($data === NULL) {
-					unset($this->sesData[$key]);
-				} else {
-					$this->sesData[$key] = $data;
-				}
-				$this->sesData_change = 1;
-				break;
+					break;
+				case 'ses':
+					if ($data === NULL) {
+						unset($this->sesData[$key]);
+					} else {
+						$this->sesData[$key] = $data;
+					}
+					$this->sesData_change = 1;
+					break;
 			}
 		}
 	}

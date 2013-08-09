@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Core\Utility;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2012 Steffen Ritter <steffen.ritter@typo3.org>
+ *  (c) 2012-2013 Steffen Ritter <steffen.ritter@typo3.org>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -119,7 +119,7 @@ class RootlineUtility {
 	protected $databaseConnection;
 
 	/**
-	 * @param int $uid
+	 * @param integer $uid
 	 * @param string $mountPointParameter
 	 * @param \TYPO3\CMS\Frontend\Page\PageRepository $context
 	 * @throws \RuntimeException
@@ -188,10 +188,11 @@ class RootlineUtility {
 	public function get() {
 		$cacheIdentifier = $this->getCacheIdentifier();
 		if (!isset(self::$localCache[$cacheIdentifier])) {
-			if (!self::$cache->has($cacheIdentifier)) {
+			$entry = self::$cache->get($cacheIdentifier);
+			if (!$entry) {
 				$this->generateRootlineCache();
 			} else {
-				self::$localCache[$cacheIdentifier] = self::$cache->get($cacheIdentifier);
+				self::$localCache[$cacheIdentifier] = $entry;
 			}
 		}
 		return self::$localCache[$cacheIdentifier];
@@ -235,6 +236,7 @@ class RootlineUtility {
 	 * @return array $pageRecord with additional relations
 	 */
 	protected function enrichWithRelationFields($uid, array $pageRecord) {
+		$pageOverlayFields = \TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(',', $GLOBALS['TYPO3_CONF_VARS']['FE']['pageOverlayFields']);
 		foreach ($GLOBALS['TCA']['pages']['columns'] as $column => $configuration) {
 			if ($this->columnHasRelationToResolve($configuration)) {
 				$configuration = $configuration['config'];
@@ -244,16 +246,17 @@ class RootlineUtility {
 					$loadDBGroup->start($pageRecord[$column], $configuration['foreign_table'], $configuration['MM'], $uid, 'pages', $configuration);
 					$relatedUids = $loadDBGroup->tableArray[$configuration['foreign_table']];
 				} else {
+					$columnIsOverlaid = in_array($column, $pageOverlayFields, TRUE);
 					$table = $configuration['foreign_table'];
 					$field = $configuration['foreign_field'];
-					$whereClauseParts = array($field . ' = ' . intval($uid));
+					$whereClauseParts = array($field . ' = ' . intval($columnIsOverlaid ? $uid : $pageRecord['uid']));
 					if (isset($configuration['foreign_match_fields']) && is_array($configuration['foreign_match_fields'])) {
 						foreach ($configuration['foreign_match_fields'] as $field => $value) {
 							$whereClauseParts[] = $field . ' = ' . $this->databaseConnection->fullQuoteStr($value, $table);
 						}
 					}
 					if (isset($configuration['foreign_table_field'])) {
-						if (intval($this->languageUid) > 0) {
+						if (intval($this->languageUid) > 0 && $columnIsOverlaid) {
 							$whereClauseParts[] = trim($configuration['foreign_table_field']) . ' = \'pages_language_overlay\'';
 						} else {
 							$whereClauseParts[] = trim($configuration['foreign_table_field']) . ' = \'pages\'';

@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Scheduler\Tests\Unit\CronCommand;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010-2011 Christian Kuhn <lolli@schwarzbu.ch>
+ *  (c) 2010-2013 Christian Kuhn <lolli@schwarzbu.ch>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -24,7 +24,7 @@ namespace TYPO3\CMS\Scheduler\Tests\Unit\CronCommand;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 /**
- * Testcase for class "tx_scheduler_CronCmd"
+ * Test case
  *
  * @author Christian Kuhn <lolli@schwarzbu.ch>
  */

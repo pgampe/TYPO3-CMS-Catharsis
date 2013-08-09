@@ -3,12 +3,18 @@ return array(
 	'ctrl' => array(
 		'title' => 'LLL:EXT:lang/locallang_tca.xlf:sys_file_reference',
 		'label' => 'uid',
+		'label_userFunc' => 'EXT:core/Classes/Resource/Service/UserFileInlineLabelService.php:TYPO3\\CMS\\Core\\Resource\\Service\\UserFileInlineLabelService->getInlineLabel',
+		'label_userFunc_options' => array(
+			'sys_file' => array(
+				'title',
+				'name'
+			)
+		),
 		'tstamp' => 'tstamp',
 		'crdate' => 'crdate',
 		'cruser_id' => 'cruser_id',
 		'type' => 'uid_local:type',
 		'hideTable' => TRUE,
-		'rootLevel' => TRUE,
 		'sortby' => 'sorting',
 		'delete' => 'deleted',
 		'versioningWS' => TRUE,
@@ -31,7 +37,7 @@ return array(
 	'columns' => array(
 		't3ver_label' => array(
 			'exclude' => 0,
-			'label' => 'LLL:EXT:lang/locallang_general.xml:LGL.versionLabel',
+			'label' => 'LLL:EXT:lang/locallang_general.xlf:LGL.versionLabel',
 			'config' => array(
 				'type' => 'input',
 				'size' => '30',
@@ -40,21 +46,21 @@ return array(
 		),
 		'sys_language_uid' => array(
 			'exclude' => 0,
-			'label' => 'LLL:EXT:lang/locallang_general.php:LGL.language',
+			'label' => 'LLL:EXT:lang/locallang_general.xlf:LGL.language',
 			'config' => array(
 				'type' => 'select',
 				'foreign_table' => 'sys_language',
 				'foreign_table_where' => 'ORDER BY sys_language.title',
 				'items' => array(
-					array('LLL:EXT:lang/locallang_general.php:LGL.allLanguages', -1),
-					array('LLL:EXT:lang/locallang_general.php:LGL.default_value', 0)
+					array('LLL:EXT:lang/locallang_general.xlf:LGL.allLanguages', -1),
+					array('LLL:EXT:lang/locallang_general.xlf:LGL.default_value', 0)
 				)
 			)
 		),
 		'l10n_parent' => array(
 			'displayCond' => 'FIELD:sys_language_uid:>:0',
 			'exclude' => 0,
-			'label' => 'LLL:EXT:lang/locallang_general.php:LGL.l18n_parent',
+			'label' => 'LLL:EXT:lang/locallang_general.xlf:LGL.l18n_parent',
 			'config' => array(
 				'type' => 'select',
 				'items' => array(
@@ -72,7 +78,7 @@ return array(
 		),
 		'hidden' => array(
 			'exclude' => 0,
-			'label' => 'LLL:EXT:lang/locallang_general.xml:LGL.hidden',
+			'label' => 'LLL:EXT:lang/locallang_general.xlf:LGL.hidden',
 			'config' => array(
 				'type' => 'check',
 				'default' => '0'
@@ -180,7 +186,7 @@ return array(
 		'description' => array(
 			// This is used for captions in the frontend
 			'l10n_mode' => 'mergeIfNotBlank',
-			'exclude' => 0,
+			'exclude' => 1,
 			'label' => 'LLL:EXT:lang/locallang_tca.xlf:sys_file_reference.description',
 			'config' => array(
 				'type' => 'text',
@@ -192,7 +198,7 @@ return array(
 		),
 		'alternative' => array(
 			'l10n_mode' => 'mergeIfNotBlank',
-			'exclude' => 0,
+			'exclude' => 1,
 			'label' => 'LLL:EXT:lang/locallang_tca.xlf:sys_file_reference.alternative',
 			'config' => array(
 				'type' => 'input',
@@ -230,7 +236,7 @@ return array(
 				--palette--;LLL:EXT:lang/locallang_tca.xlf:sys_file_reference.basicoverlayPalette;basicoverlayPalette,
 				--palette--;;filePalette'
 		),
-		\TYPO3\CMS\Core\Resource\File::FILETYPE_SOFTWARE => array(
+		\TYPO3\CMS\Core\Resource\File::FILETYPE_APPLICATION => array(
 			'showitem' => '
 				--palette--;LLL:EXT:lang/locallang_tca.xlf:sys_file_reference.basicoverlayPalette;basicoverlayPalette,
 				--palette--;;filePalette'

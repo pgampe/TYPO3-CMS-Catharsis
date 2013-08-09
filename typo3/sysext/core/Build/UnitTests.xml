@@ -49,11 +49,17 @@
 		<testsuite name="EXT:indexed_search tests">
 			<directory>../../../../typo3/sysext/indexed_search/Tests/Unit/</directory>
 		</testsuite>
+		<testsuite name="EXT:install tests">
+			<directory>../../../../typo3/sysext/install/Tests/Unit/</directory>
+		</testsuite>
 		<testsuite name="EXT:lang tests">
 			<directory>../../../../typo3/sysext/lang/Tests/Unit/</directory>
 		</testsuite>
 		<testsuite name="EXT:lowlevel tests">
 			<directory>../../../../typo3/sysext/lowlevel/Tests/Unit/</directory>
+		</testsuite>
+		<testsuite name="EXT:recordlist tests">
+			<directory>../../../../typo3/sysext/recordlist/Tests/Unit/</directory>
 		</testsuite>
 		<testsuite name="EXT:reports tests">
 			<directory>../../../../typo3/sysext/reports/Tests/Unit/</directory>

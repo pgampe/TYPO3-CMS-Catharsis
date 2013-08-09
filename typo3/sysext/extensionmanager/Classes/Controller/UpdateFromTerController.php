@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Extensionmanager\Controller;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2012 Susanne Moog, <typo3@susannemoog.de>
+ *  (c) 2012-2013 Susanne Moog, <typo3@susannemoog.de>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -35,61 +35,27 @@ class UpdateFromTerController extends \TYPO3\CMS\Extensionmanager\Controller\Abs
 
 	/**
 	 * @var \TYPO3\CMS\Extensionmanager\Utility\Repository\Helper
+	 * @inject
 	 */
 	protected $repositoryHelper;
 
 	/**
 	 * @var \TYPO3\CMS\Extensionmanager\Domain\Repository\RepositoryRepository
+	 * @inject
 	 */
 	protected $repositoryRepository;
 
 	/**
 	 * @var \TYPO3\CMS\Extensionmanager\Utility\ListUtility
+	 * @inject
 	 */
 	protected $listUtility;
 
 	/**
 	 * @var \TYPO3\CMS\Extensionmanager\Domain\Repository\ExtensionRepository
+	 * @inject
 	 */
 	protected $extensionRepository;
-
-	/**
-	 * Dependency injection of the Extension Repository
-	 *
-	 * @param \TYPO3\CMS\Extensionmanager\Domain\Repository\ExtensionRepository $extensionRepository
-	 * @return void
-	 */
-	public function injectExtensionRepository(\TYPO3\CMS\Extensionmanager\Domain\Repository\ExtensionRepository $extensionRepository) {
-		$this->extensionRepository = $extensionRepository;
-	}
-
-	/**
-	 * Dependency injection of the Repository Helper Utility
-	 *
-	 * @param \TYPO3\CMS\Extensionmanager\Utility\Repository\Helper $repositoryHelper
-	 * @return void
-	 */
-	public function injectRepositoryHelper(\TYPO3\CMS\Extensionmanager\Utility\Repository\Helper $repositoryHelper) {
-		$this->repositoryHelper = $repositoryHelper;
-	}
-
-	/**
-	 * Dependency injection of repository repository
-	 *
-	 * @param \TYPO3\CMS\Extensionmanager\Domain\Repository\RepositoryRepository $repositoryRepository
-	 * @return void
-	 */
-	public function injectRepositoryRepository(\TYPO3\CMS\Extensionmanager\Domain\Repository\RepositoryRepository $repositoryRepository) {
-		$this->repositoryRepository = $repositoryRepository;
-	}
-
-	/**
-	 * @param \TYPO3\CMS\Extensionmanager\Utility\ListUtility $listUtility
-	 * @return void
-	 */
-	public function injectListUtility(\TYPO3\CMS\Extensionmanager\Utility\ListUtility $listUtility) {
-		$this->listUtility = $listUtility;
-	}
 
 	/**
 	 * Update extension list from TER
@@ -100,8 +66,7 @@ class UpdateFromTerController extends \TYPO3\CMS\Extensionmanager\Controller\Abs
 	public function updateExtensionListFromTerAction($forceUpdateCheck = FALSE) {
 		$updated = FALSE;
 		$errorMessage = '';
-		/** @var $repository \TYPO3\CMS\Extensionmanager\Domain\Model\Repository */
-		$repository = $this->repositoryRepository->findOneByUid((int)$this->settings['repositoryUid']);
+
 		if ($this->extensionRepository->countAll() === 0 || $forceUpdateCheck) {
 			try {
 				$updated = $this->repositoryHelper->updateExtList();
@@ -109,6 +74,8 @@ class UpdateFromTerController extends \TYPO3\CMS\Extensionmanager\Controller\Abs
 				$errorMessage = $e->getMessage();
 			}
 		}
+		/** @var $repository \TYPO3\CMS\Extensionmanager\Domain\Model\Repository */
+		$repository = $this->repositoryRepository->findByUid((int)$this->settings['repositoryUid']);
 		$this->view->assign('updated', $updated)
 				->assign('repository', $repository)
 				->assign('errorMessage', $errorMessage);

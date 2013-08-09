@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Core\Resource;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2011 Andreas Wolf <andreas.wolf@ikt-werk.de>
+ *  (c) 2011-2013 Andreas Wolf <andreas.wolf@ikt-werk.de>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -26,6 +26,9 @@ namespace TYPO3\CMS\Core\Resource;
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
+
+use TYPO3\CMS\Core\Utility\PathUtility;
+
 /**
  * A folder that groups files in a storage. This may be a folder on the local
  * disk, a bucket in Amazon S3 or a user or a tag in Flickr.
@@ -195,7 +198,14 @@ class Folder implements FolderInterface {
 		$fileArray = $this->storage->getFileList($this->identifier, $start, $numberOfItems, $useFilters, TRUE, $recursive);
 		$fileObjects = array();
 		foreach ($fileArray as $fileInfo) {
-			$fileObjects[$fileInfo['name']] = $factory->createFileObject($fileInfo);
+			$fileObject = $factory->createFileObject($fileInfo);
+
+			// we might have duplicate filenames when fetching a recursive list, so don't use the filename as array key
+			if ($recursive == TRUE) {
+				$fileObjects[] = $fileObject;
+			} else {
+				$fileObjects[$fileInfo['name']] = $fileObject;
+			}
 		}
 
 		$this->restoreBackedUpFiltersInStorage($backedUpFilters);
@@ -229,8 +239,6 @@ class Folder implements FolderInterface {
 		if (!$this->storage->hasFolderInFolder($name, $this)) {
 			throw new \InvalidArgumentException('Folder "' . $name . '" does not exist in "' . $this->identifier . '"', 1329836110);
 		}
-		// TODO this will not work with non-hierarchical storages -> the identifier for subfolders is not composed of
-		// the current item's identifier for these
 		/** @var $factory ResourceFactory */
 		$factory = ResourceFactory::getInstance();
 		$folderObject = $factory->createFolderObject($this->storage, $this->identifier . $name . '/', $name);
@@ -253,11 +261,8 @@ class Folder implements FolderInterface {
 		if (count($folderArray) > 0) {
 			/** @var $factory ResourceFactory */
 			$factory = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Core\\Resource\\ResourceFactory');
-			// TODO this will not work with non-hierarchical storages
-			// -> the identifier for subfolders is not composed of the
-			// current item's identifier for these
 			foreach ($folderArray as $folder) {
-				$folderObjects[$folder['name']] = $factory->createFolderObject($this->storage, $this->identifier . $folder['name'] . '/', $folder['name']);
+				$folderObjects[$folder['name']] = $factory->createFolderObject($this->storage, $folder['identifier'], $folder['name']);
 			}
 		}
 
@@ -276,7 +281,7 @@ class Folder implements FolderInterface {
 	 * @return File The file object
 	 */
 	public function addFile($localFilePath, $fileName = NULL, $conflictMode = 'cancel') {
-		$fileName = $fileName ? $fileName : basename($localFilePath);
+		$fileName = $fileName ? $fileName : PathUtility::basename($localFilePath);
 		return $this->storage->addFile($localFilePath, $this, $fileName, $conflictMode);
 	}
 
@@ -340,7 +345,7 @@ class Folder implements FolderInterface {
 	 * @return Folder New (copied) folder object.
 	 */
 	public function copyTo(Folder $targetFolder, $targetFolderName = NULL, $conflictMode = 'renameNewFile') {
-		return $this->storage->copyFolder($this, $targetFolder, $targetFolderName, $conflictMode);
+		return $targetFolder->getStorage()->copyFolder($this, $targetFolder, $targetFolderName, $conflictMode);
 	}
 
 	/**
@@ -352,7 +357,7 @@ class Folder implements FolderInterface {
 	 * @return Folder New (copied) folder object.
 	 */
 	public function moveTo(Folder $targetFolder, $targetFolderName = NULL, $conflictMode = 'renameNewFile') {
-		return $this->storage->moveFolder($this, $targetFolder, $targetFolderName, $conflictMode);
+		return $targetFolder->getStorage()->moveFolder($this, $targetFolder, $targetFolderName, $conflictMode);
 	}
 
 	/**
@@ -467,7 +472,14 @@ class Folder implements FolderInterface {
 		$this->fileAndFolderNameFilters = $filters;
 	}
 
+	/**
+	 * Returns the role of this folder (if any). See FolderInterface::ROLE_* constants for possible values.
+	 *
+	 * @return integer
+	 */
+	public function getRole() {
+		return $this->storage->getRole($this);
+	}
 }
-
 
 ?>

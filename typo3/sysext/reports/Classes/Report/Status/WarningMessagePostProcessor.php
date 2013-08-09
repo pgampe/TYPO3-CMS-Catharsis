@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Reports\Report\Status;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010-2011 Ingo Renner <ingo@typo3.org>
+ *  (c) 2010-2013 Ingo Renner <ingo@typo3.org>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -48,13 +48,13 @@ class WarningMessagePostProcessor {
 			if ($highestSeverity > \TYPO3\CMS\Reports\Status::OK) {
 				// Display a message that there's something wrong and that
 				// the admin should take a look at the detailed status report
-				$GLOBALS['LANG']->includeLLFile('EXT:reports/reports/locallang.xml');
-				$reportModuleIdentifier = 'tools_ReportsTxreportsm1';
+				$GLOBALS['LANG']->includeLLFile('EXT:reports/reports/locallang.xlf');
+				$reportModuleIdentifier = 'system_ReportsTxreportsm1';
 				$reportModuleParameters = array(
-					'tx_reports_tools_reportstxreportsm1[extension]=tx_reports',
-					'tx_reports_tools_reportstxreportsm1[report]=status',
-					'tx_reports_tools_reportstxreportsm1[action]=detail',
-					'tx_reports_tools_reportstxreportsm1[controller]=Report',
+					'tx_reports_system_reportstxreportsm1[extension]=tx_reports',
+					'tx_reports_system_reportstxreportsm1[report]=status',
+					'tx_reports_system_reportstxreportsm1[action]=detail',
+					'tx_reports_system_reportstxreportsm1[controller]=Report',
 				);
 				$warningMessages['tx_reports_status_notification'] = sprintf(
 					$GLOBALS['LANG']->getLL('status_problemNotification'),

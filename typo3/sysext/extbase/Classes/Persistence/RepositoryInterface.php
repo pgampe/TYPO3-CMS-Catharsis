@@ -53,26 +53,25 @@ interface RepositoryInterface {
 	public function remove($object);
 
 	/**
-	 * Schedules a modified object for persistence.
+	 * Replaces an existing object with the same identifier by the given object
 	 *
-	 * @param object $object The modified object
-	 * @return void
+	 * @param object $modifiedObject The modified object
 	 * @api
 	 */
-	public function update($object);
+	public function update($modifiedObject);
 
 	/**
 	 * Returns all objects of this repository.
 	 *
-	 * @return \TYPO3\CMS\Extbase\Persistence\QueryResultInterface The query result
+	 * @return \TYPO3\CMS\Extbase\Persistence\QueryResultInterface|array The query result
 	 * @api
 	 */
 	public function findAll();
 
 	/**
-	 * Counts all objects of this repository
+	 * Returns the total number objects of this repository.
 	 *
-	 * @return integer
+	 * @return integer The object count
 	 * @api
 	 */
 	public function countAll();
@@ -89,6 +88,15 @@ interface RepositoryInterface {
 	/**
 	 * Finds an object matching the given identifier.
 	 *
+	 * @param integer $uid The identifier of the object to find
+	 * @return object The matching object if found, otherwise NULL
+	 * @api
+	 */
+	public function findByUid($uid);
+
+	/**
+	 * Finds an object matching the given identifier.
+	 *
 	 * @param mixed $identifier The identifier of the object to find
 	 * @return object The matching object if found, otherwise NULL
 	 * @api
@@ -96,32 +104,27 @@ interface RepositoryInterface {
 	public function findByIdentifier($identifier);
 
 	/**
-	 * Sets the property names to order results by. Expected like this:
+	 * Sets the property names to order the result by per default.
+	 * Expected like this:
 	 * array(
-	 *  'foo' => \TYPO3\Flow\Persistence\QueryInterface::ORDER_ASCENDING,
-	 *  'bar' => \TYPO3\Flow\Persistence\QueryInterface::ORDER_DESCENDING
+	 * 'foo' => \TYPO3\CMS\Extbase\Persistence\QueryInterface::ORDER_ASCENDING,
+	 * 'bar' => \TYPO3\CMS\Extbase\Persistence\QueryInterface::ORDER_DESCENDING
 	 * )
 	 *
-	 * @param array $defaultOrderings The property names to order by by default
+	 * @param array $defaultOrderings The property names to order by
 	 * @return void
 	 * @api
 	 */
 	public function setDefaultOrderings(array $defaultOrderings);
 
 	/**
-	 * Magic call method for repository methods.
+	 * Sets the default query settings to be used in this repository
 	 *
-	 * Provides three methods
-	 *  - findBy<PropertyName>($value, $caseSensitive = TRUE)
-	 *  - findOneBy<PropertyName>($value, $caseSensitive = TRUE)
-	 *  - countBy<PropertyName>($value, $caseSensitive = TRUE)
-	 *
-	 * @param string $method Name of the method
-	 * @param array $arguments The arguments
-	 * @return mixed The result of the repository method
+	 * @param \TYPO3\CMS\Extbase\Persistence\Generic\QuerySettingsInterface $defaultQuerySettings The query settings to be used by default
+	 * @return void
 	 * @api
 	 */
-	public function __call($method, $arguments);
+	public function setDefaultQuerySettings(\TYPO3\CMS\Extbase\Persistence\Generic\QuerySettingsInterface $defaultQuerySettings);
 
 	/**
 	 * Returns a query for objects of this repository
@@ -130,23 +133,6 @@ interface RepositoryInterface {
 	 * @api
 	 */
 	public function createQuery();
-
-	/**
-	 * If set in an implementation overrides automatic detection of the
-	 * entity class name being managed by the repository.
-	 *
-	 * @var string
-	 * @api
-	 */
-	const ENTITY_CLASSNAME = NULL;
-
-	/**
-	 * Returns the object type this repository is managing.
-	 *
-	 * @return string
-	 * @api
-	 */
-	public function getEntityClassName();
 }
 
 ?>

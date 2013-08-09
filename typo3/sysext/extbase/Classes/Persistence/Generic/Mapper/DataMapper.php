@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Extbase\Persistence\Generic\Mapper;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010-2012 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
+ *  (c) 2010-2013 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
  *  Extbase is a backport of TYPO3 Flow. All credits go to the TYPO3 Flow team.
  *  All rights reserved
  *
@@ -34,21 +34,25 @@ class DataMapper implements \TYPO3\CMS\Core\SingletonInterface {
 
 	/**
 	 * @var \TYPO3\CMS\Extbase\Persistence\Generic\IdentityMap
+	 * @inject
 	 */
 	protected $identityMap;
 
 	/**
 	 * @var \TYPO3\CMS\Extbase\Reflection\ReflectionService
+	 * @inject
 	 */
 	protected $reflectionService;
 
 	/**
 	 * @var \TYPO3\CMS\Extbase\Persistence\Generic\Qom\QueryObjectModelFactory
+	 * @inject
 	 */
 	protected $qomFactory;
 
 	/**
 	 * @var \TYPO3\CMS\Extbase\Persistence\Generic\Session
+	 * @inject
 	 */
 	protected $persistenceSession;
 
@@ -68,11 +72,13 @@ class DataMapper implements \TYPO3\CMS\Core\SingletonInterface {
 
 	/**
 	 * @var \TYPO3\CMS\Extbase\Persistence\Generic\Mapper\DataMapFactory
+	 * @inject
 	 */
 	protected $dataMapFactory;
 
 	/**
 	 * @var \TYPO3\CMS\Extbase\Persistence\Generic\QueryFactoryInterface
+	 * @inject
 	 */
 	protected $queryFactory;
 
@@ -85,75 +91,9 @@ class DataMapper implements \TYPO3\CMS\Core\SingletonInterface {
 
 	/**
 	 * @var \TYPO3\CMS\Extbase\Object\ObjectManagerInterface
+	 * @inject
 	 */
 	protected $objectManager;
-
-	/**
-	 * Injects the identity map
-	 *
-	 * @param \TYPO3\CMS\Extbase\Persistence\Generic\IdentityMap $identityMap
-	 * @return void
-	 */
-	public function injectIdentityMap(\TYPO3\CMS\Extbase\Persistence\Generic\IdentityMap $identityMap) {
-		$this->identityMap = $identityMap;
-	}
-
-	/**
-	 * Injects the persistence session
-	 *
-	 * @param \TYPO3\CMS\Extbase\Persistence\Generic\Session $persistenceSession
-	 * @return void
-	 */
-	public function injectSession(\TYPO3\CMS\Extbase\Persistence\Generic\Session $persistenceSession) {
-		$this->persistenceSession = $persistenceSession;
-	}
-
-	/**
-	 * Injects the Reflection Service
-	 *
-	 * @param \TYPO3\CMS\Extbase\Reflection\ReflectionService
-	 * @return void
-	 */
-	public function injectReflectionService(\TYPO3\CMS\Extbase\Reflection\ReflectionService $reflectionService) {
-		$this->reflectionService = $reflectionService;
-	}
-
-	/**
-	 * Injects the DataMap Factory
-	 *
-	 * @param \TYPO3\CMS\Extbase\Persistence\Generic\Mapper\DataMapFactory
-	 * @return void
-	 */
-	public function injectDataMapFactory(\TYPO3\CMS\Extbase\Persistence\Generic\Mapper\DataMapFactory $dataMapFactory) {
-		$this->dataMapFactory = $dataMapFactory;
-	}
-
-	/**
-	 * Injects the Query Factory
-	 *
-	 * @param \TYPO3\CMS\Extbase\Persistence\Generic\QueryFactoryInterface $queryFactory
-	 */
-	public function injectQueryFactory(\TYPO3\CMS\Extbase\Persistence\Generic\QueryFactoryInterface $queryFactory) {
-		$this->queryFactory = $queryFactory;
-	}
-
-	/**
-	 * Sets the query object model factory
-	 *
-	 * @param \TYPO3\CMS\Extbase\Persistence\Generic\Qom\QueryObjectModelFactory $qomFactory
-	 * @return void
-	 */
-	public function injectQomFactory(\TYPO3\CMS\Extbase\Persistence\Generic\Qom\QueryObjectModelFactory $qomFactory) {
-		$this->qomFactory = $qomFactory;
-	}
-
-	/**
-	 * @param \TYPO3\CMS\Extbase\Object\ObjectManagerInterface $objectManager
-	 * @return void
-	 */
-	public function injectObjectManager(\TYPO3\CMS\Extbase\Object\ObjectManagerInterface $objectManager) {
-		$this->objectManager = $objectManager;
-	}
 
 	/**
 	 * Maps the given rows on objects
@@ -207,7 +147,7 @@ class DataMapper implements \TYPO3\CMS\Core\SingletonInterface {
 			$this->identityMap->registerObject($object, $row['uid']);
 			$this->thawProperties($object, $row);
 			$object->_memorizeCleanState();
-			$this->persistenceSession->registerReconstitutedObject($object);
+			$this->persistenceSession->registerReconstitutedEntity($object);
 		}
 		return $object;
 	}
@@ -281,11 +221,10 @@ class DataMapper implements \TYPO3\CMS\Core\SingletonInterface {
 						break;
 					default:
 						if ($propertyData['type'] === 'DateTime' || in_array('DateTime', class_parents($propertyData['type']))) {
-							$propertyValue = $this->mapDateTime($row[$columnName]);
+							$propertyValue = $this->mapDateTime($row[$columnName], $columnMap->getDateTimeStorageFormat());
 						} else {
 							$propertyValue = $this->mapResultToPropertyValue($object, $propertyName, $this->fetchRelated($object, $propertyName, $row[$columnName]));
 						}
-						break;
 				}
 			}
 			if ($propertyValue !== NULL) {
@@ -295,18 +234,25 @@ class DataMapper implements \TYPO3\CMS\Core\SingletonInterface {
 	}
 
 	/**
-	 * Creates a DateTime from an unix timestamp. If the input is empty
-	 * NULL is returned.
+	 * Creates a DateTime from an unix timestamp or date/datetime value.
+	 * If the input is empty, NULL is returned.
 	 *
-	 * @param integer $timestamp
+	 * @param integer|string $value Unix timestamp or date/datetime value
+	 * @param NULL|string $storageFormat Storage format for native date/datetime fields
 	 * @return \DateTime
 	 */
-	protected function mapDateTime($timestamp) {
-		if (empty($timestamp)) {
+	protected function mapDateTime($value, $storageFormat = NULL) {
+		if (empty($value) || $value === '0000-00-00' || $value === '0000-00-00 00:00:00') {
 			// 0 -> NULL !!!
 			return NULL;
+		} elseif ($storageFormat === 'date' || $storageFormat === 'datetime') {
+			// native date/datetime values are stored in UTC
+			$utcTimeZone = new \DateTimeZone('UTC');
+			$utcDateTime = new \DateTime($value, $utcTimeZone);
+			$currentTimeZone = new \DateTimeZone(date_default_timezone_get());
+			return $utcDateTime->setTimezone($currentTimeZone);
 		} else {
-			return new \DateTime(date('c', $timestamp));
+			return new \DateTime(date('c', $value));
 		}
 	}
 
@@ -316,7 +262,7 @@ class DataMapper implements \TYPO3\CMS\Core\SingletonInterface {
 	 * @param \TYPO3\CMS\Extbase\DomainObject\DomainObjectInterface $parentObject The object instance this proxy is part of
 	 * @param string $propertyName The name of the proxied property in it's parent
 	 * @param mixed $fieldValue The raw field value.
-	 * @param bool $enableLazyLoading A flag indication if the related objects should be lazy loaded
+	 * @param boolean $enableLazyLoading A flag indication if the related objects should be lazy loaded
 	 * @return \TYPO3\CMS\Extbase\Persistence\Generic\LazyObjectStorage|\TYPO3\CMS\Extbase\Persistence\QueryResultInterface The result
 	 */
 	public function fetchRelated(\TYPO3\CMS\Extbase\DomainObject\DomainObjectInterface $parentObject, $propertyName, $fieldValue = '', $enableLazyLoading = TRUE) {
@@ -351,7 +297,7 @@ class DataMapper implements \TYPO3\CMS\Core\SingletonInterface {
 
 	/**
 	 * @param \TYPO3\CMS\Extbase\DomainObject\DomainObjectInterface $parentObject
-	 * @param $propertyName
+	 * @param string $propertyName
 	 * @return array|NULL
 	 */
 	protected function getEmptyRelationValue(\TYPO3\CMS\Extbase\DomainObject\DomainObjectInterface $parentObject, $propertyName) {
@@ -448,7 +394,7 @@ class DataMapper implements \TYPO3\CMS\Core\SingletonInterface {
 	 * Returns the given result as property value of the specified property type.
 	 *
 	 * @param \TYPO3\CMS\Extbase\DomainObject\DomainObjectInterface $parentObject
-	 * @param $propertyName
+	 * @param string $propertyName
 	 * @param mixed $result The result
 	 * @return mixed
 	 */
@@ -545,8 +491,8 @@ class DataMapper implements \TYPO3\CMS\Core\SingletonInterface {
 	/**
 	 * Returns the column name for a given property name of the specified class.
 	 *
-	 * @param string $className
 	 * @param string $propertyName
+	 * @param string $className
 	 * @return string The column name
 	 */
 	public function convertPropertyNameToColumnName($propertyName, $className = NULL) {

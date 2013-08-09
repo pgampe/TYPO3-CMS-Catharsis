@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Extbase\Object\Container;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010-2012 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
+ *  (c) 2010-2013 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
  *  Extbase is a backport of TYPO3 Flow. All credits go to the TYPO3 Flow team.
  *  All rights reserved
  *
@@ -42,6 +42,9 @@ class ClassInfoFactory {
 	 * @return \TYPO3\CMS\Extbase\Object\Container\ClassInfo the class info
 	 */
 	public function buildClassInfoFromClassName($className) {
+		if ($className === 'DateTime') {
+			return new \TYPO3\CMS\Extbase\Object\Container\ClassInfo($className, array(), array(), FALSE, FALSE, array());
+		}
 		try {
 			$reflectedClass = new \ReflectionClass($className);
 		} catch (\Exception $e) {
@@ -94,7 +97,7 @@ class ClassInfoFactory {
 		$reflectionMethods = $reflectedClass->getMethods();
 		if (is_array($reflectionMethods)) {
 			foreach ($reflectionMethods as $reflectionMethod) {
-				if ($reflectionMethod->isPublic() && substr($reflectionMethod->getName(), 0, 6) === 'inject' && $reflectionMethod->getName() !== 'injectSettings') {
+				if ($reflectionMethod->isPublic() && $this->isNameOfInjectMethod($reflectionMethod->getName())) {
 					$reflectionParameter = $reflectionMethod->getParameters();
 					if (isset($reflectionParameter[0])) {
 						if (!$reflectionParameter[0]->getClass()) {
@@ -132,7 +135,24 @@ class ClassInfoFactory {
 	}
 
 	/**
-	 * This method is used to determin if a class is a singleton or not.
+	 * This method checks if given method can be used for injection
+	 *
+	 * @param string $methodName
+	 * @return boolean
+	 */
+	private function isNameOfInjectMethod($methodName) {
+		if (
+			substr($methodName, 0, 6) === 'inject'
+			&& $methodName[6] === strtoupper($methodName[6])
+			&& $methodName !== 'injectSettings'
+		) {
+			return TRUE;
+		}
+		return FALSE;
+	}
+
+	/**
+	 * This method is used to determine if a class is a singleton or not.
 	 *
 	 * @param string $classname
 	 * @return boolean

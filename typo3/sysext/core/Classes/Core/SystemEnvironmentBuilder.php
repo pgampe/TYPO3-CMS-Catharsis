@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Core\Core;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2012 Christian Kuhn <lolli@schwarzbu.ch>
+ *  (c) 2012-2013 Christian Kuhn <lolli@schwarzbu.ch>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -57,8 +57,6 @@ class SystemEnvironmentBuilder {
 	 * @return void
 	 */
 	static public function run($relativePathPart = '') {
-		self::ensureRequiredEnvironment();
-		self::checkGlobalsAreNotSetViaPostOrGet();
 		self::defineBaseConstants();
 		self::definePaths($relativePathPart);
 		self::checkMainPathsExist();
@@ -72,77 +70,69 @@ class SystemEnvironmentBuilder {
 	}
 
 	/**
-	 * Check php version requirement or exit script
-	 *
-	 * @return void
-	 */
-	static protected function ensureRequiredEnvironment() {
-		if (self::getPhpIniValueBoolean('register_globals')) {
-			die('TYPO3 requires PHP setting "register_globals" set to Off. (Error: #1345284320)');
-		}
-	}
-
-	/**
-	 * Cast a on/off php ini value to boolean
-	 *
-	 * @param string $configOption
-	 * @return boolean TRUE if the given option is enabled, FALSE if disabled
-	 * @see \TYPO3\CMS\Core\Utility\PhpOptionsUtility::getIniValueBoolean
-	 */
-	static protected function getPhpIniValueBoolean($configOption) {
-		return filter_var(ini_get($configOption), FILTER_VALIDATE_BOOLEAN, array(FILTER_REQUIRE_SCALAR, FILTER_NULL_ON_FAILURE));
-	}
-
-	/**
-	 * Exit script if globals are set via post or get
-	 *
-	 * @return void
-	 */
-	static protected function checkGlobalsAreNotSetViaPostOrGet() {
-		if (isset($_POST['GLOBALS']) || isset($_GET['GLOBALS'])) {
-			die('You cannot set the GLOBALS array from outside the script.');
-		}
-	}
-
-	/**
 	 * Define all simple constants that have no dependency to local configuration
 	 *
 	 * @return void
 	 */
 	static protected function defineBaseConstants() {
 		// This version, branch and copyright
-		define('TYPO3_version', '6.1-dev');
-		define('TYPO3_branch', '6.1');
+		define('TYPO3_version', '6.2-dev');
+		define('TYPO3_branch', '6.2');
 		define('TYPO3_copyright_year', '1998-2013');
+
 		// TYPO3 external links
 		define('TYPO3_URL_GENERAL', 'http://typo3.org/');
 		define('TYPO3_URL_ORG', 'http://typo3.org/');
 		define('TYPO3_URL_LICENSE', 'http://typo3.org/licenses');
-		define('TYPO3_URL_EXCEPTION', 'http://typo3.org/go/exception/v4/');
+		define('TYPO3_URL_EXCEPTION', 'http://typo3.org/go/exception/CMS/');
 		define('TYPO3_URL_MAILINGLISTS', 'http://lists.typo3.org/cgi-bin/mailman/listinfo');
 		define('TYPO3_URL_DOCUMENTATION', 'http://typo3.org/documentation/');
-		define('TYPO3_URL_DOCUMENTATION_TSREF', 'http://typo3.org/documentation/document-library/core-documentation/doc_core_tsref/current/view/');
-		define('TYPO3_URL_DOCUMENTATION_TSCONFIG', 'http://typo3.org/documentation/document-library/core-documentation/doc_core_tsconfig/current/view/');
+		define('TYPO3_URL_DOCUMENTATION_TSREF', 'http://docs.typo3.org/typo3cms/TyposcriptReference/');
+		define('TYPO3_URL_DOCUMENTATION_TSCONFIG', 'http://docs.typo3.org/typo3cms/TSconfigReference/');
 		define('TYPO3_URL_CONSULTANCY', 'http://typo3.org/support/professional-services/');
 		define('TYPO3_URL_CONTRIBUTE', 'http://typo3.org/contribute/');
 		define('TYPO3_URL_SECURITY', 'http://typo3.org/teams/security/');
 		define('TYPO3_URL_DOWNLOAD', 'http://typo3.org/download/');
 		define('TYPO3_URL_SYSTEMREQUIREMENTS', 'http://typo3.org/about/typo3-the-cms/system-requirements/');
 		define('TYPO3_URL_DONATE', 'http://typo3.org/donate/online-donation/');
+
 		// A tabulator, a linefeed, a carriage return, a CR-LF combination
 		define('TAB', chr(9));
 		define('LF', chr(10));
 		define('CR', chr(13));
 		define('CRLF', CR . LF);
+
 		// Security related constant: Default value of fileDenyPattern
 		define('FILE_DENY_PATTERN_DEFAULT', '\\.(php[3-6]?|phpsh|phtml)(\\..*)?$|^\\.htaccess$');
 		// Security related constant: List of file extensions that should be registered as php script file extensions
 		define('PHP_EXTENSIONS_DEFAULT', 'php,php3,php4,php5,php6,phpsh,inc,phtml');
+
 		// List of extensions required to run the core
 		define('REQUIRED_EXTENSIONS', 'core,backend,frontend,cms,lang,sv,extensionmanager,recordlist,extbase,fluid,cshmanual,install');
+
 		// Operating system identifier
 		// Either "WIN" or empty string
 		define('TYPO3_OS', self::getTypo3Os());
+
+		// Service error constants
+		// General error - something went wrong
+		define('T3_ERR_SV_GENERAL', -1);
+		// During execution it showed that the service is not available and should be ignored. The service itself should call $this->setNonAvailable()
+		define('T3_ERR_SV_NOT_AVAIL', -2);
+		// Passed subtype is not possible with this service
+		define('T3_ERR_SV_WRONG_SUBTYPE', -3);
+		// Passed subtype is not possible with this service
+		define('T3_ERR_SV_NO_INPUT', -4);
+		// File not found which the service should process
+		define('T3_ERR_SV_FILE_NOT_FOUND', -20);
+		// File not readable
+		define('T3_ERR_SV_FILE_READ', -21);
+		// File not writable
+		define('T3_ERR_SV_FILE_WRITE', -22);
+		// Passed subtype is not possible with this service
+		define('T3_ERR_SV_PROG_NOT_FOUND', -40);
+		// Passed subtype is not possible with this service
+		define('T3_ERR_SV_PROG_FAILED', -41);
 	}
 
 	/**
@@ -171,9 +161,6 @@ class SystemEnvironmentBuilder {
 		// Example "install/" for the install tool entry script
 		// Example "../typo3conf/ext/templavoila/mod2/ for an extension installed in typo3conf/ext/
 		define('PATH_typo3_mod', defined('TYPO3_MOD_PATH') ? TYPO3_MOD_PATH : '');
-		// Absolute path to the t3lib directory with trailing slash
-		// Example "/var/www/instance-name/htdocs/t3lib/"
-		define('PATH_t3lib', PATH_site . 't3lib/');
 		// Absolute path to the typo3conf directory with trailing slash
 		// Example "/var/www/instance-name/htdocs/typo3conf/"
 		define('PATH_typo3conf', PATH_site . 'typo3conf/');
@@ -191,14 +178,8 @@ class SystemEnvironmentBuilder {
 		if (!is_file(PATH_thisScript)) {
 			die('Unable to determine path to entry script.');
 		}
-		if (!is_dir(PATH_t3lib)) {
-			die('Calculated absolute path to t3lib directory does not exist.');
-		}
 		if (!is_dir(PATH_tslib)) {
 			die('Calculated absolute path to tslib directory does not exist.');
-		}
-		if (!is_dir(PATH_typo3conf)) {
-			die('Calculated absolute path to typo3conf directory does not exist');
 		}
 	}
 
@@ -232,9 +213,6 @@ class SystemEnvironmentBuilder {
 		require_once __DIR__ . '/../Log/LogLevel.php';
 		require_once __DIR__ . '/../Utility/MathUtility.php';
 		require_once __DIR__ . '/ClassLoader.php';
-		if (PHP_VERSION_ID < 50307) {
-			require_once __DIR__ . '/../Compatibility/CompatbilityClassLoaderPhpBelow50307.php';
-		}
 	}
 
 	/**

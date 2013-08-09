@@ -27,7 +27,7 @@ CREATE TABLE be_groups (
   lockToDomain varchar(50) DEFAULT '' NOT NULL,
   deleted tinyint(1) unsigned DEFAULT '0' NOT NULL,
   TSconfig text,
-  subgroup varchar(255) DEFAULT '' NOT NULL,
+  subgroup text,
   hide_in_lists tinyint(4) DEFAULT '0' NOT NULL,
   workspace_perms tinyint(3) DEFAULT '1' NOT NULL,
   PRIMARY KEY (uid),
@@ -71,7 +71,7 @@ CREATE TABLE be_users (
   crdate int(11) unsigned DEFAULT '0' NOT NULL,
   cruser_id int(11) unsigned DEFAULT '0' NOT NULL,
   realName varchar(80) DEFAULT '' NOT NULL,
-  userMods varchar(255) DEFAULT '' NOT NULL,
+  userMods text,
   allowed_languages varchar(255) DEFAULT '' NOT NULL,
   uc mediumtext,
   file_mountpoints varchar(255) DEFAULT '' NOT NULL,
@@ -83,7 +83,7 @@ CREATE TABLE be_users (
   TSconfig text,
   lastlogin int(10) unsigned DEFAULT '0' NOT NULL,
   createdByAction int(11) DEFAULT '0' NOT NULL,
-  usergroup_cached_list varchar(255) DEFAULT '' NOT NULL,
+  usergroup_cached_list text,
   workspace_id int(11) DEFAULT '0' NOT NULL,
   workspace_preview tinyint(3) DEFAULT '1' NOT NULL,
   PRIMARY KEY (uid),
@@ -271,7 +271,7 @@ CREATE TABLE sys_file_storage (
 	processingfolder tinytext,
 
 	PRIMARY KEY (uid),
-	KEY parent (pid)
+	KEY parent (pid,deleted)
 );
 
 #
@@ -316,8 +316,10 @@ CREATE TABLE sys_file (
 	alternative text,
 
 	PRIMARY KEY (uid),
-	KEY parent (pid),
-	KEY t3ver_oid (t3ver_oid,t3ver_wsid)
+	KEY parent (pid,deleted),
+	KEY t3ver_oid (t3ver_oid,t3ver_wsid),
+	KEY sel01 (storage,identifier(20)),
+	KEY sha1 (sha1(40))
 );
 
 #
@@ -392,9 +394,7 @@ CREATE TABLE sys_file_reference (
 	downloadname tinytext,
 
 	PRIMARY KEY (uid),
-	KEY uid_local (uid_local),
-	KEY uid_foreign (uid_foreign),
-	KEY parent (pid)
+	KEY parent (pid,deleted)
 );
 
 
@@ -438,7 +438,7 @@ CREATE TABLE sys_file_collection (
 	folder text NOT NULL,
 
 	PRIMARY KEY (uid),
-	KEY parent (pid),
+	KEY parent (pid,deleted),
 	KEY t3ver_oid (t3ver_oid,t3ver_wsid)
 );
 
@@ -477,7 +477,7 @@ CREATE TABLE sys_collection (
 	items int(11) DEFAULT '0' NOT NULL,
 
 	PRIMARY KEY (uid),
-	KEY parent (pid),
+	KEY parent (pid,deleted),
 	KEY t3ver_oid (t3ver_oid,t3ver_wsid)
 );
 

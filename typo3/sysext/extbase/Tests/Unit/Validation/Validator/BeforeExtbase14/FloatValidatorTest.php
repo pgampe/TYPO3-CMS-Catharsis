@@ -73,8 +73,9 @@ class FloatValidatorTest extends \TYPO3\CMS\Extbase\Tests\Unit\BaseTestCase {
 	 * @param mixed $number
 	 */
 	public function floatValidatorReturnsTrueForAValidFloat($number) {
-		$floatValidator = new \TYPO3\CMS\Extbase\Validation\Validator\FloatValidator();
-		$this->assertTrue($floatValidator->isValid($number), "Validator declared {$number} as invalid though it is valid.");
+		$floatValidator = $this->getMock('TYPO3\\CMS\\Extbase\\Validation\\Validator\\FloatValidator', array('addError'), array(), '', FALSE);
+		$floatValidator->expects($this->never())->method('addError');
+		$floatValidator->isValid($number);
 	}
 
 	/**
@@ -84,16 +85,19 @@ class FloatValidatorTest extends \TYPO3\CMS\Extbase\Tests\Unit\BaseTestCase {
 	 */
 	public function floatValidatorReturnsFalseForAnInvalidFloat($number) {
 		$floatValidator = $this->getMock('TYPO3\\CMS\\Extbase\\Validation\\Validator\\FloatValidator', array('addError'), array(), '', FALSE);
-		$this->assertFalse($floatValidator->isValid($number), "Validator declared {$number} as valid though it is invalid.");
+		$floatValidator->expects($this->once())->method('addError');
+		$floatValidator->isValid($number);
 	}
 
 	/**
 	 * @test
 	 */
 	public function floatValidatorCreatesTheCorrectErrorForAnInvalidSubject() {
-		$floatValidator = new \TYPO3\CMS\Extbase\Validation\Validator\FloatValidator();
 		$floatValidator = $this->getMock('TYPO3\\CMS\\Extbase\\Validation\\Validator\\FloatValidator', array('addError'), array(), '', FALSE);
-		$floatValidator->expects($this->once())->method('addError')->with('The given subject was not a valid float.', 1221560288);
+
+		$translatedMessage = \TYPO3\CMS\Extbase\Utility\LocalizationUtility::translate('validator.float.notvalid', 'extbase');
+
+		$floatValidator->expects($this->once())->method('addError')->with($translatedMessage, 1221560288);
 		$floatValidator->isValid(123456);
 	}
 }

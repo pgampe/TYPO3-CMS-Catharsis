@@ -1,22 +1,29 @@
 <?php
 namespace TYPO3\CMS\Lang;
+
 /***************************************************************
  *  Copyright notice
- *  (c) 1999-2011 Kasper Skårhøj (kasperYYYY@typo3.com)
+ *
+ *  (c) 1999-2013 Kasper Skårhøj (kasperYYYY@typo3.com)
  *  All rights reserved
+ *
  *  This script is part of the TYPO3 project. The TYPO3 project is
  *  free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
+ *
  *  The GNU General Public License can be found at
  *  http://www.gnu.org/copyleft/gpl.html.
  *  A copy is found in the textfile GPL.txt and important notices to the license
  *  from the author is found in LICENSE.txt distributed with these scripts.
+ *
+ *
  *  This script is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
+ *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
@@ -24,11 +31,11 @@ namespace TYPO3\CMS\Lang;
  * Contains the TYPO3 Backend Language class
  * For detailed information about how localization is handled,
  * please refer to the 'Inside TYPO3' document which describes this.
- * This class is normally instantiated as the global variable $LANG in typo3/template.php
+ * This class is normally instantiated as the global variable $GLOBALS['LANG']
  * It's only available in the backend and under certain circumstances in the frontend
  *
  * @author Kasper Skårhøj <kasperYYYY@typo3.com>
- * @see typo3/template.php, template
+ * @see \TYPO3\CMS\Backend\Template\DocumentTemplate
  */
 class LanguageService {
 
@@ -114,7 +121,7 @@ class LanguageService {
 
 	/**
 	 * Initializes the backend language.
-	 * This is for example done in typo3/template.php with lines like these:
+	 * This is for example done in \TYPO3\CMS\Backend\Template\DocumentTemplate with lines like these:
 	 * require (PATH_typo3 . 'sysext/lang/lang.php');
 	 * $LANG = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('language');
 	 * $LANG->init($GLOBALS['BE_USER']->uc['lang']);
@@ -273,12 +280,9 @@ class LanguageService {
 
 	/**
 	 * splitLabel function
-	 * Historically labels were exploded by '|' and each part would correspond
-	 * to the translation of the language found at the same 'index' in the TYPO3_languages constant.
-	 * Today all translations are based on $LOCAL_LANG variables.
-	 * 'language-splitted' labels can therefore refer to a local-lang file + index instead!
-	 * It's highly recommended to use the 'local_lang' method
-	 * (and thereby it's highly deprecated to use 'language-splitted' label strings)
+	 *
+	 * All translations are based on $LOCAL_LANG variables.
+	 * 'language-splitted' labels can therefore refer to a local-lang file + index.
 	 * Refer to 'Inside TYPO3' for more details
 	 *
 	 * @param string $input Label key/reference

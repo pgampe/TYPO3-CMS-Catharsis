@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Core\Tests\Unit\Log;
 /***************************************************************
  * Copyright notice
  *
- * (c) 2012-2012 Steffen Gebert (steffen.gebert@typo3.org)
+ * (c) 2012-2013 Steffen Gebert (steffen.gebert@typo3.org)
  * All rights reserved
  *
  * This script is part of the TYPO3 project. The TYPO3 project is
@@ -101,7 +101,7 @@ class RecordTest extends \TYPO3\CMS\Core\Tests\UnitTestCase {
 
 	/**
 	 * @test
-	 * @expectedException RangeException
+	 * @expectedException Psr\Log\InvalidArgumentException
 	 */
 	public function setLevelValidatesLevel() {
 		$record = $this->getRecord();

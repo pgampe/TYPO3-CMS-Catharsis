@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Extbase\Command;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010-2012 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
+ *  (c) 2010-2013 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
  *  Extbase is a backport of TYPO3 Flow. All credits go to the TYPO3 Flow team.
  *  All rights reserved
  *
@@ -36,6 +36,7 @@ class HelpCommandController extends \TYPO3\CMS\Extbase\Mvc\Controller\CommandCon
 
 	/**
 	 * @var \TYPO3\CMS\Extbase\Mvc\Cli\CommandManager
+	 * @inject
 	 */
 	protected $commandManager;
 
@@ -43,14 +44,6 @@ class HelpCommandController extends \TYPO3\CMS\Extbase\Mvc\Controller\CommandCon
 	 * @var array
 	 */
 	protected $commandsByExtensionsAndControllers = array();
-
-	/**
-	 * @param \TYPO3\CMS\Extbase\Mvc\Cli\CommandManager $commandManager
-	 * @return void
-	 */
-	public function injectCommandManager(\TYPO3\CMS\Extbase\Mvc\Cli\CommandManager $commandManager) {
-		$this->commandManager = $commandManager;
-	}
 
 	/**
 	 * Displays a short, general help message

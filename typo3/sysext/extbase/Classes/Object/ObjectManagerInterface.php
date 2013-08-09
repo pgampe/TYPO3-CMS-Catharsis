@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Extbase\Object;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010-2012 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
+ *  (c) 2010-2013 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
  *  Extbase is a backport of TYPO3 Flow. All credits go to the TYPO3 Flow team.
  *  All rights reserved
  *
@@ -71,6 +71,14 @@ interface ObjectManagerInterface extends \TYPO3\CMS\Core\SingletonInterface {
 	 * @api
 	 */
 	public function getEmptyObject($className);
+
+	/**
+	 * Returns the scope of the specified object.
+	 *
+	 * @param string $objectName The object name
+	 * @return integer One of the Container::SCOPE_ constants
+	 */
+	public function getScope($objectName);
 }
 
 ?>

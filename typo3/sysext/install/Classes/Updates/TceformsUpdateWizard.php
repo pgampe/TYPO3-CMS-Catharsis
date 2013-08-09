@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Install\Updates;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2011 Ingmar Schlecht <ingmar@typo3.org>
+ *  (c) 2011-2013 Ingmar Schlecht <ingmar@typo3.org>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -23,19 +23,16 @@ namespace TYPO3\CMS\Install\Updates;
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
+
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+
 /**
  * Upgrade wizard which goes through all files referenced in the tt_content.image filed
  * and creates sys_file records as well as sys_file_reference records for the individual usages.
  *
  * @author Ingmar Schlecht <ingmar@typo3.org>
- * @license http://www.gnu.org/copyleft/gpl.html
  */
-use TYPO3\CMS\Core\Utility\GeneralUtility;
-
-/**
- * Updates TCEform references from direct file relations to FAL.
- */
-class TceformsUpdateWizard extends \TYPO3\CMS\Install\Updates\AbstractUpdate {
+class TceformsUpdateWizard extends AbstractUpdate {
 
 	/**
 	 * @var string
@@ -52,6 +49,9 @@ class TceformsUpdateWizard extends \TYPO3\CMS\Install\Updates\AbstractUpdate {
 	 */
 	protected $logger;
 
+	/**
+	 * Constructor
+	 */
 	public function __construct() {
 		/** @var $logManager \TYPO3\CMS\Core\Log\LogManager */
 		$logManager = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Core\\Log\\LogManager');
@@ -71,25 +71,24 @@ class TceformsUpdateWizard extends \TYPO3\CMS\Install\Updates\AbstractUpdate {
 	/**
 	 * Checks if an update is needed
 	 *
-	 * @param 	string		&$description: The description for the update
-	 * @return 	boolean		TRUE if an update is needed, FALSE otherwise
+	 * @param string &$description The description for the update
+	 * @return boolean TRUE if an update is needed, FALSE otherwise
 	 */
 	public function checkForUpdate(&$description) {
 		$description = 'This update wizard goes through all files that are referenced in the tt_content.image and pages.media / pages_language_overlay.media filed and adds the files to the new File Index.<br />It also moves the files from uploads/ to the fileadmin/_migrated/ path.<br /><br />This update wizard can be called multiple times in case it didn\'t finish after running once.';
-		// make this wizard always available
+		// Make this wizard always available
 		return TRUE;
 	}
 
 	/**
 	 * Performs the database update.
 	 *
-	 * @param 	array		&$dbQueries: queries done in this update
-	 * @param 	mixed		&$customMessages: custom messages
-	 * @return 	boolean		TRUE on success, FALSE on error
+	 * @param array &$dbQueries Queries done in this update
+	 * @param mixed &$customMessages Custom messages
+	 * @return boolean TRUE on success, FALSE on error
 	 */
 	public function performUpdate(array &$dbQueries, &$customMessages) {
 		$this->init();
-		// Function below copied from sysext/install/updates/class.tx_coreupdates_imagelink.php
 		$tables = array(
 			'tt_content' => array(
 				'image' => array(
@@ -171,6 +170,13 @@ class TceformsUpdateWizard extends \TYPO3\CMS\Install\Updates\AbstractUpdate {
 		return $result;
 	}
 
+	/**
+	 * Get records from table
+	 *
+	 * @param string $table
+	 * @param array $relationFields
+	 * @return array
+	 */
 	protected function getRecordsFromTable($table, $relationFields) {
 		$fields = implode(',', array_merge($relationFields, array('uid', 'pid')));
 		$records = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows($fields, $table, '');
@@ -247,6 +253,9 @@ class TceformsUpdateWizard extends \TYPO3\CMS\Install\Updates\AbstractUpdate {
 					// TODO add sorting/sorting_foreign
 					'fieldname' => $fieldname,
 					'table_local' => 'sys_file',
+					// the sys_file_reference record should always placed on the same page
+					// as the record to link to, see issue #46497
+					'pid' => ($table === 'pages' ? $row['uid'] : $row['pid']),
 					'uid_foreign' => $row['uid'],
 					'uid_local' => $file->getUid(),
 					'tablenames' => $table,
@@ -277,6 +286,5 @@ class TceformsUpdateWizard extends \TYPO3\CMS\Install\Updates\AbstractUpdate {
 	}
 
 }
-
 
 ?>

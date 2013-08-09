@@ -329,8 +329,14 @@ class Typo3DbBackendTest extends \TYPO3\CMS\Extbase\Tests\Unit\BaseTestCase {
 		$mockQuerySettings->expects($this->once())->method('getEnableFieldsToBeIgnored')->will($this->returnValue($enableFieldsToBeIgnored));
 		$mockQuerySettings->expects($this->once())->method('getIncludeDeleted')->will($this->returnValue($deletedValue));
 		$sql = array();
-		$mockTypo3DbBackend = $this->getAccessibleMock('TYPO3\\CMS\\Extbase\\Persistence\\Generic\\Storage\\Typo3DbBackend', array('getTypo3Mode'), array(), '', FALSE);
-		$mockTypo3DbBackend->expects($this->any())->method('getTypo3Mode')->will($this->returnValue($mode));
+
+		/** @var $mockEnvironmentService \TYPO3\CMS\Extbase\Service\EnvironmentService | \PHPUnit_Framework_MockObject_MockObject */
+		$mockEnvironmentService = $this->getMock('TYPO3\\CMS\\Extbase\\Service\\EnvironmentService', array('isEnvironmentInFrontendMode'));
+		$mockEnvironmentService->expects($this->any())->method('isEnvironmentInFrontendMode')->will($this->returnValue($mode == 'FE'));
+
+		/** @var $mockTypo3DbBackend \TYPO3\CMS\Extbase\Persistence\Generic\Storage\Typo3DbBackend | \PHPUnit_Framework_MockObject_MockObject */
+		$mockTypo3DbBackend = $this->getAccessibleMock('TYPO3\\CMS\\Extbase\\Persistence\\Generic\\Storage\\Typo3DbBackend', array('dummy'), array(), '', FALSE);
+		$mockTypo3DbBackend->_set('environmentService', $mockEnvironmentService);
 		$mockTypo3DbBackend->_callRef('addVisibilityConstraintStatement', $mockQuerySettings, $tableName, $sql);
 		$this->assertSame($expectedSql, $sql['additionalWhereClause']);
 		unset($GLOBALS['TCA'][$tableName]);
@@ -364,8 +370,14 @@ class Typo3DbBackendTest extends \TYPO3\CMS\Extbase\Tests\Unit\BaseTestCase {
 		$mockQuerySettings = $this->getMock('TYPO3\\CMS\\Extbase\\Persistence\\Generic\\Typo3QuerySettings', array('dummy'), array(), '', FALSE);
 		$mockQuerySettings->setRespectEnableFields($respectEnableFields);
 		$sql = array();
-		$mockTypo3DbBackend = $this->getAccessibleMock('TYPO3\\CMS\\Extbase\\Persistence\\Generic\\Storage\\Typo3DbBackend', array('getTypo3Mode'), array(), '', FALSE);
-		$mockTypo3DbBackend->expects($this->any())->method('getTypo3Mode')->will($this->returnValue($mode));
+
+		/** @var $mockEnvironmentService \TYPO3\CMS\Extbase\Service\EnvironmentService | \PHPUnit_Framework_MockObject_MockObject */
+		$mockEnvironmentService = $this->getMock('TYPO3\\CMS\\Extbase\\Service\\EnvironmentService', array('isEnvironmentInFrontendMode'));
+		$mockEnvironmentService->expects($this->any())->method('isEnvironmentInFrontendMode')->will($this->returnValue($mode == 'FE'));
+
+		/** @var $mockTypo3DbBackend \TYPO3\CMS\Extbase\Persistence\Generic\Storage\Typo3DbBackend | \PHPUnit_Framework_MockObject_MockObject */
+		$mockTypo3DbBackend = $this->getAccessibleMock('TYPO3\\CMS\\Extbase\\Persistence\\Generic\\Storage\\Typo3DbBackend', array('dummy'), array(), '', FALSE);
+		$mockTypo3DbBackend->_set('environmentService', $mockEnvironmentService);
 		$mockTypo3DbBackend->_callRef('addVisibilityConstraintStatement', $mockQuerySettings, $tableName, $sql);
 		$this->assertSame($expectedSql, $sql['additionalWhereClause']);
 		unset($GLOBALS['TCA'][$tableName]);
@@ -388,8 +400,14 @@ class Typo3DbBackendTest extends \TYPO3\CMS\Extbase\Tests\Unit\BaseTestCase {
 		$mockQuerySettings->expects($this->once())->method('getEnableFieldsToBeIgnored')->will($this->returnValue(array()));
 		$mockQuerySettings->expects($this->once())->method('getIncludeDeleted')->will($this->returnValue(TRUE));
 		$sql = array();
-		$mockTypo3DbBackend = $this->getAccessibleMock('TYPO3\\CMS\\Extbase\\Persistence\\Generic\\Storage\\Typo3DbBackend', array('getTypo3Mode'), array(), '', FALSE);
-		$mockTypo3DbBackend->expects($this->any())->method('getTypo3Mode')->will($this->returnValue('FE'));
+
+		/** @var $mockEnvironmentService \TYPO3\CMS\Extbase\Service\EnvironmentService | \PHPUnit_Framework_MockObject_MockObject */
+		$mockEnvironmentService = $this->getMock('TYPO3\\CMS\\Extbase\\Service\\EnvironmentService', array('isEnvironmentInFrontendMode'));
+		$mockEnvironmentService->expects($this->any())->method('isEnvironmentInFrontendMode')->will($this->returnValue(TRUE));
+
+		/** @var $mockTypo3DbBackend \TYPO3\CMS\Extbase\Persistence\Generic\Storage\Typo3DbBackend | \PHPUnit_Framework_MockObject_MockObject */
+		$mockTypo3DbBackend = $this->getAccessibleMock('TYPO3\\CMS\\Extbase\\Persistence\\Generic\\Storage\\Typo3DbBackend', array('dummy'), array(), '', FALSE);
+		$mockTypo3DbBackend->_set('environmentService', $mockEnvironmentService);
 		$mockTypo3DbBackend->_callRef('addVisibilityConstraintStatement', $mockQuerySettings, $tableName, $sql);
 		unset($GLOBALS['TCA'][$tableName]);
 	}
@@ -398,8 +416,8 @@ class Typo3DbBackendTest extends \TYPO3\CMS\Extbase\Tests\Unit\BaseTestCase {
 	 * @test
 	 */
 	public function uidOfAlreadyPersistedValueObjectIsDeterminedCorrectly() {
-		$mockValueObject = $this->getMockForAbstractClass('TYPO3\\CMS\\Extbase\\DomainObject\\AbstractValueObject', array('_getProperties'), '', FALSE);
-		$mockValueObject->expects($this->any())->method('_getProperties')->will($this->returnValue(array('propertyName' => 'propertyValue')));
+		$mockValueObject = $this->getMock('TYPO3\\CMS\\Extbase\\DomainObject\\AbstractValueObject', array('_getProperties'), array(), '', FALSE);
+		$mockValueObject->expects($this->once())->method('_getProperties')->will($this->returnValue(array('propertyName' => 'propertyValue')));
 		$mockColumnMap = $this->getMock('TYPO3\\CMS\\Extbase\\Persistence\\Generic\\Mapper\\DataMap', array('isPersistableProperty', 'getColumnName'), array(), '', FALSE);
 		$mockColumnMap->expects($this->any())->method('getColumnName')->will($this->returnValue('column_name'));
 		$tableName = 'tx_foo_table';
@@ -408,7 +426,7 @@ class Typo3DbBackendTest extends \TYPO3\CMS\Extbase\Tests\Unit\BaseTestCase {
 		$mockDataMap->expects($this->any())->method('getColumnMap')->will($this->returnValue($mockColumnMap));
 		$mockDataMap->expects($this->any())->method('getTableName')->will($this->returnValue($tableName));
 		$mockDataMapper = $this->getMock('TYPO3\\CMS\\Extbase\\Persistence\\Generic\\Mapper\\DataMapper', array('getDataMap'), array(), '', FALSE);
-		$mockDataMapper->expects($this->any())->method('getDataMap')->will($this->returnValue($mockDataMap));
+		$mockDataMapper->expects($this->once())->method('getDataMap')->will($this->returnValue($mockDataMap));
 		$expectedStatement = 'SELECT * FROM tx_foo_table WHERE column_name=?';
 		$expectedParameters = array('plainPropertyValue');
 		$expectedUid = 52;
@@ -418,7 +436,7 @@ class Typo3DbBackendTest extends \TYPO3\CMS\Extbase\Tests\Unit\BaseTestCase {
 		$mockTypo3DbBackend = $this->getAccessibleMock('TYPO3\\CMS\\Extbase\\Persistence\\Generic\\Storage\\Typo3DbBackend', array('getPlainValue', 'checkSqlErrors', 'replacePlaceholders', 'addVisibilityConstraintStatement'), array(), '', FALSE);
 		$mockTypo3DbBackend->expects($this->once())->method('getPlainValue')->will($this->returnValue('plainPropertyValue'));
 		$mockTypo3DbBackend->expects($this->once())->method('addVisibilityConstraintStatement')->with($this->isInstanceOf('TYPO3\\CMS\\Extbase\\Persistence\\Generic\\QuerySettingsInterface'), $tableName, $this->isType('array'));
-		$mockTypo3DbBackend->expects($this->once())->method('replacePlaceholders')->with($expectedStatement, $expectedParameters)->will($this->returnValue('plainPropertyValue'));
+		$mockTypo3DbBackend->expects($this->once())->method('replacePlaceholders')->with($expectedStatement, $expectedParameters);
 		$mockTypo3DbBackend->_set('dataMapper', $mockDataMapper);
 		$mockTypo3DbBackend->_set('databaseHandle', $mockDataBaseHandle);
 		$result = $mockTypo3DbBackend->_callRef('getUidOfAlreadyPersistedValueObject', $mockValueObject);
@@ -443,7 +461,9 @@ class Typo3DbBackendTest extends \TYPO3\CMS\Extbase\Tests\Unit\BaseTestCase {
 			'uid' => '43',
 			'pid' => '-1'
 		);
-		$languageUid = 2;
+		$querySettings = new \TYPO3\CMS\Extbase\Persistence\Generic\Typo3QuerySettings();
+		$querySettings->initializeObject();
+
 		$workspaceUid = 2;
 		$sourceMock = new \TYPO3\CMS\Extbase\Persistence\Generic\Qom\Selector('tx_foo', 'Tx_Foo');
 		/** @var $pageRepositoryMock \TYPO3\CMS\Frontend\Page\PageRepository|\PHPUnit_Framework_MockObject_MockObject */
@@ -452,8 +472,178 @@ class Typo3DbBackendTest extends \TYPO3\CMS\Extbase\Tests\Unit\BaseTestCase {
 		$pageRepositoryMock->expects($this->once())->method('getWorkspaceVersionOfRecord')->with($workspaceUid, 'tx_foo', '42')->will($this->returnValue($workspaceVersion));
 		$mockTypo3DbBackend = $this->getAccessibleMock('TYPO3\\CMS\\Extbase\\Persistence\\Generic\\Storage\\Typo3DbBackend', array('dummy'), array(), '', FALSE);
 		$mockTypo3DbBackend->_set('pageRepository', $pageRepositoryMock);
-		$this->assertSame(array($comparisonRow), $mockTypo3DbBackend->_call('doLanguageAndWorkspaceOverlay', $sourceMock, array($row), $languageUid, $workspaceUid));
+		$this->assertSame(array($comparisonRow), $mockTypo3DbBackend->_call('doLanguageAndWorkspaceOverlay', $sourceMock, array($row), $querySettings, $workspaceUid));
 	}
+
+	/**
+	 * DataProvider for addPageIdStatement Tests
+	 */
+	public function providerForAddPageIdStatementData() {
+		$table = uniqid('tx_coretest_table');
+		return array(
+			'set Pid to zero if rootLevel = 1' => array(
+				'1',
+				$table,
+				array('additionalWhereClause' => array($table . '.pid = 0'))
+			),
+			'set Pid to given Pids if rootLevel = 0' => array(
+				'0',
+				$table,
+				array('additionalWhereClause' => array($table . '.pid IN (42, 27)'))
+			),
+			'set no statement if rootLevel = -1' => array(
+				'-1',
+				$table,
+				array()
+			)
+		);
+	}
+
+	/**
+	 * @test
+	 * @dataProvider providerForAddPageIdStatementData
+	 */
+	public function addPageIdStatementSetsPidToZeroIfTableDeclaresRootlevel($rootLevel, $table, $expectedSql) {
+
+		$GLOBALS['TCA'][$table]['ctrl'] = array(
+			'rootLevel' => $rootLevel
+		);
+		$querySettings = new \TYPO3\CMS\Extbase\Persistence\Generic\Typo3QuerySettings();
+		$querySettings->initializeObject();
+		$sql = array();
+		$storagePageIds = array(42,27);
+		$mockTypo3DbBackend = $this->getAccessibleMock('TYPO3\\CMS\\Extbase\\Persistence\\Generic\\Storage\\Typo3DbBackend', array('dummy'), array(), '', FALSE);
+		$mockFrontendVariableCache = $this->getMock('TYPO3\\CMS\\Core\\Cache\\Frontend\\VariableFrontend', array(), array(), '', FALSE);
+		$mockTypo3DbBackend->_set('tableColumnCache', $mockFrontendVariableCache);
+		$mockFrontendVariableCache->expects($this->once())->method('get')->will($this->returnValue(array('pid' => '42')));
+		$mockTypo3DbBackend->_callRef('addPageIdStatement', $table, $sql, $storagePageIds);
+
+		$this->assertSame($expectedSql, $sql);
+	}
+
+	/**
+	 * @test
+	 * @expectedException \TYPO3\CMS\Extbase\Persistence\Generic\Exception\UnexpectedTypeException
+	 */
+	public function getPlainValueThrowsExceptionIfInputIsArray() {
+		$mockTypo3DbBackend = $this->getAccessibleMock(
+			'TYPO3\\CMS\\Extbase\\Persistence\\Generic\\Storage\\Typo3DbBackend',
+			array('dummy'),
+			array(),
+			'',
+			FALSE
+		);
+		$mockTypo3DbBackend->_call('getPlainValue', array());
+	}
+
+	/**
+	 * @test
+	 */
+	public function getPlainValueReturnsTimestampIfDateTimeObjectIsGiven() {
+		$mockTypo3DbBackend = $this->getAccessibleMock(
+			'TYPO3\\CMS\\Extbase\\Persistence\\Generic\\Storage\\Typo3DbBackend',
+			array('dummy'),
+			array(),
+			'',
+			FALSE
+		);
+		$input = new \DateTime('@1365866253');
+		$this->assertSame('1365866253', $mockTypo3DbBackend->_call('getPlainValue', $input));
+	}
+
+	/**
+	 * @test
+	 */
+	public function getPlainValueReturnsIntegerOneIfValueIsBooleanTrue() {
+		$mockTypo3DbBackend = $this->getAccessibleMock(
+			'TYPO3\\CMS\\Extbase\\Persistence\\Generic\\Storage\\Typo3DbBackend',
+			array('dummy'),
+			array(),
+			'',
+			FALSE
+		);
+		$this->assertSame(1, $mockTypo3DbBackend->_call('getPlainValue', TRUE));
+	}
+
+	/**
+	 * @test
+	 */
+	public function getPlainValueReturnsIntegerZeroIfValueIsBooleanFalse() {
+		$mockTypo3DbBackend = $this->getAccessibleMock(
+			'TYPO3\\CMS\\Extbase\\Persistence\\Generic\\Storage\\Typo3DbBackend',
+			array('dummy'),
+			array(),
+			'',
+			FALSE
+		);
+		$this->assertSame(0, $mockTypo3DbBackend->_call('getPlainValue', FALSE));
+	}
+
+	/**
+	 * @test
+	 * @expectedException \TYPO3\CMS\Extbase\Persistence\Generic\Exception\UnexpectedTypeException
+	 */
+	public function getPlainValueCallsGetRealInstanceOnInputIfInputIsInstanceOfLazyLoadingProxy() {
+		$mockTypo3DbBackend = $this->getAccessibleMock(
+			'TYPO3\\CMS\\Extbase\\Persistence\\Generic\\Storage\\Typo3DbBackend',
+			array('dummy'),
+			array(),
+			'',
+			FALSE
+		);
+		$input = $this->getMock(
+			'TYPO3\\CMS\\Extbase\\Persistence\\Generic\\LazyLoadingProxy',
+			array(),
+			array(),
+			'',
+			FALSE
+		);
+		$input
+			->expects($this->once())
+			->method('_loadRealInstance');
+		$mockTypo3DbBackend->_call('getPlainValue', $input);
+	}
+
+	/**
+	 * @test
+	 */
+	public function getPlainValueCallsGetUidOnDomainObjectInterfaceInput() {
+		$mockTypo3DbBackend = $this->getAccessibleMock(
+			'TYPO3\\CMS\\Extbase\\Persistence\\Generic\\Storage\\Typo3DbBackend',
+			array('dummy'),
+			array(),
+			'',
+			FALSE
+		);
+		$input = $this->getMock(
+			'TYPO3\\CMS\\Extbase\\DomainObject\\DomainObjectInterface',
+			array(),
+			array(),
+			'',
+			FALSE
+		);
+		$input
+			->expects($this->once())
+			->method('getUid')
+			->will($this->returnValue(23));
+		$this->assertSame(23, $mockTypo3DbBackend->_call('getPlainValue', $input));
+	}
+
+	/**
+	 * @test
+	 */
+	public function getPlainValueReturnsSimpleType() {
+		$mockTypo3DbBackend = $this->getAccessibleMock(
+			'TYPO3\\CMS\\Extbase\\Persistence\\Generic\\Storage\\Typo3DbBackend',
+			array('dummy'),
+			array(),
+			'',
+			FALSE
+		);
+		$value = uniqid('foo_');
+		$this->assertSame($value, $mockTypo3DbBackend->_call('getPlainValue', $value));
+	}
+
 }
 
 ?>

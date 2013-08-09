@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Frontend\ContentObject;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2012 Ingmar Schlecht <ingmar@typo3.org>
+ *  (c) 2012-2013 Ingmar Schlecht <ingmar@typo3.org>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -26,6 +26,9 @@ namespace TYPO3\CMS\Frontend\ContentObject;
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
+
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+
 /**
  * Contains FILES content object
  *
@@ -41,7 +44,7 @@ class FilesContentObject extends \TYPO3\CMS\Frontend\ContentObject\AbstractConte
 	 */
 	public function render($conf = array()) {
 		/** @var \TYPO3\CMS\Core\Resource\FileRepository $fileRepository */
-		$fileRepository = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Core\\Resource\\FileRepository');
+		$fileRepository = GeneralUtility::makeInstance('TYPO3\\CMS\\Core\\Resource\\FileRepository');
 		$fileObjects = array();
 		// Getting the files
 		if ($conf['references'] || $conf['references.']) {
@@ -55,13 +58,13 @@ class FilesContentObject extends \TYPO3\CMS\Frontend\ContentObject\AbstractConte
 			references = 27
 			 */
 			$referencesUid = $this->stdWrapValue('references', $conf);
-			$referencesUidArray = \TYPO3\CMS\Core\Utility\GeneralUtility::intExplode(',', $referencesUid, TRUE);
+			$referencesUidArray = GeneralUtility::intExplode(',', $referencesUid, TRUE);
 			foreach ($referencesUidArray as $referenceUid) {
 				try {
 					$this->addToArray($fileRepository->findFileReferenceByUid($referenceUid), $fileObjects);
 				} catch (\TYPO3\CMS\Core\Resource\Exception $e) {
 					/** @var \TYPO3\CMS\Core\Log\Logger $logger */
-					$logger = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\CMS\Core\Log\LogManager')->getLogger();
+					$logger = GeneralUtility::makeInstance('TYPO3\CMS\Core\Log\LogManager')->getLogger();
 					$logger->warning('The file-reference with uid  "' . $referenceUid . '" could not be found and won\'t be included in frontend output');
 				}
 			}
@@ -85,21 +88,21 @@ class FilesContentObject extends \TYPO3\CMS\Frontend\ContentObject\AbstractConte
 			files = 12,14,15# using stdWrap:
 			files.field = some_field
 			 */
-			$fileUids = \TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(',', $this->stdWrapValue('files', $conf), TRUE);
+			$fileUids = GeneralUtility::trimExplode(',', $this->stdWrapValue('files', $conf), TRUE);
 			foreach ($fileUids as $fileUid) {
 				try {
 					$this->addToArray($fileRepository->findByUid($fileUid), $fileObjects);
 				} catch (\TYPO3\CMS\Core\Resource\Exception $e) {
 					/** @var \TYPO3\CMS\Core\Log\Logger $logger */
-					$logger = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\CMS\Core\Log\LogManager')->getLogger();
+					$logger = GeneralUtility::makeInstance('TYPO3\CMS\Core\Log\LogManager')->getLogger();
 					$logger->warning('The file with uid  "' . $fileUid . '" could not be found and won\'t be included in frontend output');
 				}
 			}
 		}
 		if ($conf['collections'] || $conf['collections.']) {
-			$collectionUids = \TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(',', $this->stdWrapValue('collections', $conf), TRUE);
+			$collectionUids = GeneralUtility::trimExplode(',', $this->stdWrapValue('collections', $conf), TRUE);
 			/** @var \TYPO3\CMS\Core\Resource\FileCollectionRepository $collectionRepository */
-			$collectionRepository = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Core\\Resource\\FileCollectionRepository');
+			$collectionRepository = GeneralUtility::makeInstance('TYPO3\\CMS\\Core\\Resource\\FileCollectionRepository');
 			foreach ($collectionUids as $collectionUid) {
 				try {
 					$fileCollection = $collectionRepository->findByUid($collectionUid);
@@ -109,15 +112,15 @@ class FilesContentObject extends \TYPO3\CMS\Frontend\ContentObject\AbstractConte
 					}
 				} catch (\TYPO3\CMS\Core\Resource\Exception $e) {
 					/** @var \TYPO3\CMS\Core\Log\Logger $logger */
-					$logger = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\CMS\Core\Log\LogManager')->getLogger();
+					$logger = GeneralUtility::makeInstance('TYPO3\CMS\Core\Log\LogManager')->getLogger();
 					$logger->warning('The file-collection with uid  "' . $collectionUid . '" could not be found or contents could not be loaded and won\'t be included in frontend output');
 				}
 			}
 		}
 		if ($conf['folders'] || $conf['folders.']) {
-			$folderIdentifiers = \TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(',', $this->stdWrapValue('folders', $conf));
+			$folderIdentifiers = GeneralUtility::trimExplode(',', $this->stdWrapValue('folders', $conf));
 			/** @var \TYPO3\CMS\Core\Resource\ResourceFactory $fileFactory */
-			$fileFactory = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Core\\Resource\\ResourceFactory');
+			$fileFactory = GeneralUtility::makeInstance('TYPO3\\CMS\\Core\\Resource\\ResourceFactory');
 			foreach ($folderIdentifiers as $folderIdentifier) {
 				if ($folderIdentifier) {
 					try {
@@ -127,7 +130,7 @@ class FilesContentObject extends \TYPO3\CMS\Frontend\ContentObject\AbstractConte
 						}
 					} catch (\TYPO3\CMS\Core\Resource\Exception $e) {
 						/** @var \TYPO3\CMS\Core\Log\Logger $logger */
-						$logger = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\CMS\Core\Log\LogManager')->getLogger();
+						$logger = GeneralUtility::makeInstance('TYPO3\CMS\Core\Log\LogManager')->getLogger();
 						$logger->warning('The folder with identifier  "' . $folderIdentifier . '" could not be found and won\'t be included in frontend output');
 					}
 				}
@@ -137,9 +140,29 @@ class FilesContentObject extends \TYPO3\CMS\Frontend\ContentObject\AbstractConte
 		$content = '';
 		// optionSplit applied to conf to allow differnt settings per file
 		$splitConf = $GLOBALS['TSFE']->tmpl->splitConfArray($conf, count($fileObjects));
+
+		// Enable sorting for multiple fileObjects
+		$sortingProperty = '';
+		if ($conf['sorting'] || $conf['sorting.']) {
+			$sortingProperty = $this->stdWrapValue('sorting', $conf);
+		}
+		if ($sortingProperty !== '' && count($fileObjects) > 1) {
+			usort($fileObjects, function(\TYPO3\CMS\Core\Resource\FileInterface $a, \TYPO3\CMS\Core\Resource\FileInterface $b) use($sortingProperty) {
+				if ($a->hasProperty($sortingProperty) && $b->hasProperty($sortingProperty)) {
+					return strnatcasecmp($a->getProperty($sortingProperty), $b->getProperty($sortingProperty));
+				} else {
+					return 0;
+				}
+			});
+		}
+
+		$GLOBALS['TSFE']->register['FILES_COUNT'] = count($fileObjects);
+		$fileObjectCounter = 0;
 		foreach ($fileObjects as $key => $fileObject) {
+			$GLOBALS['TSFE']->register['FILE_NUM_CURRENT'] = $fileObjectCounter;
 			$this->cObj->setCurrentFile($fileObject);
 			$content .= $this->cObj->cObjGetSingle($splitConf[$key]['renderObj'], $splitConf[$key]['renderObj.']);
+			$fileObjectCounter++;
 		}
 		$content = $this->cObj->stdWrap($content, $conf['stdWrap.']);
 		return $content;

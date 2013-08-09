@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Rsaauth\Storage;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2009-2011 Dmitry Dulepov <dmitry@typo3.org>
+ *  (c) 2009-2013 Dmitry Dulepov <dmitry@typo3.org>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -50,7 +50,7 @@ class SessionStorage extends \TYPO3\CMS\Rsaauth\Storage\AbstractStorage {
 	 * Obtains key from the session
 	 *
 	 * @return string The key or NULL
-	 * @see tx_rsaauth_abstract_storage::get()
+	 * @see \TYPO3\CMS\Rsaauth\Storage\AbstractStorage::get()
 	 */
 	public function get() {
 		return isset($_SESSION['tx_rsaauth_key']) ? $_SESSION['tx_rsaauth_key'] : NULL;
@@ -60,7 +60,7 @@ class SessionStorage extends \TYPO3\CMS\Rsaauth\Storage\AbstractStorage {
 	 * Puts key to the session
 	 *
 	 * @param string $key The key
-	 * @see tx_rsaauth_abstract_storage::put()
+	 * @see \TYPO3\CMS\Rsaauth\Storage\AbstractStorage::put()
 	 */
 	public function put($key) {
 		$_SESSION['tx_rsaauth_key'] = $key;

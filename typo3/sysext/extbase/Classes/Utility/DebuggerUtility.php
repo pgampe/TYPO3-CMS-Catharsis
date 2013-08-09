@@ -51,7 +51,7 @@ class DebuggerUtility {
 		'TYPO3\\CMS\\Extbase\\Reflection\\ReflectionService',
 		'TYPO3\\CMS\\Extbase\\Object\\ObjectManager',
 		'TYPO3\\CMS\\Extbase\\Persistence\\Generic\\Mapper\\DataMapper',
-		'TYPO3\\CMS\\Extbase\\Persistence\\PersistenceManagerInterface',
+		'TYPO3\\CMS\\Extbase\\Persistence\\Generic\\PersistenceManager',
 		'TYPO3\\CMS\\Extbase\\Persistence\\Generic\\Qom\\QueryObjectModelFactory',
 		'TYPO3\\CMS\\Frontend\\ContentObject\\ContentObjectRenderer'
 	);
@@ -187,7 +187,7 @@ class DebuggerUtility {
 	 * Checks if a given object or property should be excluded/filtered
 	 *
 	 * @param object $value An ReflectionProperty or other Object
-	 * @return bool TRUE if the given object should be filtered
+	 * @return boolean TRUE if the given object should be filtered
 	 */
 	static protected function isBlacklisted($value) {
 		$result = FALSE;
@@ -202,8 +202,8 @@ class DebuggerUtility {
 	/**
 	 * Checks if a given object was already rendered.
 	 *
-	 * @param $object
-	 * @return bool TRUE if the given object was already rendered
+	 * @param object $object
+	 * @return boolean TRUE if the given object was already rendered
 	 */
 	static protected function isAlreadyRendered($object) {
 		return self::$renderedObjects->contains($object);
@@ -212,10 +212,10 @@ class DebuggerUtility {
 	/**
 	 * Renders the header of a given object/collection. It is usually the class name along with some flags.
 	 *
-	 * @param $object
-	 * @param $level
-	 * @param $plainText
-	 * @param $ansiColors
+	 * @param object $object
+	 * @param integer $level
+	 * @param boolean $plainText
+	 * @param boolean $ansiColors
 	 * @return string The rendered header with tags
 	 */
 	static protected function renderHeader($object, $level, $plainText, $ansiColors) {
@@ -296,10 +296,10 @@ class DebuggerUtility {
 	}
 
 	/**
-	 * @param $object
-	 * @param $level
-	 * @param $plainText
-	 * @param $ansiColors
+	 * @param object $object
+	 * @param integer $level
+	 * @param boolean $plainText
+	 * @param boolean $ansiColors
 	 * @return string The rendered body content of the Object(Storage)
 	 */
 	static protected function renderContent($object, $level, $plainText, $ansiColors) {

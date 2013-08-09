@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Extensionmanager\Controller;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2012 Susanne Moog, <typo3@susannemoog.de>
+ *  (c) 2012-2013 Susanne Moog, <typo3@susannemoog.de>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -36,42 +36,21 @@ class UploadExtensionFileController extends \TYPO3\CMS\Extensionmanager\Controll
 
 	/**
 	 * @var \TYPO3\CMS\Extensionmanager\Utility\FileHandlingUtility
+	 * @inject
 	 */
 	protected $fileHandlingUtility;
 
 	/**
 	 * @var \TYPO3\CMS\Extensionmanager\Utility\Connection\TerUtility
+	 * @inject
 	 */
 	protected $terUtility;
 
 	/**
 	 * @var \TYPO3\CMS\Extensionmanager\Utility\InstallUtility
+	 * @inject
 	 */
 	protected $installUtility;
-
-	/**
-	 * @param \TYPO3\CMS\Extensionmanager\Utility\FileHandlingUtility $fileHandlingUtility
-	 * @return void
-	 */
-	public function injectFileHandlingUtility(\TYPO3\CMS\Extensionmanager\Utility\FileHandlingUtility $fileHandlingUtility) {
-		$this->fileHandlingUtility = $fileHandlingUtility;
-	}
-
-	/**
-	 * @param \TYPO3\CMS\Extensionmanager\Utility\Connection\TerUtility $terUtility
-	 * @return void
-	 */
-	public function injectTerUtility(\TYPO3\CMS\Extensionmanager\Utility\Connection\TerUtility $terUtility) {
-		$this->terUtility = $terUtility;
-	}
-
-	/**
-	 * @param \TYPO3\CMS\Extensionmanager\Utility\InstallUtility $installUtility
-	 * @return void
-	 */
-	public function injectInstallUtility(\TYPO3\CMS\Extensionmanager\Utility\InstallUtility $installUtility) {
-		$this->installUtility = $installUtility;
-	}
 
 	/**
 	 * Render upload extension form
@@ -103,7 +82,10 @@ class UploadExtensionFileController extends \TYPO3\CMS\Extensionmanager\Controll
 			if (!empty($file['tmp_name']['extensionFile'])) {
 				$tempFile = \TYPO3\CMS\Core\Utility\GeneralUtility::upload_to_tempfile($file['tmp_name']['extensionFile']);
 			} else {
-				throw new \TYPO3\CMS\Extensionmanager\Exception\ExtensionManagerException('Creating temporary file failed.', 1342864339);
+				throw new \TYPO3\CMS\Extensionmanager\Exception\ExtensionManagerException(
+					'Creating temporary file failed. Check your upload_max_filesize and post_max_size limits.',
+					1342864339
+				);
 			}
 			if ($fileExtension === 't3x') {
 				$extensionData = $this->getExtensionFromT3xFile($tempFile, $overwrite);
@@ -151,11 +133,11 @@ class UploadExtensionFileController extends \TYPO3\CMS\Extensionmanager\Controll
 	 * @param string $fileName Filename (basename) of uploaded file
 	 * @param boolean $overwrite Overwrite existing extension if TRUE
 	 * @return array
+	 * @throws \TYPO3\CMS\Extensionmanager\Exception\ExtensionManagerException
 	 */
 	protected function getExtensionFromZipFile($file, $fileName, $overwrite = FALSE) {
 			// Remove version and ending from filename to determine extension key
-		$extensionKey = preg_replace('/_(\d+)(\.|\-)(\d+)(\.|\-)(\d+)/i', '', strtolower($fileName));
-		$extensionKey = substr($extensionKey, 0, strrpos($extensionKey, '.'));
+		$extensionKey = preg_replace('/_(\d+)(\.|\-)(\d+)(\.|\-)(\d+).*/i', '', strtolower($fileName));
 		if (!$overwrite && $this->installUtility->isAvailable($extensionKey)) {
 			throw new \TYPO3\CMS\Extensionmanager\Exception\ExtensionManagerException('Extension is already available and overwriting is disabled.', 1342864311);
 		}
@@ -165,6 +147,5 @@ class UploadExtensionFileController extends \TYPO3\CMS\Extensionmanager\Controll
 	}
 
 }
-
 
 ?>

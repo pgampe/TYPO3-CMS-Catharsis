@@ -5,7 +5,7 @@ use \TYPO3\CMS\Core\Utility\GeneralUtility;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2012 Susanne Moog <susanne.moog@typo3.org>
+ *  (c) 2012-2013 Susanne Moog <susanne.moog@typo3.org>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -36,33 +36,15 @@ class FileHandlingUtility implements \TYPO3\CMS\Core\SingletonInterface {
 
 	/**
 	 * @var \TYPO3\CMS\Extensionmanager\Utility\EmConfUtility
+	 * @inject
 	 */
 	protected $emConfUtility;
 
 	/**
-	 * Injector for Tx_Extensionmanager_Utility_EmConf
-	 *
-	 * @param \TYPO3\CMS\Extensionmanager\Utility\EmConfUtility $emConfUtility
-	 * @return void
-	 */
-	public function injectEmConfUtility(\TYPO3\CMS\Extensionmanager\Utility\EmConfUtility $emConfUtility) {
-		$this->emConfUtility = $emConfUtility;
-	}
-
-	/**
 	 * @var \TYPO3\CMS\Extensionmanager\Utility\InstallUtility
+	 * @inject
 	 */
 	protected $installUtility;
-
-	/**
-	 * Injector for Tx_Extensionmanager_Utility_Install
-	 *
-	 * @param \TYPO3\CMS\Extensionmanager\Utility\InstallUtility $installUtility
-	 * @return void
-	 */
-	public function injectInstallUtility(\TYPO3\CMS\Extensionmanager\Utility\InstallUtility $installUtility) {
-		$this->installUtility = $installUtility;
-	}
 
 	/**
 	 * Unpack an extension in t3x data format and write files
@@ -250,8 +232,13 @@ class FileHandlingUtility implements \TYPO3\CMS\Core\SingletonInterface {
 	 * @return void
 	 */
 	public function removeDirectory($extDirPath) {
-		$res = GeneralUtility::rmdir($extDirPath, TRUE);
-		if ($res === FALSE) {
+		$extensionPathWithoutTrailingSlash = rtrim($extDirPath, DIRECTORY_SEPARATOR);
+		if (is_link($extensionPathWithoutTrailingSlash)) {
+			$result = unlink($extensionPathWithoutTrailingSlash);
+		} else {
+			$result = GeneralUtility::rmdir($extDirPath, TRUE);
+		}
+		if ($result === FALSE) {
 			throw new \TYPO3\CMS\Extensionmanager\Exception\ExtensionManagerException(sprintf($GLOBALS['LANG']->getLL('clearMakeExtDir_could_not_remove_dir'), $this->getRelativePath($extDirPath)), 1337280415);
 		}
 	}
@@ -351,7 +338,7 @@ class FileHandlingUtility implements \TYPO3\CMS\Core\SingletonInterface {
 			$version =  '0.0.0';
 		}
 
-		$fileName = $this->getAbsolutePath('typo3temp/' . $extension . '_' . $version . '.zip');
+		$fileName = $this->getAbsolutePath('typo3temp/' . $extension . '_' . $version . '_' . date('YmdHi') . '.zip');
 
 		$zip = new \ZipArchive();
 		$zip->open($fileName, \ZipArchive::CREATE);
@@ -375,7 +362,14 @@ class FileHandlingUtility implements \TYPO3\CMS\Core\SingletonInterface {
 		$files = array_filter($files);
 
 		foreach ($files as $file) {
-			$zip->addFile($extensionPath . $file, $file);
+			$fullPath = $extensionPath . $file;
+			// Distinguish between files and directories, as creation of the archive
+			// fails on Windows when trying to add a directory with "addFile".
+			if (is_dir($fullPath)) {
+				$zip->addEmptyDir($file);
+			} else {
+				$zip->addFile($fullPath, $file);
+			}
 		}
 
 		$zip->close();

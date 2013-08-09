@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Aboutmodules\Controller;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2012 Christian Kuhn <lolli@schwarzbu.ch>
+ *  (c) 2012-2013 Christian Kuhn <lolli@schwarzbu.ch>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -68,7 +68,6 @@ class ModulesController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionControll
 			$mainModuleData = array();
 			$moduleKey = $moduleName . '_tab';
 			$mainModuleData['name'] = $moduleName;
-			$mainModuleData['icon'] = substr($GLOBALS['LANG']->moduleLabels['tabs_images'][$moduleKey], strlen(PATH_site));
 			$mainModuleData['label'] = $GLOBALS['LANG']->moduleLabels['tabs'][$moduleKey];
 			if (is_array($moduleInfo['sub']) && count($moduleInfo['sub']) > 0) {
 				$mainModuleData['subModules'] = $this->getSubModuleData($moduleName, $moduleInfo['sub']);

@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Extbase\Validation;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010-2012 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
+ *  (c) 2010-2013 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
  *  Extbase is a backport of TYPO3 Flow. All credits go to the TYPO3 Flow team.
  *  All rights reserved
  *
@@ -27,19 +27,20 @@ namespace TYPO3\CMS\Extbase\Validation;
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
+
 /**
- * Objects of this kind contain a list of validation errors which occurred during
- * validation.
+ * This object holds a validation error.
+ *
  */
 class Error extends \TYPO3\CMS\Extbase\Error\Error {
 
 	/**
-	 * @var string The default (english) error message.
+	 * @var string
 	 */
 	protected $message = 'Unknown validation error';
 
 	/**
-	 * @var string The error code
+	 * @var string
 	 */
 	protected $code = 1201447005;
 }

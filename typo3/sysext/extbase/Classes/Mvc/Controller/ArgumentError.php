@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Extbase\Mvc\Controller;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010-2012 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
+ *  (c) 2010-2013 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
  *  Extbase is a backport of TYPO3 Flow. All credits go to the TYPO3 Flow team.
  *  All rights reserved
  *
@@ -31,7 +31,7 @@ namespace TYPO3\CMS\Extbase\Mvc\Controller;
  * This object holds validation errors for one argument.
  *
  * @license http://www.gnu.org/licenses/lgpl.html GNU Lesser General Public License, version 3 or later
- * @deprecated since Extbase 1.4.0, will be removed in Extbase 6.1
+ * @deprecated since Extbase 1.4.0, will be removed two versions after Extbase 6.1
  */
 class ArgumentError extends \TYPO3\CMS\Extbase\Validation\PropertyError {
 

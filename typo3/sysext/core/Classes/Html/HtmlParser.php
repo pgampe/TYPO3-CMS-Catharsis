@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Core\Html;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 1999-2011 Kasper Skårhøj (kasperYYYY@typo3.com)
+ *  (c) 1999-2013 Kasper Skårhøj (kasperYYYY@typo3.com)
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -26,13 +26,9 @@ namespace TYPO3\CMS\Core\Html;
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
-/**
- * Contains class with functions for parsing HTML code.
- *
- * Revised for TYPO3 3.6 July/2003 by Kasper Skårhøj
- *
- * @author Kasper Skårhøj <kasperYYYY@typo3.com>
- */
+
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+
 /**
  * Functions for parsing HTML.
  * You are encouraged to use this class in your own applications
@@ -205,7 +201,7 @@ class HtmlParser {
 	 */
 	static public function substituteMarkerArray($content, $markContentArray, $wrap = '', $uppercase = FALSE, $deleteUnused = FALSE) {
 		if (is_array($markContentArray)) {
-			$wrapArr = \TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode('|', $wrap);
+			$wrapArr = GeneralUtility::trimExplode('|', $wrap);
 			foreach ($markContentArray as $marker => $markContent) {
 				if ($uppercase) {
 					// use strtr instead of strtoupper to avoid locale problems with Turkish
@@ -220,7 +216,7 @@ class HtmlParser {
 				if (empty($wrap)) {
 					$wrapArr = array('###', '###');
 				}
-				$content = preg_replace('/' . preg_quote($wrapArr[0]) . '([A-Z0-9_|\\-]*)' . preg_quote($wrapArr[1]) . '/is', '', $content);
+				$content = preg_replace('/' . preg_quote($wrapArr[0], '/') . '([A-Z0-9_|\\-]*)' . preg_quote($wrapArr[1], '/') . '/is', '', $content);
 			}
 		}
 		return $content;
@@ -237,18 +233,21 @@ class HtmlParser {
 	 * markers.
 	 *
 	 * $markersAndSubparts = array (
-	 * '###SINGLEMARKER1###' => 'value 1',
-	 * '###SUBPARTMARKER1###' => array(
-	 * 0 => array(
-	 * '###SINGLEMARKER2###' => 'value 2',
-	 * ),
-	 * 1 => array(
-	 * '###SINGLEMARKER2###' => 'value 3',
-	 * )
-	 * )
+	 * 	'###SINGLEMARKER1###' => 'value 1',
+	 * 	'###SUBPARTMARKER1###' => array(
+	 * 		0 => array(
+	 * 			'###SINGLEMARKER2###' => 'value 2',
+	 * 		),
+	 * 		1 => array(
+	 * 			'###SINGLEMARKER2###' => 'value 3',
+	 * 		)
+	 * 	),
+	 * 	'###SUBPARTMARKER2###' => array(
+	 * 	),
 	 * )
 	 * Subparts can be nested, so below the 'SINGLEMARKER2' it is possible to have another subpart marker with an array as the
 	 * value, which in its turn contains the elements of the sub-subparts.
+	 * Empty arrays for Subparts will cause the subtemplate to be cleared.
 	 *
 	 * @static
 	 * @param string $content The content stream, typically HTML template content.
@@ -259,7 +258,7 @@ class HtmlParser {
 	 * @return string The processed output stream
 	 */
 	static public function substituteMarkerAndSubpartArrayRecursive($content, array $markersAndSubparts, $wrap = '', $uppercase = FALSE, $deleteUnused = FALSE) {
-		$wraps = \TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode('|', $wrap);
+		$wraps = GeneralUtility::trimExplode('|', $wrap);
 		$singleItems = array();
 		$compoundItems = array();
 		// Split markers and subparts into separate arrays
@@ -285,16 +284,21 @@ class HtmlParser {
 		}
 		// Replace the subpart contents recursively
 		foreach ($compoundItems as $subpartMarker) {
-			foreach ($markersAndSubparts[$subpartMarker] as $partialMarkersAndSubparts) {
-				$completeMarker = $subpartMarker;
-				if ($uppercase) {
-					// use strtr instead of strtoupper to avoid locale problems with Turkish
-					$completeMarker = strtr($completeMarker, 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ');
+			$completeMarker = $subpartMarker;
+			if ($uppercase) {
+				// use strtr instead of strtoupper to avoid locale problems with Turkish
+				$completeMarker = strtr($completeMarker, 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ');
+			}
+			if (count($wraps) > 0) {
+				$completeMarker = $wraps[0] . $completeMarker . $wraps[1];
+			}
+			if (count($markersAndSubparts[$subpartMarker]) > 0) {
+				foreach ($markersAndSubparts[$subpartMarker] as $partialMarkersAndSubparts) {
+					$subpartSubstitutes[$completeMarker] .= self::substituteMarkerAndSubpartArrayRecursive($subTemplates[$completeMarker],
+						$partialMarkersAndSubparts, $wrap, $uppercase, $deleteUnused);
 				}
-				if (count($wraps) > 0) {
-					$completeMarker = $wraps[0] . $completeMarker . $wraps[1];
-				}
-				$subpartSubstitutes[$completeMarker] .= self::substituteMarkerAndSubpartArrayRecursive($subTemplates[$completeMarker], $partialMarkersAndSubparts, $wrap, $uppercase, $deleteUnused);
+			} else {
+				$subpartSubstitutes[$completeMarker] = '';
 			}
 		}
 		// Substitute the single markers and subparts
@@ -321,7 +325,10 @@ class HtmlParser {
 	 * @todo Define visibility
 	 */
 	public function splitIntoBlock($tag, $content, $eliminateExtraEndTags = FALSE) {
-		$tags = array_unique(\TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(',', $tag, 1));
+		$tags = array_unique(GeneralUtility::trimExplode(',', $tag, TRUE));
+		foreach ($tags as &$tag) {
+			$tag = preg_quote($tag, '/');
+		}
 		$regexStr = '/\\<\\/?(' . implode('|', $tags) . ')(\\s*\\>|\\s[^\\>]*\\>)/si';
 		$parts = preg_split($regexStr, $content);
 		$newParts = array();
@@ -424,7 +431,10 @@ class HtmlParser {
 	 * @todo Define visibility
 	 */
 	public function splitTags($tag, $content) {
-		$tags = \TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(',', $tag, 1);
+		$tags = GeneralUtility::trimExplode(',', $tag, TRUE);
+		foreach ($tags as &$tag) {
+			$tag = preg_quote($tag, '/');
+		}
 		$regexStr = '/\\<(' . implode('|', $tags) . ')(\\s[^>]*)?\\/?>/si';
 		$parts = preg_split($regexStr, $content);
 		$pointer = strlen($parts[0]);
@@ -542,7 +552,7 @@ class HtmlParser {
 				if ($val != '=') {
 					if ($valuemode) {
 						if ($name) {
-							$attributes[$name] = $deHSC ? \TYPO3\CMS\Core\Utility\GeneralUtility::htmlspecialchars_decode($val) : $val;
+							$attributes[$name] = $deHSC ? GeneralUtility::htmlspecialchars_decode($val) : $val;
 							$attributesMeta[$name]['dashType'] = $metaC[$key];
 							$name = '';
 						}
@@ -627,8 +637,8 @@ class HtmlParser {
 		// Block tags, must have endings...
 		$blockTags = explode(',', $blockTags);
 		foreach ($blockTags as $tagName) {
-			$countBegin = count(preg_split(('/\\<' . $tagName . '(\\s|\\>)/s'), $content)) - 1;
-			$countEnd = count(preg_split(('/\\<\\/' . $tagName . '(\\s|\\>)/s'), $content)) - 1;
+			$countBegin = count(preg_split(('/\\<' . preg_quote($tagName, '/') . '(\\s|\\>)/s'), $content)) - 1;
+			$countEnd = count(preg_split(('/\\<\\/' . preg_quote($tagName, '/') . '(\\s|\\>)/s'), $content)) - 1;
 			$analyzedOutput['blocks'][$tagName] = array($countBegin, $countEnd, $countBegin - $countEnd);
 			if ($countBegin) {
 				$analyzedOutput['counts'][$tagName] = $countBegin;
@@ -644,8 +654,8 @@ class HtmlParser {
 		// Solo tags, must NOT have endings...
 		$soloTags = explode(',', $soloTags);
 		foreach ($soloTags as $tagName) {
-			$countBegin = count(preg_split(('/\\<' . $tagName . '(\\s|\\>)/s'), $content)) - 1;
-			$countEnd = count(preg_split(('/\\<\\/' . $tagName . '(\\s|\\>)/s'), $content)) - 1;
+			$countBegin = count(preg_split(('/\\<' . preg_quote($tagName, '/') . '(\\s|\\>)/s'), $content)) - 1;
+			$countEnd = count(preg_split(('/\\<\\/' . preg_quote($tagName, '/') . '(\\s|\\>)/s'), $content)) - 1;
 			$analyzedOutput['solo'][$tagName] = array($countBegin, $countEnd);
 			if ($countBegin) {
 				$analyzedOutput['counts'][$tagName] = $countBegin;
@@ -767,7 +777,7 @@ class HtmlParser {
 										$newTagAttrib = array();
 										if (!($tList = $tags[$tagName]['_allowedAttribs'])) {
 											// Just explode attribts for tag once
-											$tList = ($tags[$tagName]['_allowedAttribs'] = \TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(',', strtolower($tags[$tagName]['allowedAttribs']), 1));
+											$tList = ($tags[$tagName]['_allowedAttribs'] = GeneralUtility::trimExplode(',', strtolower($tags[$tagName]['allowedAttribs']), TRUE));
 										}
 										foreach ($tList as $allowTag) {
 											if (isset($tagAttrib[0][$allowTag])) {
@@ -816,7 +826,7 @@ class HtmlParser {
 												// Classes are case sensitive
 												if ($attr == 'class') {
 													$newClasses = array();
-													$classes = \TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(' ', $tagAttrib[0][$attr], TRUE);
+													$classes = GeneralUtility::trimExplode(' ', $tagAttrib[0][$attr], TRUE);
 													foreach ($classes as $class) {
 														if (in_array($class, $params['list'])) {
 															$newClasses[] = $class;
@@ -841,10 +851,10 @@ class HtmlParser {
 											}
 											if ($params['prefixLocalAnchors']) {
 												if (substr($tagAttrib[0][$attr], 0, 1) == '#') {
-													$prefix = \TYPO3\CMS\Core\Utility\GeneralUtility::getIndpEnv('TYPO3_REQUEST_URL');
+													$prefix = GeneralUtility::getIndpEnv('TYPO3_REQUEST_URL');
 													$tagAttrib[0][$attr] = $prefix . $tagAttrib[0][$attr];
-													if ($params['prefixLocalAnchors'] == 2 && \TYPO3\CMS\Core\Utility\GeneralUtility::isFirstPartOfStr($prefix, \TYPO3\CMS\Core\Utility\GeneralUtility::getIndpEnv('TYPO3_SITE_URL'))) {
-														$tagAttrib[0][$attr] = substr($tagAttrib[0][$attr], strlen(\TYPO3\CMS\Core\Utility\GeneralUtility::getIndpEnv('TYPO3_SITE_URL')));
+													if ($params['prefixLocalAnchors'] == 2 && GeneralUtility::isFirstPartOfStr($prefix, GeneralUtility::getIndpEnv('TYPO3_SITE_URL'))) {
+														$tagAttrib[0][$attr] = substr($tagAttrib[0][$attr], strlen(GeneralUtility::getIndpEnv('TYPO3_SITE_URL')));
 													}
 												}
 											}
@@ -856,7 +866,7 @@ class HtmlParser {
 												}
 											}
 											if ($params['userFunc']) {
-												$tagAttrib[0][$attr] = \TYPO3\CMS\Core\Utility\GeneralUtility::callUserFunction($params['userFunc'], $tagAttrib[0][$attr], $this);
+												$tagAttrib[0][$attr] = GeneralUtility::callUserFunction($params['userFunc'], $tagAttrib[0][$attr], $this);
 											}
 										}
 									}
@@ -973,7 +983,7 @@ class HtmlParser {
 		if ($dir == 1) {
 			$value = htmlspecialchars($value);
 		} elseif ($dir == 2) {
-			$value = \TYPO3\CMS\Core\Utility\GeneralUtility::deHSCentities(htmlspecialchars($value));
+			$value = GeneralUtility::deHSCentities(htmlspecialchars($value));
 		} elseif ($dir == -1) {
 			$value = str_replace('&gt;', '>', $value);
 			$value = str_replace('&lt;', '<', $value);
@@ -1005,55 +1015,55 @@ class HtmlParser {
 				$somethingDone = 0;
 				$prefix = isset($alternatives[strtoupper($firstTagName)]) ? $alternatives[strtoupper($firstTagName)] : $main_prefix;
 				switch (strtolower($firstTagName)) {
-				case 'td':
+					case 'td':
 
-				case 'body':
+					case 'body':
 
-				case 'table':
-					$src = $params[0]['background'];
-					if ($src) {
-						$params[0]['background'] = $this->prefixRelPath($prefix, $params[0]['background'], $suffix);
-						$somethingDone = 1;
-					}
-					break;
-				case 'img':
-
-				case 'input':
-
-				case 'script':
-
-				case 'embed':
-					$src = $params[0]['src'];
-					if ($src) {
-						$params[0]['src'] = $this->prefixRelPath($prefix, $params[0]['src'], $suffix);
-						$somethingDone = 1;
-					}
-					break;
-				case 'link':
-
-				case 'a':
-					$src = $params[0]['href'];
-					if ($src) {
-						$params[0]['href'] = $this->prefixRelPath($prefix, $params[0]['href'], $suffix);
-						$somethingDone = 1;
-					}
-					break;
-				case 'form':
-					$src = $params[0]['action'];
-					if ($src) {
-						$params[0]['action'] = $this->prefixRelPath($prefix, $params[0]['action'], $suffix);
-						$somethingDone = 1;
-					}
-					break;
-				case 'param':
-					$test = $params[0]['name'];
-					if ($test && $test === 'movie') {
-						if ($params[0]['value']) {
-							$params[0]['value'] = $this->prefixRelPath($prefix, $params[0]['value'], $suffix);
+					case 'table':
+						$src = $params[0]['background'];
+						if ($src) {
+							$params[0]['background'] = $this->prefixRelPath($prefix, $params[0]['background'], $suffix);
 							$somethingDone = 1;
 						}
-					}
-					break;
+						break;
+					case 'img':
+
+					case 'input':
+
+					case 'script':
+
+					case 'embed':
+						$src = $params[0]['src'];
+						if ($src) {
+							$params[0]['src'] = $this->prefixRelPath($prefix, $params[0]['src'], $suffix);
+							$somethingDone = 1;
+						}
+						break;
+					case 'link':
+
+					case 'a':
+						$src = $params[0]['href'];
+						if ($src) {
+							$params[0]['href'] = $this->prefixRelPath($prefix, $params[0]['href'], $suffix);
+							$somethingDone = 1;
+						}
+						break;
+					case 'form':
+						$src = $params[0]['action'];
+						if ($src) {
+							$params[0]['action'] = $this->prefixRelPath($prefix, $params[0]['action'], $suffix);
+							$somethingDone = 1;
+						}
+						break;
+					case 'param':
+						$test = $params[0]['name'];
+						if ($test && $test === 'movie') {
+							if ($params[0]['value']) {
+								$params[0]['value'] = $this->prefixRelPath($prefix, $params[0]['value'], $suffix);
+								$somethingDone = 1;
+							}
+						}
+						break;
 				}
 				if ($somethingDone) {
 					$tagParts = preg_split('/\\s+/s', $v, 2);
@@ -1152,7 +1162,7 @@ class HtmlParser {
 	 */
 	public function mapTags($value, $tags = array(), $ltChar = '<', $ltChar2 = '<') {
 		foreach ($tags as $from => $to) {
-			$value = preg_replace('/' . preg_quote($ltChar) . '(\\/)?' . $from . '\\s([^\\>])*(\\/)?\\>/', $ltChar2 . '$1' . $to . ' $2$3>', $value);
+			$value = preg_replace('/' . preg_quote($ltChar, '/') . '(\\/)?' . $from . '\\s([^\\>])*(\\/)?\\>/', $ltChar2 . '$1' . $to . ' $2$3>', $value);
 		}
 		return $value;
 	}
@@ -1166,7 +1176,7 @@ class HtmlParser {
 	 * @todo Define visibility
 	 */
 	public function unprotectTags($content, $tagList = '') {
-		$tagsArray = \TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(',', $tagList, 1);
+		$tagsArray = GeneralUtility::trimExplode(',', $tagList, TRUE);
 		$contentParts = explode('&lt;', $content);
 		next($contentParts);
 		// bypass the first
@@ -1206,8 +1216,8 @@ class HtmlParser {
 	 * @todo Define visibility
 	 */
 	public function stripTagsExcept($value, $tagList) {
-		\TYPO3\CMS\Core\Utility\GeneralUtility::logDeprecatedFunction();
-		$tags = \TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(',', $tagList, 1);
+		GeneralUtility::logDeprecatedFunction();
+		$tags = GeneralUtility::trimExplode(',', $tagList, TRUE);
 		$forthArr = array();
 		$backArr = array();
 		foreach ($tags as $theTag) {
@@ -1326,7 +1336,7 @@ class HtmlParser {
 	 */
 	public function HTMLparserConfig($TSconfig, $keepTags = array()) {
 		// Allow tags (base list, merged with incoming array)
-		$alTags = array_flip(\TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(',', strtolower($TSconfig['allowTags']), 1));
+		$alTags = array_flip(GeneralUtility::trimExplode(',', strtolower($TSconfig['allowTags']), TRUE));
 		$keepTags = array_merge($alTags, $keepTags);
 		// Set config properties.
 		if (is_array($TSconfig['tags.'])) {
@@ -1356,10 +1366,10 @@ class HtmlParser {
 								$keepTags[$key]['fixAttrib'][$atName] = array_merge($keepTags[$key]['fixAttrib'][$atName], $atConfig);
 								// Candidate for \TYPO3\CMS\Core\Utility\GeneralUtility::array_merge() if integer-keys will some day make trouble...
 								if (strcmp($keepTags[$key]['fixAttrib'][$atName]['range'], '')) {
-									$keepTags[$key]['fixAttrib'][$atName]['range'] = \TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(',', $keepTags[$key]['fixAttrib'][$atName]['range']);
+									$keepTags[$key]['fixAttrib'][$atName]['range'] = GeneralUtility::trimExplode(',', $keepTags[$key]['fixAttrib'][$atName]['range']);
 								}
 								if (strcmp($keepTags[$key]['fixAttrib'][$atName]['list'], '')) {
-									$keepTags[$key]['fixAttrib'][$atName]['list'] = \TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(',', $keepTags[$key]['fixAttrib'][$atName]['list']);
+									$keepTags[$key]['fixAttrib'][$atName]['list'] = GeneralUtility::trimExplode(',', $keepTags[$key]['fixAttrib'][$atName]['list']);
 								}
 							}
 						}
@@ -1373,7 +1383,7 @@ class HtmlParser {
 		}
 		// LocalNesting
 		if ($TSconfig['localNesting']) {
-			$lN = \TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(',', strtolower($TSconfig['localNesting']), 1);
+			$lN = GeneralUtility::trimExplode(',', strtolower($TSconfig['localNesting']), TRUE);
 			foreach ($lN as $tn) {
 				if (isset($keepTags[$tn])) {
 					$keepTags[$tn]['nesting'] = 1;
@@ -1381,7 +1391,7 @@ class HtmlParser {
 			}
 		}
 		if ($TSconfig['globalNesting']) {
-			$lN = \TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(',', strtolower($TSconfig['globalNesting']), 1);
+			$lN = GeneralUtility::trimExplode(',', strtolower($TSconfig['globalNesting']), TRUE);
 			foreach ($lN as $tn) {
 				if (isset($keepTags[$tn])) {
 					if (!is_array($keepTags[$tn])) {
@@ -1392,7 +1402,7 @@ class HtmlParser {
 			}
 		}
 		if ($TSconfig['rmTagIfNoAttrib']) {
-			$lN = \TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(',', strtolower($TSconfig['rmTagIfNoAttrib']), 1);
+			$lN = GeneralUtility::trimExplode(',', strtolower($TSconfig['rmTagIfNoAttrib']), TRUE);
 			foreach ($lN as $tn) {
 				if (isset($keepTags[$tn])) {
 					if (!is_array($keepTags[$tn])) {
@@ -1403,7 +1413,7 @@ class HtmlParser {
 			}
 		}
 		if ($TSconfig['noAttrib']) {
-			$lN = \TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(',', strtolower($TSconfig['noAttrib']), 1);
+			$lN = GeneralUtility::trimExplode(',', strtolower($TSconfig['noAttrib']), TRUE);
 			foreach ($lN as $tn) {
 				if (isset($keepTags[$tn])) {
 					if (!is_array($keepTags[$tn])) {
@@ -1414,7 +1424,7 @@ class HtmlParser {
 			}
 		}
 		if ($TSconfig['removeTags']) {
-			$lN = \TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(',', strtolower($TSconfig['removeTags']), 1);
+			$lN = GeneralUtility::trimExplode(',', strtolower($TSconfig['removeTags']), TRUE);
 			foreach ($lN as $tn) {
 				$keepTags[$tn] = array();
 				$keepTags[$tn]['allowedAttribs'] = 0;
@@ -1512,7 +1522,7 @@ class HtmlParser {
 				}
 				$newTag = '<' . trim(($tagName . ' ' . implode(' ', $outA)));
 				// All tags that are standalone (not wrapping, not having endtags) should be ended with '/>'
-				if (\TYPO3\CMS\Core\Utility\GeneralUtility::inList('img,br,hr,meta,link,base,area,input,param,col', $tagName) || substr($value, -2) == '/>') {
+				if (GeneralUtility::inList('img,br,hr,meta,link,base,area,input,param,col', $tagName) || substr($value, -2) == '/>') {
 					$newTag .= ' />';
 				} else {
 					$newTag .= '>';

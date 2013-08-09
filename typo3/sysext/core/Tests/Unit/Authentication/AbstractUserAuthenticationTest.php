@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Core\Tests\Unit\Authentication;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2011 Helmut Hummel <helmut.hummel@typo3.org>
+ *  (c) 2011-2013 Helmut Hummel <helmut.hummel@typo3.org>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -29,13 +29,6 @@ namespace TYPO3\CMS\Core\Tests\Unit\Authentication;
  *
  */
 class AbstractUserAuthenticationTest extends \TYPO3\CMS\Core\Tests\UnitTestCase {
-
-	/**
-	 * Enable backup of global and system variables
-	 *
-	 * @var boolean
-	 */
-	protected $backupGlobals = TRUE;
 
 	/**
 	 * phpunit still needs some globals that are

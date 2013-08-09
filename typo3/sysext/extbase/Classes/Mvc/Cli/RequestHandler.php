@@ -33,55 +33,27 @@ class RequestHandler implements \TYPO3\CMS\Extbase\Mvc\RequestHandlerInterface {
 
 	/**
 	 * @var \TYPO3\CMS\Extbase\Object\ObjectManagerInterface
+	 * @inject
 	 */
 	protected $objectManager;
 
 	/**
 	 * @var \TYPO3\CMS\Extbase\Mvc\Dispatcher
+	 * @inject
 	 */
 	protected $dispatcher;
 
 	/**
 	 * @var \TYPO3\CMS\Extbase\Mvc\Cli\RequestBuilder
+	 * @inject
 	 */
 	protected $requestBuilder;
 
 	/**
-	 * @var \TYPO3\CMS\Extbase\Mvc\Controller\FlashMessageContainer
+	 * @var \TYPO3\CMS\Extbase\Service\EnvironmentService
+	 * @inject
 	 */
-	protected $flashMessageContainer;
-
-	/**
-	 * @param \TYPO3\CMS\Extbase\Object\ObjectManagerInterface $objectManager
-	 * @return void
-	 */
-	public function injectObjectManager(\TYPO3\CMS\Extbase\Object\ObjectManagerInterface $objectManager) {
-		$this->objectManager = $objectManager;
-	}
-
-	/**
-	 * @param \TYPO3\CMS\Extbase\Mvc\Controller\FlashMessageContainer $flashMessageContainer
-	 * @return void
-	 */
-	public function injectFlashMessageContainer(\TYPO3\CMS\Extbase\Mvc\Controller\FlashMessageContainer $flashMessageContainer) {
-		$this->flashMessageContainer = $flashMessageContainer;
-	}
-
-	/**
-	 * @param \TYPO3\CMS\Extbase\Mvc\Dispatcher $dispatcher
-	 * @return void
-	 */
-	public function injectDispatcher(\TYPO3\CMS\Extbase\Mvc\Dispatcher $dispatcher) {
-		$this->dispatcher = $dispatcher;
-	}
-
-	/**
-	 * @param \TYPO3\CMS\Extbase\Mvc\Cli\RequestBuilder $requestBuilder
-	 * @return void
-	 */
-	public function injectRequestBuilder(\TYPO3\CMS\Extbase\Mvc\Cli\RequestBuilder $requestBuilder) {
-		$this->requestBuilder = $requestBuilder;
-	}
+	protected $environmentService;
 
 	/**
 	 * Handles the request
@@ -89,7 +61,8 @@ class RequestHandler implements \TYPO3\CMS\Extbase\Mvc\RequestHandlerInterface {
 	 * @return void
 	 */
 	public function handleRequest() {
-		$request = $this->requestBuilder->build();
+		$commandLine = isset($_SERVER['argv']) ? $_SERVER['argv'] : array();
+		$request = $this->requestBuilder->build(array_slice($commandLine, 1));
 		/** @var $response \TYPO3\CMS\Extbase\Mvc\Cli\Response */
 		$response = $this->objectManager->get('TYPO3\\CMS\\Extbase\\Mvc\\Cli\\Response');
 		$this->dispatcher->dispatch($request, $response);
@@ -102,7 +75,7 @@ class RequestHandler implements \TYPO3\CMS\Extbase\Mvc\RequestHandlerInterface {
 	 * @return boolean If the request is a command line request, TRUE otherwise FALSE
 	 */
 	public function canHandleRequest() {
-		return PHP_SAPI === 'cli';
+		return $this->environmentService->isEnvironmentInCliMode();
 	}
 
 	/**
@@ -112,7 +85,7 @@ class RequestHandler implements \TYPO3\CMS\Extbase\Mvc\RequestHandlerInterface {
 	 * @return integer The priority of the request handler.
 	 */
 	public function getPriority() {
-		return 90;
+		return 100;
 	}
 }
 

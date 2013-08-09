@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Core\Tests\Unit\Resource;
 /***************************************************************
  * Copyright notice
  *
- * (c) 2011 Andreas Wolf <andreas.wolf@ikt-werk.de>
+ * (c) 2011-2013 Andreas Wolf <andreas.wolf@ikt-werk.de>
  * All rights reserved
  *
  * This script is part of the TYPO3 project. The TYPO3 project is
@@ -23,8 +23,6 @@ namespace TYPO3\CMS\Core\Tests\Unit\Resource;
  *
  * This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
-
-require_once 'vfsStream/vfsStream.php';
 
 /**
  * Testcase for the file class of the TYPO3 FAL
@@ -317,7 +315,7 @@ class FileTest extends \TYPO3\CMS\Core\Tests\UnitTestCase {
 	 */
 	public function readFailsIfFileIsClosed() {
 		$this->markTestSkipped();
-		$this->setExpectedException('\RuntimeException', '', 1299863431);
+		$this->setExpectedException('\\RuntimeException', '', 1299863431);
 		$fixture = $this->prepareFixture();
 		$mockFileHandle = $this->getMock('TYPO3\\CMS\\Core\\Resource\\FileHandle', array(), array(), '', FALSE);
 		$mockDriver = $this->getMockForAbstractClass('t3lib_file_driver_Abstract');
@@ -349,7 +347,7 @@ class FileTest extends \TYPO3\CMS\Core\Tests\UnitTestCase {
 	 */
 	public function writeFailsIfFileIsClosed() {
 		$this->markTestSkipped();
-		$this->setExpectedException('\RuntimeException', '', 1299863432);
+		$this->setExpectedException('\\RuntimeException', '', 1299863432);
 		$fixture = $this->prepareFixture();
 		$mockFileHandle = $this->getMock('TYPO3\\CMS\\Core\\Resource\\FileHandle', array(), array(), '', FALSE);
 		$mockDriver = $this->getMockForAbstractClass('t3lib_file_driver_Abstract');
@@ -392,7 +390,39 @@ class FileTest extends \TYPO3\CMS\Core\Tests\UnitTestCase {
 		$this->assertSame($expectedExtension, $fixture->getExtension());
 	}
 
+	/**
+	 * @test
+	 */
+	public function indexablePropertyIsByDefaultTrue() {
+		$fixture = new \TYPO3\CMS\Core\Resource\File(array());
+		$this->assertAttributeEquals(TRUE, 'indexable', $fixture);
+	}
 
+	/**
+	 * @test
+	 */
+	public function indexablePropertyCanBeSetAndGet() {
+		$fixture = new \TYPO3\CMS\Core\Resource\File(array());
+		foreach (array(FALSE, TRUE) as $value) {
+			$fixture->setIndexable($value);
+			$this->assertSame($value, $fixture->isIndexable());
+		}
+	}
+
+	/**
+	 * @test
+	 */
+	public function callMethodLoadIndexRecordWithPropertyIndexableSetToFalseAndCheckWhetherIsIndexedReturnsNull() {
+		$method = new \ReflectionMethod(
+			'TYPO3\CMS\Core\Resource\File', 'loadIndexRecord'
+		);
+		$method->setAccessible(TRUE);
+
+		$fixture = new \TYPO3\CMS\Core\Resource\File(array());
+		$fixture->setIndexable(FALSE);
+		$method->invoke($fixture);
+		$this->assertNull($fixture->isIndexed());
+	}
 }
 
 ?>

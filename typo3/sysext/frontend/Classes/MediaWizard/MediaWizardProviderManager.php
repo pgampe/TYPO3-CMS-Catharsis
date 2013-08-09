@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Frontend\MediaWizard;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010-2011 Ernesto Baschny <ernst@cron-it.de>
+ *  (c) 2010-2013 Ernesto Baschny <ernst@cron-it.de>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -42,7 +42,7 @@ class MediaWizardProviderManager {
 	/**
 	 * Allows extensions to register themselves as media wizard providers
 	 *
-	 * @param string $className A class implementing tslib_mediaWizardProvider
+	 * @param string $className A class implementing MediaWizardProviderInterface
 	 * @return void
 	 */
 	static public function registerMediaWizardProvider($className) {
@@ -62,7 +62,7 @@ class MediaWizardProviderManager {
 	static public function getValidMediaWizardProvider($url) {
 		// Go through registered providers in reverse order (last one registered wins)
 		$providers = array_reverse(self::$providers, TRUE);
-		foreach (self::$providers as $className => $provider) {
+		foreach ($providers as $provider) {
 			/** @var $provider \TYPO3\CMS\Frontend\MediaWizard\MediaWizardProviderInterface */
 			if ($provider->canHandle($url)) {
 				return $provider;

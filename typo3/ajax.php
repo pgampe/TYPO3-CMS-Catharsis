@@ -2,7 +2,7 @@
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2007-2011 Benjamin Mack
+ *  (c) 2007-2013 Benjamin Mack
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -53,13 +53,15 @@ if (in_array($ajaxID, $noUserAjaxIDs)) {
 	define('TYPO3_PROCEED_IF_NO_USER', 2);
 }
 
-require 'init.php';
+require __DIR__ . '/init.php';
 
 // finding the script path from the variable
 $ajaxScript = $TYPO3_CONF_VARS['BE']['AJAX'][$ajaxID];
+
 // Instantiating the AJAX object
 $ajaxObj = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Core\\Http\\AjaxRequestHandler', $ajaxID);
 $ajaxParams = array();
+
 // Evaluating the arguments and calling the AJAX method/function
 if (empty($ajaxID)) {
 	$ajaxObj->setError('No valid ajaxID parameter given.');
@@ -71,6 +73,7 @@ if (empty($ajaxID)) {
 		$ajaxObj->setError('Registered backend function for ajaxID "' . $ajaxID . '" was not found.');
 	}
 }
+
 // Outputting the content (and setting the X-JSON-Header)
 $ajaxObj->render();
 ?>

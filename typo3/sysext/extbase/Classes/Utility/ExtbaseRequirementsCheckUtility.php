@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Extbase\Utility;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010-2012 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
+ *  (c) 2010-2013 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
  *  Extbase is a backport of TYPO3 Flow. All credits go to the TYPO3 Flow team.
  *  All rights reserved
  *
@@ -27,16 +27,16 @@ namespace TYPO3\CMS\Extbase\Utility;
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
+
 /**
- * A checker which hooks into the backend module "Reports" checking whether there
- * is a PHP accelerator in place which strips off Doc Comments.
+ * A checker which hooks into the backend module "Reports" checking whether
+ * dbal is installed
  */
 class ExtbaseRequirementsCheckUtility implements \TYPO3\CMS\Reports\StatusProviderInterface {
 
 	/**
 	 * Compiles a collection of system status checks as a status report.
 	 *
-	 * @see typo3/sysext/reports/interfaces/tx_reports_StatusProvider::getStatus()
 	 * @return array
 	 */
 	public function getStatus() {

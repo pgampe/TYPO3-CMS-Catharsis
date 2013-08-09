@@ -4,8 +4,8 @@ namespace TYPO3\CMS\Impexp\Task;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 1999-2011 Kasper Skårhøj (kasper@typo3.com)
- *  (c) 2010-2011 Georg Ringer (typo3@ringerge.org)
+ *  (c) 1999-2013 Kasper Skårhøj (kasper@typo3.com)
+ *  (c) 2010-2013 Georg Ringer (typo3@ringerge.org)
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -45,7 +45,7 @@ class ImportExportTask implements \TYPO3\CMS\Taskcenter\TaskInterface {
 	 */
 	public function __construct(\TYPO3\CMS\Taskcenter\Controller\TaskModuleController $taskObject) {
 		$this->taskObject = $taskObject;
-		$GLOBALS['LANG']->includeLLFile('EXT:impexp/locallang_csh.xml');
+		$GLOBALS['LANG']->includeLLFile('EXT:impexp/locallang_csh.xlf');
 	}
 
 	/**
@@ -102,7 +102,7 @@ class ImportExportTask implements \TYPO3\CMS\Taskcenter\TaskInterface {
 					$description = array();
 					// Is public?
 					if ($presetCfg['public']) {
-						$description[] = $GLOBALS['LANG']->getLL('task.public') . ': ' . $GLOBALS['LANG']->sL('LLL:EXT:lang/locallang_common.xml:yes');
+						$description[] = $GLOBALS['LANG']->getLL('task.public') . ': ' . $GLOBALS['LANG']->sL('LLL:EXT:lang/locallang_common.xlf:yes');
 					}
 					// Owner
 					$description[] = $GLOBALS['LANG']->getLL('task.owner') . ': ' . ($presetCfg['user_uid'] === $GLOBALS['BE_USER']->user['uid'] ? $GLOBALS['LANG']->getLL('task.own') : '[' . htmlspecialchars($usernames[$presetCfg['user_uid']]['username']) . ']');

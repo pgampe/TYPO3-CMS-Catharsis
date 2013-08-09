@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Extbase\Mvc\Controller;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010-2012 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
+ *  (c) 2010-2013 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
  *  Extbase is a backport of TYPO3 Flow. All credits go to the TYPO3 Flow team.
  *  All rights reserved
  *
@@ -50,17 +50,9 @@ class MvcPropertyMappingConfigurationService implements \TYPO3\CMS\Core\Singleto
 	 * The hash service class to use
 	 *
 	 * @var \TYPO3\CMS\Extbase\Security\Cryptography\HashService
+	 * @inject
 	 */
 	protected $hashService;
-
-	/**
-	 * Inject the hash service
-	 *
-	 * @param \TYPO3\CMS\Extbase\Security\Cryptography\HashService $hashService
-	 */
-	public function injectHashService(\TYPO3\CMS\Extbase\Security\Cryptography\HashService $hashService) {
-		$this->hashService = $hashService;
-	}
 
 	/**
 	 * Generate a request hash for a list of form fields

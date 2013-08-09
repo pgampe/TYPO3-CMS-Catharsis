@@ -2,7 +2,7 @@
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 1999-2011 Kasper Skårhøj (kasperYYYY@typo3.com)
+ *  (c) 1999-2013 Kasper Skårhøj (kasperYYYY@typo3.com)
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -24,28 +24,17 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
+
 /**
  * No-document script
  * This is used by eg. the Doc module if no documents is registered as "open"
  * (a concept which is better known from the "classic backend"...)
  *
- * Revised for TYPO3 3.6 November/2003 by Kasper Skårhøj
- * XHTML compliant
- *
  * @author Kasper Skårhøj <kasperYYYY@typo3.com>
  */
-require 'init.php';
-$LANG->includeLLFile('EXT:lang/locallang_alt_doc.xml');
-require_once \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath('opendocs') . 'class.tx_opendocs.php';
-/*
- * @deprecated since 6.0, the classname SC_alt_doc_nodoc and this file is obsolete
- * and will be removed with 6.2. The class was renamed and is now located at:
- * typo3/sysext/backend/Classes/Controller/NoDocumentsOpenController.php
- */
-require_once \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath('backend') . 'Classes/Controller/NoDocumentsOpenController.php';
-// Make instance:
-$SOBE = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\CMS\Backend\Controller\NoDocumentsOpenController');
-$SOBE->init();
-$SOBE->main();
-$SOBE->printContent();
+require __DIR__ . '/init.php';
+
+$noDocumentsOpenController = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\CMS\Backend\Controller\NoDocumentsOpenController');
+$noDocumentsOpenController->main();
+$noDocumentsOpenController->printContent();
 ?>

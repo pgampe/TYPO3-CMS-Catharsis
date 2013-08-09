@@ -22,11 +22,13 @@ class UriBuilder {
 
 	/**
 	 * @var \TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface
+	 * @inject
 	 */
 	protected $configurationManager;
 
 	/**
 	 * @var \TYPO3\CMS\Extbase\Service\ExtensionService
+	 * @inject
 	 */
 	protected $extensionService;
 
@@ -115,20 +117,10 @@ class UriBuilder {
 	protected $argumentPrefix = NULL;
 
 	/**
-	 * @param \TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface $configurationManager
-	 * @return void
+	 * @var \TYPO3\CMS\Extbase\Service\EnvironmentService
+	 * @inject
 	 */
-	public function injectConfigurationManager(\TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface $configurationManager) {
-		$this->configurationManager = $configurationManager;
-	}
-
-	/**
-	 * @param \TYPO3\CMS\Extbase\Service\ExtensionService $extensionService
-	 * @return void
-	 */
-	public function injectExtensionService(\TYPO3\CMS\Extbase\Service\ExtensionService $extensionService) {
-		$this->extensionService = $extensionService;
-	}
+	protected $environmentService;
 
 	/**
 	 * Life-cycle method that is called by the DI container as soon as this object is completely built
@@ -375,7 +367,6 @@ class UriBuilder {
 
 	/**
 	 * @return integer
-	 * @api
 	 */
 	public function getTargetPageType() {
 		return $this->targetPageType;
@@ -480,16 +471,16 @@ class UriBuilder {
 		if ($extensionName === NULL) {
 			$extensionName = $this->request->getControllerExtensionName();
 		}
-		if ($pluginName === NULL && TYPO3_MODE === 'FE') {
+		if ($pluginName === NULL && $this->environmentService->isEnvironmentInFrontendMode()) {
 			$pluginName = $this->extensionService->getPluginNameByAction($extensionName, $controllerArguments['controller'], $controllerArguments['action']);
 		}
 		if ($pluginName === NULL) {
 			$pluginName = $this->request->getPluginName();
 		}
-		if (TYPO3_MODE === 'FE' && $this->configurationManager->isFeatureEnabled('skipDefaultArguments')) {
+		if ($this->environmentService->isEnvironmentInFrontendMode() && $this->configurationManager->isFeatureEnabled('skipDefaultArguments')) {
 			$controllerArguments = $this->removeDefaultControllerAndAction($controllerArguments, $extensionName, $pluginName);
 		}
-		if ($this->targetPageUid === NULL && TYPO3_MODE === 'FE') {
+		if ($this->targetPageUid === NULL && $this->environmentService->isEnvironmentInFrontendMode()) {
 			$this->targetPageUid = $this->extensionService->getTargetPidByPlugin($extensionName, $pluginName);
 		}
 		if ($this->format !== '') {
@@ -540,7 +531,7 @@ class UriBuilder {
 	 * @see buildFrontendUri()
 	 */
 	public function build() {
-		if (TYPO3_MODE === 'BE') {
+		if ($this->environmentService->isEnvironmentInBackendMode()) {
 			return $this->buildBackendUri();
 		} else {
 			return $this->buildFrontendUri();
@@ -610,6 +601,9 @@ class UriBuilder {
 		$typolinkConfiguration['parameter'] = $this->targetPageUid !== NULL ? $this->targetPageUid : $GLOBALS['TSFE']->id;
 		if ($this->targetPageType !== 0) {
 			$typolinkConfiguration['parameter'] .= ',' . $this->targetPageType;
+		} elseif ($this->format !== '') {
+			$targetPageType = $this->extensionService->getTargetPageTypeByFormat($this->request->getControllerExtensionKey(), $this->format);
+			$typolinkConfiguration['parameter'] .= ',' . $targetPageType;
 		}
 		if (count($this->arguments) > 0) {
 			$arguments = $this->convertDomainObjectsToIdentityArrays($this->arguments);
@@ -675,8 +669,8 @@ class UriBuilder {
 	 *
 	 * @param \TYPO3\CMS\Extbase\DomainObject\AbstractDomainObject $object
 	 * @return array
+	 * @todo Refactore this into convertDomainObjectsToIdentityArrays()
 	 */
-	// TODO Refactore this into convertDomainObjectsToIdentityArrays()
 	public function convertTransientObjectToArray(\TYPO3\CMS\Extbase\DomainObject\AbstractDomainObject $object) {
 		$result = array();
 		foreach ($object->_getProperties() as $propertyName => $propertyValue) {
@@ -694,6 +688,7 @@ class UriBuilder {
 		}
 		return $result;
 	}
+
 }
 
 ?>

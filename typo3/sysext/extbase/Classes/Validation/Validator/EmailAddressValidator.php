@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Extbase\Validation\Validator;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010-2012 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
+ *  (c) 2010-2013 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
  *  Extbase is a backport of TYPO3 Flow. All credits go to the TYPO3 Flow team.
  *  All rights reserved
  *
@@ -27,25 +27,39 @@ namespace TYPO3\CMS\Extbase\Validation\Validator;
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
+
 /**
  * Validator for email addresses
+ *
+ * @api
  */
-class EmailAddressValidator extends \TYPO3\CMS\Extbase\Validation\Validator\AbstractValidator {
+class EmailAddressValidator extends AbstractValidator {
 
 	/**
 	 * Checks if the given value is a valid email address.
-	 * If at least one error occurred, the result is FALSE.
 	 *
 	 * @param mixed $value The value that should be validated
-	 * @return boolean TRUE if the value is valid, FALSE if an error occured
+	 * @return void
+	 * @api
 	 */
 	public function isValid($value) {
-		$this->errors = array();
-		if (is_string($value) && \TYPO3\CMS\Core\Utility\GeneralUtility::validEmail($value)) {
-			return TRUE;
+		if (!is_string($value) || !$this->validEmail($value)) {
+			$this->addError(
+				\TYPO3\CMS\Extbase\Utility\LocalizationUtility::translate(
+					'validator.emailaddress.notvalid',
+					'extbase'
+				), 1221559976);
 		}
-		$this->addError('The given subject was not a valid email address.', 1221559976);
-		return FALSE;
+	}
+
+	/**
+	 * Checking syntax of input email address
+	 *
+	 * @param string $emailAddress Input string to evaluate
+	 * @return boolean Returns TRUE if the $email address (input string) is valid
+	 */
+	protected function validEmail($emailAddress) {
+		return \TYPO3\CMS\Core\Utility\GeneralUtility::validEmail($emailAddress);
 	}
 }
 

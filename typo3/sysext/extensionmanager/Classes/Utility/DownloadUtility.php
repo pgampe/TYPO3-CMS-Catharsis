@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Extensionmanager\Utility;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2012 Susanne Moog <susanne.moog@typo3.org>
+ *  (c) 2012-2013 Susanne Moog <susanne.moog@typo3.org>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -35,11 +35,13 @@ class DownloadUtility implements \TYPO3\CMS\Core\SingletonInterface {
 
 	/**
 	 * @var \TYPO3\CMS\Extensionmanager\Utility\Connection\TerUtility
+	 * @inject
 	 */
 	protected $terUtility;
 
 	/**
 	 * @var \TYPO3\CMS\Extensionmanager\Utility\Repository\Helper
+	 * @inject
 	 */
 	protected $repositoryHelper;
 
@@ -49,33 +51,10 @@ class DownloadUtility implements \TYPO3\CMS\Core\SingletonInterface {
 	protected $downloadPath = 'Local';
 
 	/**
-	 * @param \TYPO3\CMS\Extensionmanager\Utility\Connection\TerUtility $terUtility
-	 * @return void
-	 */
-	public function injectTerUtility(\TYPO3\CMS\Extensionmanager\Utility\Connection\TerUtility $terUtility) {
-		$this->terUtility = $terUtility;
-	}
-
-	/**
-	 * @param \TYPO3\CMS\Extensionmanager\Utility\Repository\Helper $repositoryHelper
-	 * @return void
-	 */
-	public function injectRepositoryHelper(\TYPO3\CMS\Extensionmanager\Utility\Repository\Helper $repositoryHelper) {
-		$this->repositoryHelper = $repositoryHelper;
-	}
-
-	/**
 	 * @var \TYPO3\CMS\Extensionmanager\Utility\FileHandlingUtility
+	 * @inject
 	 */
 	protected $fileHandlingUtility;
-
-	/**
-	 * @param \TYPO3\CMS\Extensionmanager\Utility\FileHandlingUtility $fileHandlingUtility
-	 * @return void
-	 */
-	public function injectFileHandlingUtility(\TYPO3\CMS\Extensionmanager\Utility\FileHandlingUtility $fileHandlingUtility) {
-		$this->fileHandlingUtility = $fileHandlingUtility;
-	}
 
 	/**
 	 * Download an extension

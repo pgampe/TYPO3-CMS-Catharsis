@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Extbase\Validation\Validator;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010-2012 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
+ *  (c) 2010-2013 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
  *  Extbase is a backport of TYPO3 Flow. All credits go to the TYPO3 Flow team.
  *  All rights reserved
  *
@@ -27,37 +27,42 @@ namespace TYPO3\CMS\Extbase\Validation\Validator;
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
+
 /**
- * Validator based on regular expressions
+ * Validator based on regular expressions.
  *
- * The regular expression is specified in the options by using the array key "regularExpression"
+ * @api
  */
-class RegularExpressionValidator extends \TYPO3\CMS\Extbase\Validation\Validator\AbstractValidator {
+class RegularExpressionValidator extends AbstractValidator {
+
 
 	/**
-	 * Returns TRUE, if the given property ($value) matches the given regular expression.
-	 *
-	 * If at least one error occurred, the result is FALSE.
+	 * @var array
+	 */
+	protected $supportedOptions = array(
+		'regularExpression' => array('', 'The regular expression to use for validation, used as given', 'string', TRUE)
+	);
+
+	/**
+	 * Checks if the given value matches the specified regular expression.
 	 *
 	 * @param mixed $value The value that should be validated
-	 * @return boolean TRUE if the value is valid, FALSE if an error occured
+	 * @return void
+	 * @throws \TYPO3\CMS\Extbase\Validation\Exception\InvalidValidationOptionsException
+	 * @api
 	 */
 	public function isValid($value) {
-		$this->errors = array();
-		if (!isset($this->options['regularExpression'])) {
-			$this->addError('The regular expression was empty.', 1221565132);
-			return FALSE;
-		}
 		$result = preg_match($this->options['regularExpression'], $value);
 		if ($result === 0) {
-			$this->addError('The given subject did not match the pattern.', 1221565130);
-			return FALSE;
+			$this->addError(
+				\TYPO3\CMS\Extbase\Utility\LocalizationUtility::translate(
+					'validator.regularexpression.nomatch',
+					'extbase'
+				), 1221565130);
 		}
 		if ($result === FALSE) {
-			$this->addError('The regular expression "%1$d" contained an error.', 1221565131, array($this->options['regularExpression']));
-			return FALSE;
+			throw new \TYPO3\CMS\Extbase\Validation\Exception\InvalidValidationOptionsException('regularExpression "' . $this->options['regularExpression'] . '" in RegularExpressionValidator contained an error.', 1298273089);
 		}
-		return TRUE;
 	}
 }
 

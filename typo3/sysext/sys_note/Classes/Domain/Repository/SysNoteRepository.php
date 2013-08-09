@@ -4,7 +4,7 @@ namespace TYPO3\CMS\SysNote\Domain\Repository;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2012 Georg Ringer <typo3@ringerge.org>
+ *  (c) 2012-2013 Georg Ringer <typo3@ringerge.org>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -40,7 +40,7 @@ class SysNoteRepository extends \TYPO3\CMS\Extbase\Persistence\Repository {
 	public function initializeObject() {
 		$querySettings = $this->objectManager->get('TYPO3\\CMS\\Extbase\\Persistence\\Generic\\Typo3QuerySettings');
 		$querySettings->setRespectStoragePage(FALSE);
-		$this->persistenceManager->setDefaultQuerySettings($querySettings);
+		$this->setDefaultQuerySettings($querySettings);
 	}
 
 	/**

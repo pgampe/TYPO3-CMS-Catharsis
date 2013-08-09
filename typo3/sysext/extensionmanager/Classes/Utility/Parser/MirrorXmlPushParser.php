@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Extensionmanager\Utility\Parser;
 /***************************************************************
  * Copyright notice
  *
- * (c) 2010 Marcus Krause <marcus#exp2010@t3sec.info>
+ * (c) 2010-2013 Marcus Krause <marcus#exp2010@t3sec.info>
  *		 Steffen Kamper <info@sk-typo3.de>
  * All rights reserved
  *
@@ -52,10 +52,16 @@ class MirrorXmlPushParser extends \TYPO3\CMS\Extensionmanager\Utility\Parser\Abs
 	 */
 	public function __construct() {
 		$this->requiredPhpExtensions = 'xml';
-		if ($this->isAvailable()) {
-			$this->objXml = xml_parser_create();
-			xml_set_object($this->objXml, $this);
-		}
+	}
+
+	/**
+	 * Create required parser
+	 *
+	 * @return  void
+	 */
+	protected function createParser() {
+		$this->objXml = xml_parser_create();
+		xml_set_object($this->objXml, $this);
 	}
 
 	/**
@@ -66,6 +72,7 @@ class MirrorXmlPushParser extends \TYPO3\CMS\Extensionmanager\Utility\Parser\Abs
 	 * @throws \TYPO3\CMS\Extensionmanager\Exception\ExtensionManagerException in case of XML parser errors
 	 */
 	public function parseXml($file) {
+		$this->createParser();
 		if (!is_resource($this->objXml)) {
 			throw new \TYPO3\CMS\Extensionmanager\Exception\ExtensionManagerException('Unable to create XML parser.', 1342641009);
 		}
@@ -96,8 +103,8 @@ class MirrorXmlPushParser extends \TYPO3\CMS\Extensionmanager\Utility\Parser\Abs
 	 */
 	protected function startElement($parser, $elementName, $attrs) {
 		switch ($elementName) {
-		default:
-			$this->element = $elementName;
+			default:
+				$this->element = $elementName;
 		}
 	}
 
@@ -113,12 +120,12 @@ class MirrorXmlPushParser extends \TYPO3\CMS\Extensionmanager\Utility\Parser\Abs
 	 */
 	protected function endElement($parser, $elementName) {
 		switch ($elementName) {
-		case 'mirror':
-			$this->notify();
-			$this->resetProperties();
-			break;
-		default:
-			$this->element = NULL;
+			case 'mirror':
+				$this->notify();
+				$this->resetProperties();
+				break;
+			default:
+				$this->element = NULL;
 		}
 	}
 
@@ -135,29 +142,29 @@ class MirrorXmlPushParser extends \TYPO3\CMS\Extensionmanager\Utility\Parser\Abs
 	protected function characterData($parser, $data) {
 		if (isset($this->element)) {
 			switch ($this->element) {
-			case 'title':
-				$this->title = $data;
-				break;
-			case 'host':
-				$this->host = $data;
-				break;
-			case 'path':
-				$this->path = $data;
-				break;
-			case 'country':
-				$this->country = $data;
-				break;
-			case 'name':
-				$this->sponsorname = $data;
-				break;
-			case 'link':
-				$this->sponsorlink = $data;
-				break;
-			case 'logo':
-				$this->sponsorlogo = $data;
-				break;
-			default:
-
+				case 'title':
+					$this->title = $data;
+					break;
+				case 'host':
+					$this->host = $data;
+					break;
+				case 'path':
+					$this->path = $data;
+					break;
+				case 'country':
+					$this->country = $data;
+					break;
+				case 'name':
+					$this->sponsorname = $data;
+					break;
+				case 'link':
+					$this->sponsorlink = $data;
+					break;
+				case 'logo':
+					$this->sponsorlogo = $data;
+					break;
+				default:
+					// Do nothing
 			}
 		}
 	}

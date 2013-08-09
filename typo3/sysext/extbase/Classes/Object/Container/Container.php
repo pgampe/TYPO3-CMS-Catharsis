@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Extbase\Object\Container;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010-2012 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
+ *  (c) 2010-2013 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
  *  Extbase is a backport of TYPO3 Flow. All credits go to the TYPO3 Flow team.
  *  All rights reserved
  *
@@ -35,6 +35,9 @@ namespace TYPO3\CMS\Extbase\Object\Container;
  * @author Timo Schmidt
  */
 class Container implements \TYPO3\CMS\Core\SingletonInterface {
+
+	const SCOPE_PROTOTYPE = 1;
+	const SCOPE_SINGLETON = 2;
 
 	/**
 	 * internal cache for classinfos
@@ -227,6 +230,7 @@ class Container implements \TYPO3\CMS\Core\SingletonInterface {
 				$this->log('The singleton "' . $classInfo->getClassName() . '" needs a prototype in "' . $injectPropertyName . '". This is often a bad code smell; often you rather want to inject a singleton.', 1320177676);
 			}
 			$propertyReflection = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Extbase\\Reflection\\PropertyReflection', $instance, $injectPropertyName);
+
 			$propertyReflection->setAccessible(TRUE);
 			$propertyReflection->setValue($instance, $instanceToInject);
 		}
@@ -326,6 +330,24 @@ class Container implements \TYPO3\CMS\Core\SingletonInterface {
 			$this->getClassInfoCache()->set($classNameHash, $classInfo);
 		}
 		return $classInfo;
+	}
+
+	/**
+	 * @param string $className
+	 *
+	 * @return boolean
+	 */
+	public function isSingleton($className) {
+		return $this->getClassInfo($className)->getIsSingleton();
+	}
+
+	/**
+	 * @param string $className
+	 *
+	 * @return boolean
+	 */
+	public function isPrototype($className) {
+		return !$this->isSingleton($className);
 	}
 }
 

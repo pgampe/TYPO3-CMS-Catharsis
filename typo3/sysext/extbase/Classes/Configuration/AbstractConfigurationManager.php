@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Extbase\Configuration;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010-2012 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
+ *  (c) 2010-2013 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
  *  Extbase is a backport of TYPO3 Flow. All credits go to the TYPO3 Flow team.
  *  All rights reserved
  *
@@ -51,11 +51,13 @@ abstract class AbstractConfigurationManager implements \TYPO3\CMS\Core\Singleton
 
 	/**
 	 * @var \TYPO3\CMS\Extbase\Object\ObjectManagerInterface
+	 * @inject
 	 */
 	protected $objectManager;
 
 	/**
 	 * @var \TYPO3\CMS\Extbase\Service\TypoScriptService
+	 * @inject
 	 */
 	protected $typoScriptService;
 
@@ -81,20 +83,10 @@ abstract class AbstractConfigurationManager implements \TYPO3\CMS\Core\Singleton
 	protected $configurationCache = array();
 
 	/**
-	 * @param \TYPO3\CMS\Extbase\Object\ObjectManagerInterface $objectManager
-	 * @return void
+	 * @var \TYPO3\CMS\Extbase\Service\EnvironmentService
+	 * @inject
 	 */
-	public function injectObjectManager(\TYPO3\CMS\Extbase\Object\ObjectManagerInterface $objectManager) {
-		$this->objectManager = $objectManager;
-	}
-
-	/**
-	 * @param \TYPO3\CMS\Extbase\Service\TypoScriptService $typoScriptService
-	 * @return void
-	 */
-	public function injectTypoScriptService(\TYPO3\CMS\Extbase\Service\TypoScriptService $typoScriptService) {
-		$this->typoScriptService = $typoScriptService;
-	}
+	protected $environmentService;
 
 	/**
 	 * @param \TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer $contentObject
@@ -174,12 +166,12 @@ abstract class AbstractConfigurationManager implements \TYPO3\CMS\Core\Singleton
 					* stdWrap. Than we convert the configuration to normal TypoScript
 					* and apply the stdWrap to the storagePid
 					*/
-				if (TYPO3_MODE !== 'FE') {
+				if (!$this->environmentService->isEnvironmentInFrontendMode()) {
 					\TYPO3\CMS\Extbase\Utility\FrontendSimulatorUtility::simulateFrontendEnvironment($this->getContentObject());
 				}
 				$conf = $this->typoScriptService->convertPlainArrayToTypoScriptArray($frameworkConfiguration['persistence']);
 				$frameworkConfiguration['persistence']['storagePid'] = $GLOBALS['TSFE']->cObj->stdWrap($conf['storagePid'], $conf['storagePid.']);
-				if (TYPO3_MODE !== 'FE') {
+				if (!$this->environmentService->isEnvironmentInFrontendMode()) {
 					\TYPO3\CMS\Extbase\Utility\FrontendSimulatorUtility::resetFrontendEnvironment();
 				}
 			}

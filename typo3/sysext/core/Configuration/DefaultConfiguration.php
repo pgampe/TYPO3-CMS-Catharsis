@@ -93,25 +93,24 @@ return array(
 		'loginCopyrightShowVersion' => FALSE,	// Boolean: If set, the current TYPO3 version is shown.
 		'curlUse' => FALSE,						// Boolean: If set, try to use cURL to fetch external URLs
 		/**
-		 * @deprecated Deprecated since 4.6 - will be removed in 6.0.
+		 * @deprecated Deprecated since 4.6 - will be removed in 6.2.
 		 */
-		'curlProxyServer' => '',				// String: Proxyserver as http://proxy:port/. Deprecated since 4.6 - will be removed in 6.0. See below for http options.
+		'curlProxyServer' => '',				// String: Proxyserver as http://proxy:port/. Deprecated since 4.6 - will be removed in 6.2. See below for http options.
 		/**
-		 * @deprecated Deprecated since 4.6 - will be removed in 6.0.
+		 * @deprecated Deprecated since 4.6 - will be removed in 6.2.
 		 */
-		'curlProxyTunnel' => FALSE,				// Boolean: If set, use a tunneled connection through the proxy (useful for websense etc.). Deprecated since 4.6 - will be removed in 6.0. See below for http options.
+		'curlProxyTunnel' => FALSE,				// Boolean: If set, use a tunneled connection through the proxy (useful for websense etc.). Deprecated since 4.6 - will be removed in 6.2. See below for http options.
 		/**
-		 * @deprecated Deprecated since 4.6 - will be removed in 6.0.
+		 * @deprecated Deprecated since 4.6 - will be removed in 6.2.
 		 */
-		'curlProxyUserPass' => '',				// String: Proxyserver authentication user:pass. Deprecated since 4.6 - will be removed in 6.0. See below for http options.
+		'curlProxyUserPass' => '',				// String: Proxyserver authentication user:pass. Deprecated since 4.6 - will be removed in 6.2. See below for http options.
 		/**
-		 * @deprecated Deprecated since 4.6 - will be removed in 6.0.
+		 * @deprecated Deprecated since 4.6 - will be removed in 6.2.
 		 */
-		'curlTimeout' => 0,						// Integer: Timeout value for cURL requests in seconds. 0 means to wait indefinitely. Deprecated since 4.6 - will be removed in 6.0. See below for http options.
+		'curlTimeout' => 0,						// Integer: Timeout value for cURL requests in seconds. 0 means to wait indefinitely. Deprecated since 4.6 - will be removed in 6.2. See below for http options.
 		'form_enctype' => 'multipart/form-data',// String: This is the default form encoding type for most forms in TYPO3. It allows for file uploads to be in the form. However if file-upload is disabled for your PHP version even ordinary data sent with this encryption will not get to the server. So if you have file_upload disabled, you will have to change this to eg. 'application/x-www-form-urlencoded'
 		'textfile_ext' => 'txt,html,htm,css,tmpl,js,sql,xml,csv,' . PHP_EXTENSIONS_DEFAULT,		// Text file extensions. Those that can be edited. Executable PHP files may not be editable in webspace if disallowed!
 		'contentTable' => '',					// This is the page-content table (Normally 'tt_content')
-		'T3instID' => 'N/A',					// A unique installation ID - not used yet. The idea is that a TYPO3 installation can identify itself by this ID string to the Extension Repository on TYPO3.org so that we can keep a realistic count of serious TYPO3 installations.
 		'binPath' => '',						// String: List of absolute paths where external programs should be searched for. Eg. <code>/usr/local/webbin/,/home/xyz/bin/</code>. (ImageMagick path have to be configured separately)
 		'binSetup' => '',						// String (textarea): List of programs (separated by newline or comma). By default programs will be searched in default paths and the special paths defined by 'binPath'. When PHP has openbasedir enabled the programs can not be found and have to be configured here. Example: <code>perl=/usr/bin/perl,unzip=/usr/local/bin/unzip</code>
 		't3lib_cs_convMethod' => '',			// String (values: "iconv", "recode", "mbstring", default is homemade PHP-code). Defines which of these PHP-features to use for various charset conversion functions in t3lib_cs. Will speed up charset conversion radically.
@@ -123,11 +122,11 @@ return array(
 		'phpTimeZone' => '',					// String: timezone to force for all date() and mktime() functions. A list of supported values can be found at <a href="http://php.net/manual/en/timezones.php" target="_blank">php.net</a>. If this is not set, a valid fallback will be searched for by PHP (php.ini's <a href="http://www.php.net/manual/en/datetime.configuration.php#ini.date.timezone" target="_blank">date.timezone</a> setting, server defaults, etc); and if no fallback is found, the value of "UTC" is used instead.
 		'systemLog' => '',						// <p>String: semi-colon separated list. Defines one or more logging methods. Possible methods:</p><dl><dt>file,&lt;abs-path-to-file&gt;[,&lt;level&gt;]</dt><dd>logs to a file</dd><dt>mail,&lt;to&gt;[/&lt;from&gt;][,&lt;level&gt;]</dt><dd>sends the log entries via mail</dd><dt>syslog,&lt;facility&gt;,[,&lt;level&gt;]</dt><dd>uses the operating system's log. Facility may be one of LOCAL0..LOCAL7, USER (on Windows USER is the only valid type).</dd><dt>error_log[,,&lt;level&gt;]</dt><dd>uses the PHP error log</dd></dl><p>The &lt;level&gt; is the individual logging level (see <a href="#SYS-systemLogLevel">[SYS][systemLogLevel]</a>).</p>
 		'systemLogLevel' => 0,					// <p>Integer (0, 1, 2, 3, 4): Only messages with same or higher severity are logged.</p><ul><li>0: info</li><li>1: notice</li><li>2: warning</li><li>3: error</li><li>4: fatal error</li></ul>
-		'enableDeprecationLog' => 'file',		// Commalist: Enables the logging of deprecated methods and functions. Default is 'file'. The following options are allowed: <dl><dt>file</dt><dd>The log file will be written to typo3conf/deprecation_[hash-value].log</dd><dt>devlog</dt><dd>The log will be written to the development log</dd><dt>console<dt><dd>The log will be displayed in the Backend's Debug Console. The logging options can be combined by comma-separating them.</dd></dl>
+		'enableDeprecationLog' => 'file',		// If set, this configuration enables the logging of deprecated methods and functions. The following options are allowed: <dl><dt>String: &quot;file&quot; (or integer &quot;1&quot;)</dt><dd>The log file will be written to typo3conf/deprecation_[hash-value].log</dd><dt>String: &quot;devlog&quot;</dt><dd>The log will be written to the development log</dd><dt>String: &quot;console&quot;<dt><dd>The log will be displayed in the Backend's Debug Console.</dd></dl>Logging options &quot;file&quot;, &quot;devlog&quot; and &quot;console&quot; can be combined by comma-separating them. Default is &quot;file&quot;.
 		'maxFileNameLength' => 60,				// Integer: This is the maximum file name length. The value will be taken into account by basic file operations like renaming or creation of files and folders.
 		'UTF8filesystem' => FALSE,				// Boolean: If TRUE then TYPO3 uses utf-8 to store file names. This allows for accented Latin letters as well as any other non-latin characters like Cyrillic and Chinese.
 		'systemLocale' => '',					// String: locale used for certain system related functions, e.g. escaping shell commands. If problems with filenames containing special characters occur, the value of this option is probably wrong. See <a href="http://php.net/manual/en/function.setlocale.php" target="_blank">setlocale()</a>.
-		'lockingMode' => 'simple',				// String: Define which locking mode is used to control requests to pages being generated. Can be one of either "disable" (no locking), "simple" (checks for file existance), "flock" (using PHPs <a href="http://php.net/flock" target="_blank">flock()</a> function), "semaphore" (using PHPs <a href="http://php.net/sem-acquire" target="_blank">sem_acquire()</a> function). Default is "disable".
+		'lockingMode' => 'simple',				// String: Define which locking mode is used to control requests to pages being generated. Can be one of either "disable" (no locking), "simple" (checks for file existance), "flock" (using PHPs <a href="http://php.net/flock" target="_blank">flock()</a> function), "semaphore" (using PHPs <a href="http://php.net/sem-acquire" target="_blank">sem_acquire()</a> function). Default is "simple".
 		'reverseProxyIP' => '',					// String: list of IP addresses. If TYPO3 is behind one or more (intransparent) reverese proxies the IP addresses must be added here.
 		'reverseProxyHeaderMultiValue' => 'none',	// String: "none","first","last": defines which values of a proxy header (eg HTTP_X_FORWARDED_FOR) to use, if more than one is found. "none" discards the value, "first" and "last" use the first/last of the values in the list.
 		'reverseProxyPrefix' => '',				// String: optional prefix to be added to the internal URL (SCRIPT_NAME and REQUEST_URI).
@@ -211,26 +210,24 @@ return array(
 				'Image.Preview' => 'TYPO3\\CMS\\Core\\Resource\\Processing\\ImagePreviewTask',
 				'Image.CropScaleMask' => 'TYPO3\\CMS\\Core\\Resource\\Processing\\ImageCropScaleMaskTask'
 			)
-		)
+		),
+		'isInitialInstallationInProgress' => FALSE,		// Boolean: If TRUE, the installation is 'in progress'. This value is handled within the install tool step installer internally.
 	),
 	'EXT' => array( // Options related to the Extension Management
 		'allowGlobalInstall' => FALSE,		// Boolean: If set, global extensions in typo3/ext/ are allowed to be installed, updated and deleted etc.
 		'allowLocalInstall' => TRUE,		// Boolean: If set, local extensions in typo3conf/ext/ are allowed to be installed, updated and deleted etc.
 		'allowSystemInstall' => FALSE,		// Boolean: If set, you can install extensions in the sysext/ dir. Use this to upgrade the 'cms' and 'lang' extensions.
-		'em_wsdlURL' => 'http://typo3.org/wsdl/tx_ter_wsdl.php',		// The SOAP URL for uploading extensions to the TER2. Usually doesn't need to be changed.
-		'em_mirrorListURL' => 'http://repositories.typo3.org/mirrors.xml.gz',		// Allows to preset the URL for fetching the extension repository mirror list from. Used in the Extension Manager.
 		'requiredExt' => array(),		// String. List of additional extensions which are REQUIRED and cannot be unloaded by the Extension Manager!
 		'excludeForPackaging' => '(CVS|\\..*|.*~|.*\\.bak)',		// String: List of directories and files which will not be packaged into extensions nor taken into account otherwise by the Extension Manager. Perl regular expression syntax!
-		'extCache' => -1,		// <p>Integer (0, 1)</p><dl><dt>0</dt><dd>ext-scripts (ext_localconf.php and ext_tables.php) are NOT cached, but included every time</dd><dt>1</dt><dd>scripts cached to typo3conf/temp_CACHED_[sitePathHash]* (saves some milliseconds even with PHP accelerators)</dd></dl>
 		'extListArray' => array(
 			'filelist',
 			'version',
-			'tsconfig_help',
 			'context_help',
 			'extra_page_cm_options',
 			'impexp',
 			'belog',
 			'about',
+			'documentation',
 			'cshmanual',
 			'aboutmodules',
 			'setup',
@@ -259,8 +256,8 @@ return array(
 		'userHomePath' => '',							// Path to the directory where TYPO3 backend-users have their home-dirs.  Eg. '/home/typo3/users/'. A home for backend user 2 would be: '/home/typo3/users/2/'. Ending slash required!
 		'groupHomePath' => '',							// Path to the directory where TYPO3 backend-groups have their home-dirs. Remember that the first part of this path must be 'lockRootPath'. Eg. '/home/typo3/groups/'. A home for backend group 1 would be: '/home/typo3/groups/1/'. Ending slash required!
 		'userUploadDir' => '',							// Suffix to the user home dir which is what gets mounted in TYPO3. Eg. if the user dir is "../123_user/" and this value is "/upload" then "../123_user/upload" gets mounted.
-		'fileCreateMask' => '0644',						// File mode mask for Unix file systems (when files are uploaded/created).
-		'folderCreateMask' => '0755',					// As above, but for folders.
+		'fileCreateMask' => '0660',						// File mode mask for Unix file systems (when files are uploaded/created).
+		'folderCreateMask' => '2770',					// As above, but for folders.
 		'createGroup' => '',							// Group for newly created files and folders (Unix only). Group ownership can be changed on Unix file systems (see above). Set this if you want to change the group ownership of created files/folders to a specific group. This makes sense in all cases where the webserver is running with a different user/group as you do. Create a new group on your system and add you and the webserver user to the group. Now you can safely set the last bit in fileCreateMask/folderCreateMask to 0 (e.g. 770). Important: The user who is running your webserver needs to be a member of the group you specify here! Otherwise you might get some error messages.
 		'warning_email_addr' => '',						// Email address that will receive notification whenever an attempt to login to the Install Tool is made and that will also receive warnings whenever more than 3 failed backend login attempts (regardless of user) are detected within an hour.
 		'warning_mode' => '',							// Bit 1: If set, warning_email_addr will be notified every time a backend user logs in. Bit 2: If set, warning_email_addr will be notified every time an ADMIN backend user logs in. Other bits are reserved for future options.
@@ -304,7 +301,7 @@ return array(
 							100 = ITEM
 							100 {
 								name = history
-								label = LLL:EXT:lang/locallang_misc.xml:CM_history
+								label = LLL:EXT:lang/locallang_misc.xlf:CM_history
 								spriteIcon = actions-document-history-open
 								displayCondition = canShowHistory != 0
 								callbackAction = openHistoryPopUp
@@ -319,7 +316,7 @@ return array(
 							100 = ITEM
 							100 {
 								name = view
-								label = LLL:EXT:lang/locallang_core.xml:cm.view
+								label = LLL:EXT:lang/locallang_core.xlf:cm.view
 								spriteIcon = actions-document-view
 								displayCondition = canBeViewed != 0
 								callbackAction = viewPage
@@ -328,7 +325,7 @@ return array(
 							200 = ITEM
 							200 {
 								name = new
-								label = LLL:EXT:lang/locallang_core.xml:cm.new
+								label = LLL:EXT:lang/locallang_core.xlf:cm.new
 								spriteIcon = actions-page-new
 								displayCondition = canCreateNewPages != 0
 								callbackAction = newPageWizard
@@ -339,7 +336,7 @@ return array(
 							400 = ITEM
 							400 {
 								name = history
-								label = LLL:EXT:lang/locallang_misc.xml:CM_history
+								label = LLL:EXT:lang/locallang_misc.xlf:CM_history
 								spriteIcon = actions-document-history-open
 								displayCondition = canShowHistory != 0
 								callbackAction = openHistoryPopUp
@@ -354,7 +351,7 @@ return array(
 							100 = ITEM
 							100 {
 								name = view
-								label = LLL:EXT:lang/locallang_core.xml:cm.view
+								label = LLL:EXT:lang/locallang_core.xlf:cm.view
 								spriteIcon = actions-document-view
 								displayCondition = canBeViewed != 0
 								callbackAction = viewPage
@@ -365,7 +362,7 @@ return array(
 							300 = ITEM
 							300 {
 								name = disable
-								label = LLL:EXT:lang/locallang_common.xml:disable
+								label = LLL:EXT:lang/locallang_common.xlf:disable
 								spriteIcon = actions-edit-hide
 								displayCondition = getRecord|hidden = 0 && canBeDisabledAndEnabled != 0
 								callbackAction = disablePage
@@ -374,7 +371,7 @@ return array(
 							400 = ITEM
 							400 {
 								name = enable
-								label = LLL:EXT:lang/locallang_common.xml:enable
+								label = LLL:EXT:lang/locallang_common.xlf:enable
 								spriteIcon = actions-edit-unhide
 								displayCondition = getRecord|hidden = 1 && canBeDisabledAndEnabled != 0
 								callbackAction = enablePage
@@ -383,7 +380,7 @@ return array(
 							500 = ITEM
 							500 {
 								name = edit
-								label = LLL:EXT:lang/locallang_core.xml:cm.edit
+								label = LLL:EXT:lang/locallang_core.xlf:cm.edit
 								spriteIcon = actions-page-open
 								displayCondition = canBeEdited != 0
 								callbackAction = editPageProperties
@@ -392,7 +389,7 @@ return array(
 							600 = ITEM
 							600 {
 								name = info
-								label = LLL:EXT:lang/locallang_core.xml:cm.info
+								label = LLL:EXT:lang/locallang_core.xlf:cm.info
 								spriteIcon = actions-document-info
 								displayCondition = canShowInfo != 0
 								callbackAction = openInfoPopUp
@@ -401,7 +398,7 @@ return array(
 							700 = ITEM
 							700 {
 								name = history
-								label = LLL:EXT:lang/locallang_misc.xml:CM_history
+								label = LLL:EXT:lang/locallang_misc.xlf:CM_history
 								spriteIcon = actions-document-history-open
 								displayCondition = canShowHistory != 0
 								callbackAction = openHistoryPopUp
@@ -411,12 +408,12 @@ return array(
 
 							900 = SUBMENU
 							900 {
-								label = LLL:EXT:lang/locallang_core.xml:cm.copyPasteActions
+								label = LLL:EXT:lang/locallang_core.xlf:cm.copyPasteActions
 
 								100 = ITEM
 								100 {
 									name = new
-									label = LLL:EXT:lang/locallang_core.xml:cm.new
+									label = LLL:EXT:lang/locallang_core.xlf:cm.new
 									spriteIcon = actions-page-new
 									displayCondition = canCreateNewPages != 0
 									callbackAction = newPageWizard
@@ -427,7 +424,7 @@ return array(
 								300 = ITEM
 								300 {
 									name = cut
-									label = LLL:EXT:lang/locallang_core.xml:cm.cut
+									label = LLL:EXT:lang/locallang_core.xlf:cm.cut
 									spriteIcon = actions-edit-cut
 									displayCondition = isInCutMode = 0 && canBeCut != 0 && isMountPoint != 1
 									callbackAction = enableCutMode
@@ -436,7 +433,7 @@ return array(
 								400 = ITEM
 								400 {
 									name = cut
-									label = LLL:EXT:lang/locallang_core.xml:cm.cut
+									label = LLL:EXT:lang/locallang_core.xlf:cm.cut
 									spriteIcon = actions-edit-cut-release
 									displayCondition = isInCutMode = 1 && canBeCut != 0
 									callbackAction = disableCutMode
@@ -445,7 +442,7 @@ return array(
 								500 = ITEM
 								500 {
 									name = copy
-									label = LLL:EXT:lang/locallang_core.xml:cm.copy
+									label = LLL:EXT:lang/locallang_core.xlf:cm.copy
 									spriteIcon = actions-edit-copy
 									displayCondition = isInCopyMode = 0 && canBeCopied != 0
 									callbackAction = enableCopyMode
@@ -454,7 +451,7 @@ return array(
 								600 = ITEM
 								600 {
 									name = copy
-									label = LLL:EXT:lang/locallang_core.xml:cm.copy
+									label = LLL:EXT:lang/locallang_core.xlf:cm.copy
 									spriteIcon = actions-edit-copy-release
 									displayCondition = isInCopyMode = 1 && canBeCopied != 0
 									callbackAction = disableCopyMode
@@ -463,7 +460,7 @@ return array(
 								700 = ITEM
 								700 {
 									name = pasteInto
-									label = LLL:EXT:lang/locallang_core.xml:cm.pasteinto
+									label = LLL:EXT:lang/locallang_core.xlf:cm.pasteinto
 									spriteIcon = actions-document-paste-into
 									displayCondition = getContextInfo|inCopyMode = 1 || getContextInfo|inCutMode = 1 && canBePastedInto != 0
 									callbackAction = pasteIntoNode
@@ -472,7 +469,7 @@ return array(
 								800 = ITEM
 								800 {
 									name = pasteAfter
-									label = LLL:EXT:lang/locallang_core.xml:cm.pasteafter
+									label = LLL:EXT:lang/locallang_core.xlf:cm.pasteafter
 									spriteIcon = actions-document-paste-after
 									displayCondition = getContextInfo|inCopyMode = 1 || getContextInfo|inCutMode = 1 && canBePastedAfter != 0
 									callbackAction = pasteAfterNode
@@ -483,7 +480,7 @@ return array(
 								1000 = ITEM
 								1000 {
 									name = delete
-									label = LLL:EXT:lang/locallang_core.xml:cm.delete
+									label = LLL:EXT:lang/locallang_core.xlf:cm.delete
 									spriteIcon = actions-edit-delete
 									displayCondition = canBeRemoved != 0 && isMountPoint != 1
 									callbackAction = removeNode
@@ -492,12 +489,12 @@ return array(
 
 							1000 = SUBMENU
 							1000 {
-								label = LLL:EXT:lang/locallang_core.xml:cm.branchActions
+								label = LLL:EXT:lang/locallang_core.xlf:cm.branchActions
 
 								100 = ITEM
 								100 {
 									name = mountAsTreeroot
-									label = LLL:EXT:lang/locallang_core.xml:cm.tempMountPoint
+									label = LLL:EXT:lang/locallang_core.xlf:cm.tempMountPoint
 									spriteIcon = actions-system-extension-documentation
 									displayCondition = canBeTemporaryMountPoint != 0 && isMountPoint = 0
 									callbackAction = mountAsTreeRoot
@@ -508,7 +505,7 @@ return array(
 								300 = ITEM
 								300 {
 									name = expandBranch
-									label = LLL:EXT:lang/locallang_core.xml:cm.expandBranch
+									label = LLL:EXT:lang/locallang_core.xlf:cm.expandBranch
 									spriteIcon = actions-pagetree-expand
 									displayCondition =
 									callbackAction = expandBranch
@@ -517,7 +514,7 @@ return array(
 								400 = ITEM
 								400 {
 									name = collapseBranch
-									label = LLL:EXT:lang/locallang_core.xml:cm.collapseBranch
+									label = LLL:EXT:lang/locallang_core.xlf:cm.collapseBranch
 									spriteIcon = actions-pagetree-collapse
 									displayCondition =
 									callbackAction = collapseBranch
@@ -564,7 +561,7 @@ return array(
 		'versionNumberInFilename' => FALSE,					// <p>Boolean: If TRUE, included CSS and JS files will have the timestamp embedded in the filename, ie. filename.1269312081.js. This will make browsers and proxies reload the files if they change (thus avoiding caching issues). IMPORTANT: this feature requires extra .htaccess rules to work (please refer to _.htaccess or the _.htaccess file from the dummy package)</p><p>If FALSE the filemtime will be appended as a query-string.</p>
 		'spriteIconGenerator_handler' => 'TYPO3\\CMS\\Backend\\Sprite\\SimpleSpriteHandler',		// String: Used to register own/other spriteGenerating Handler, they have to implement the interface \TYPO3\CMS\Backend\Sprite\SpriteIconGeneratorInterface. If set to "\TYPO3\CMS\Backend\Sprite\SpriteBuildingHandler" icons from extensions will automatically merged into sprites.
 		'debug' => FALSE,									// Boolean: If set, the loginrefresh is disabled and pageRenderer is set to debug mode. Use this to debug the backend only!
-		'AJAX' => array(									// array of key-value pairs for a unified use of AJAX calls in the TYPO3 backend. Keys are the unique ajaxIDs where the value will be resolved to call a method in an object. See ajax.php and the classes/class.typo3ajax.php for more information.
+		'AJAX' => array(									// array of key-value pairs for a unified use of AJAX calls in the TYPO3 backend. Keys are the unique ajaxIDs where the value will be resolved to call a method in an object. See ajax.php for more information.
 			'SC_alt_db_navframe::expandCollapse' => 'TYPO3\\CMS\\Backend\\Controller\\PageTreeNavigationController->ajaxExpandCollapse',
 			'SC_alt_file_navframe::expandCollapse' => 'TYPO3\\CMS\\Backend\\Controller\\FileSystemNavigationFrameController->ajaxExpandCollapse',
 			'TYPO3_tcefile::process' => 'TYPO3\\CMS\\Backend\\Controller\\File\\FileController->processAjaxRequest',
@@ -633,7 +630,7 @@ return array(
 			// array('IPmaskList_1','fe_group uid'), array('IPmaskList_2','fe_group uid')
 		),
 		'get_url_id_token' => '#get_URL_ID_TOK#',		// This is the token, which is substituted in the output code in order to keep a GET-based session going. Normally the GET-session-id is 5 chars ('&amp;ftu=') + hash_length (norm. 10)
-		'content_doktypes' => '1,2,5,7',		// List of pages.doktype values which can contain content (so shortcut pages and external url pages are excluded, but all pages below doktype 199 should be included. doktype=6 is not either (backend users only...). For doktypes going into menus see class.tslib_menu.php, line 494 (search for 'doktype'))
+		'content_doktypes' => '1,2,5,7',		// List of pages.doktype values which can contain content (so shortcut pages and external url pages are excluded, but all pages below doktype 199 should be included. doktype=6 is not either (backend users only...).
 		'enable_mount_pids' => TRUE,		// Boolean: If set to "1", the mount_pid feature allowing 'symlinks' in the page tree (for frontend operation) is allowed.
 		'pageOverlayFields' => 'uid,title,subtitle,nav_title,media,keywords,description,abstract,author,author_email,url,urltype,shortcut,shortcut_mode',		// List of fields from the table "pages_language_overlay" which should be overlaid on page records. See t3lib_page::getPageOverlay()
 		'hidePagesIfNotTranslatedByDefault' => FALSE,		// Boolean: If TRUE, pages that has no translation will be hidden by default. Basically this will inverse the effect of the page localization setting "Hide page if no translation for current language exists" to "Show page even if no translation exists"
@@ -703,16 +700,16 @@ return array(
 		// Here you can more or less freely define additional configuration for scripts in TYPO3. Of course the features supported depends on the script. See documentation "Inside TYPO3" for examples. Keys in the array are the relative path of a script (for output scripts it should be the "script ID" as found in a comment in the HTML header ) and values can then be anything that scripts wants to define for itself. The key "GLOBAL" is reserved.
 		'GLOBAL' => array(
 			'softRefParser' => array(
-				'substitute' => 'TYPO3\CMS\Core\Database\SoftReferenceIndex',
-				'notify' => 'TYPO3\CMS\Core\Database\SoftReferenceIndex',
-				'images' => 'TYPO3\CMS\Core\Database\SoftReferenceIndex',
-				'typolink' => 'TYPO3\CMS\Core\Database\SoftReferenceIndex',
-				'typolink_tag' => 'TYPO3\CMS\Core\Database\SoftReferenceIndex',
-				'TSconfig' => 'TYPO3\CMS\Core\Database\SoftReferenceIndex',
-				'TStemplate' => 'TYPO3\CMS\Core\Database\SoftReferenceIndex',
-				'ext_fileref' => 'TYPO3\CMS\Core\Database\SoftReferenceIndex',
-				'email' => 'TYPO3\CMS\Core\Database\SoftReferenceIndex',
-				'url' => 'TYPO3\CMS\Core\Database\SoftReferenceIndex',
+				'substitute' => 'TYPO3\\CMS\\Core\\Database\\SoftReferenceIndex',
+				'notify' => 'TYPO3\\CMS\\Core\\Database\\SoftReferenceIndex',
+				'images' => 'TYPO3\\CMS\\Core\\Database\\SoftReferenceIndex',
+				'typolink' => 'TYPO3\\CMS\\Core\\Database\\SoftReferenceIndex',
+				'typolink_tag' => 'TYPO3\\CMS\\Core\\Database\\SoftReferenceIndex',
+				'TSconfig' => 'TYPO3\\CMS\\Core\\Database\\SoftReferenceIndex',
+				'TStemplate' => 'TYPO3\\CMS\\Core\\Database\\SoftReferenceIndex',
+				'ext_fileref' => 'TYPO3\\CMS\\Core\\Database\\SoftReferenceIndex',
+				'email' => 'TYPO3\\CMS\\Core\\Database\\SoftReferenceIndex',
+				'url' => 'TYPO3\\CMS\\Core\\Database\\SoftReferenceIndex',
 			),
 			'softRefParser_GL' => array(),
 			// Global soft reference parsers

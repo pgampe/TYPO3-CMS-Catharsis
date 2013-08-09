@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Core\Controller;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2006-2011 Kasper Skårhøj (kasperYYYY@typo3.com)
+ *  (c) 2006-2013 Kasper Skårhøj (kasperYYYY@typo3.com)
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -80,7 +80,7 @@ class CommandLineController {
 	 */
 	public function __construct() {
 		// Loads the cli_args array with command line arguments
-		$this->cli_args = $this->cli_getArgIndex();
+		$this->cli_setArguments($_SERVER['argv']);
 	}
 
 	/**
@@ -130,13 +130,14 @@ class CommandLineController {
 	 * Argument names (eg. "-s") will be keys and values after (eg. "-s value1 value2 ..." or "-s=value1") will be in the array.
 	 * Array is empty if no values
 	 *
+	 * @param array $argv Configuration options
 	 * @return array
 	 * @todo Define visibility
 	 */
-	public function cli_getArgIndex() {
+	public function cli_getArgIndex(array $argv = array()) {
 		$cli_options = array();
 		$index = '_DEFAULT';
-		foreach ($_SERVER['argv'] as $token) {
+		foreach ($argv as $token) {
 			// Options starting with a number is invalid - they could be negative values!
 			if ($token[0] === '-' && !\TYPO3\CMS\Core\Utility\MathUtility::canBeInterpretedAsInteger($token[1])) {
 				list($index, $opt) = explode('=', $token, 2);
@@ -167,7 +168,7 @@ class CommandLineController {
 		$allOptions = array();
 		foreach ($this->cli_options as $cfg) {
 			$allOptions[] = $cfg[0];
-			$argSplit = \TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(' ', $cfg[0], 1);
+			$argSplit = \TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(' ', $cfg[0], TRUE);
 			if (isset($cli_args_copy[$argSplit[0]])) {
 				foreach ($argSplit as $i => $v) {
 					$ii = $i;
@@ -191,6 +192,16 @@ class CommandLineController {
 			echo wordwrap('ERROR: Option ' . implode(',', array_keys($cli_args_copy)) . ' was unknown to this script!' . LF . '(Options are: ' . implode(', ', $allOptions) . ')' . LF);
 			die;
 		}
+	}
+
+	/**
+	 * Set environment array to $cli_args
+	 *
+	 * @param array $argv Configuration options
+	 * @return void
+	 */
+	public function cli_setArguments(array $argv = array()) {
+		$this->cli_args = $this->cli_getArgIndex($argv);
 	}
 
 	/**
@@ -257,33 +268,32 @@ class CommandLineController {
 			$this->cli_echo(strtoupper($key) . ':
 ');
 			switch ($key) {
-			case 'synopsis':
-				$optStr = '';
-				foreach ($this->cli_options as $v) {
-					$optStr .= ' [' . $v[0] . ']';
-				}
-				$this->cli_echo($this->cli_indent(str_replace('###OPTIONS###', trim($optStr), $value), 4) . '
-
-');
-				break;
-			case 'options':
-				$this->cli_echo($this->cli_indent($value, 4) . LF);
-				$maxLen = 0;
-				foreach ($this->cli_options as $v) {
-					if (strlen($v[0]) > $maxLen) {
-						$maxLen = strlen($v[0]);
+				case 'synopsis':
+					$optStr = '';
+					foreach ($this->cli_options as $v) {
+						$optStr .= ' [' . $v[0] . ']';
 					}
-				}
-				foreach ($this->cli_options as $v) {
-					$this->cli_echo($v[0] . substr($this->cli_indent(rtrim(($v[1] . LF . $v[2])), ($maxLen + 4)), strlen($v[0])) . LF);
-				}
-				$this->cli_echo(LF);
-				break;
-			default:
-				$this->cli_echo($this->cli_indent($value, 4) . '
+					$this->cli_echo($this->cli_indent(str_replace('###OPTIONS###', trim($optStr), $value), 4) . '
 
 ');
-				break;
+					break;
+				case 'options':
+					$this->cli_echo($this->cli_indent($value, 4) . LF);
+					$maxLen = 0;
+					foreach ($this->cli_options as $v) {
+						if (strlen($v[0]) > $maxLen) {
+							$maxLen = strlen($v[0]);
+						}
+					}
+					foreach ($this->cli_options as $v) {
+						$this->cli_echo($v[0] . substr($this->cli_indent(rtrim(($v[1] . LF . $v[2])), ($maxLen + 4)), strlen($v[0])) . LF);
+					}
+					$this->cli_echo(LF);
+					break;
+				default:
+					$this->cli_echo($this->cli_indent($value, 4) . '
+
+');
 			}
 		}
 	}

@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Core\Tests\Unit\Resource;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2011 Andreas Wolf <andreas.wolf@ikt-werk.de>
+ *  (c) 2011-2013 Andreas Wolf <andreas.wolf@ikt-werk.de>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -27,7 +27,7 @@ namespace TYPO3\CMS\Core\Tests\Unit\Resource;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
-require_once 'vfsStream/vfsStream.php';
+use \org\bovigo\vfs\vfsStream;
 
 /**
  * Testcase for the storage collection class of the TYPO3 FAL
@@ -45,7 +45,7 @@ class FolderTest extends \TYPO3\CMS\Core\Tests\UnitTestCase {
 
 	public function setUp() {
 		$this->singletonInstances = \TYPO3\CMS\Core\Utility\GeneralUtility::getSingletonInstances();
-		\vfsStream::setup($this->basedir);
+		vfsStream::setup($this->basedir);
 	}
 
 	protected function tearDown() {

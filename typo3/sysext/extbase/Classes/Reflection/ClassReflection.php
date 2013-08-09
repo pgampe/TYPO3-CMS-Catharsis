@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Extbase\Reflection;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010-2012 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
+ *  (c) 2010-2013 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
  *  Extbase is a backport of TYPO3 Flow. All credits go to the TYPO3 Flow team.
  *  All rights reserved
  *
@@ -116,7 +116,7 @@ class ClassReflection extends \ReflectionClass {
 	 * that a \TYPO3\CMS\Extbase\Reflection\PropertyReflection object is returned instead of the
 	 * orginal ReflectionProperty instance.
 	 *
-	 * @param string $name: Name of the property
+	 * @param string $name Name of the property
 	 * @return \TYPO3\CMS\Extbase\Reflection\PropertyReflection Property reflection object of the specified property in this class
 	 */
 	public function getProperty($name) {
@@ -155,7 +155,7 @@ class ClassReflection extends \ReflectionClass {
 	 * Checks if the doc comment of this method is tagged with
 	 * the specified tag
 	 *
-	 * @param string $tag: Tag name to check for
+	 * @param string $tag Tag name to check for
 	 * @return boolean TRUE if such a tag has been defined, otherwise FALSE
 	 */
 	public function isTaggedWith($tag) {

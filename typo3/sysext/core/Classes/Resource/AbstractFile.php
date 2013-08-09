@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Core\Resource;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2011 Ingmar Schlecht <ingmar@typo3.org>
+ *  (c) 2011-2013 Ingmar Schlecht <ingmar@typo3.org>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -26,6 +26,9 @@ namespace TYPO3\CMS\Core\Resource;
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
+
+use TYPO3\CMS\Core\Utility\PathUtility;
+
 /**
  * Abstract file representation in the file abstraction layer.
  *
@@ -78,26 +81,43 @@ abstract class AbstractFile implements FileInterface {
 	 * any other file
 	 */
 	const FILETYPE_UNKNOWN = 0;
+
 	/**
 	 * Any kind of text
+	 * @see http://www.iana.org/assignments/media-types/text
 	 */
 	const FILETYPE_TEXT = 1;
+
 	/**
 	 * Any kind of image
+	 * @see http://www.iana.org/assignments/media-types/image
 	 */
 	const FILETYPE_IMAGE = 2;
+
 	/**
 	 * Any kind of audio file
+	 * @see http://www.iana.org/assignments/media-types/audio
 	 */
 	const FILETYPE_AUDIO = 3;
+
 	/**
 	 * Any kind of video
+	 * @see http://www.iana.org/assignments/media-types/video
 	 */
 	const FILETYPE_VIDEO = 4;
+
+	/**
+	 * Any kind of application
+	 * @see http://www.iana.org/assignments/media-types/application
+	 */
+	const FILETYPE_APPLICATION = 5;
+
 	/**
 	 * Any kind of software, often known as "application"
+	 * @deprecated since 6.1, will be removed in 6.3. Use rather FILETYPE_APPLICATION which matches the Iana standard.
 	 */
 	const FILETYPE_SOFTWARE = 5;
+
 	/******************
 	 * VARIOUS FILE PROPERTY GETTERS
 	 ******************/
@@ -156,7 +176,7 @@ abstract class AbstractFile implements FileInterface {
 	 * @return string
 	 */
 	public function getNameWithoutExtension() {
-		return pathinfo($this->getName(), PATHINFO_FILENAME);
+		return PathUtility::pathinfo($this->getName(), PATHINFO_FILENAME);
 	}
 
 	/**
@@ -226,7 +246,7 @@ abstract class AbstractFile implements FileInterface {
 	 * @return string The file extension
 	 */
 	public function getExtension() {
-		$pathinfo = pathinfo($this->getName());
+		$pathinfo = PathUtility::pathinfo($this->getName());
 
 		$extension = strtolower($pathinfo['extension']);
 
@@ -265,25 +285,25 @@ abstract class AbstractFile implements FileInterface {
 			$mimeType = $this->getMimeType();
 			list($fileType) = explode('/', $mimeType);
 			switch (strtolower($fileType)) {
-			case 'text':
-				$this->properties['type'] = self::FILETYPE_TEXT;
-				break;
-			case 'image':
-				$this->properties['type'] = self::FILETYPE_IMAGE;
-				break;
-			case 'audio':
-				$this->properties['type'] = self::FILETYPE_AUDIO;
-				break;
-			case 'video':
-				$this->properties['type'] = self::FILETYPE_VIDEO;
-				break;
-			case 'application':
+				case 'text':
+					$this->properties['type'] = self::FILETYPE_TEXT;
+					break;
+				case 'image':
+					$this->properties['type'] = self::FILETYPE_IMAGE;
+					break;
+				case 'audio':
+					$this->properties['type'] = self::FILETYPE_AUDIO;
+					break;
+				case 'video':
+					$this->properties['type'] = self::FILETYPE_VIDEO;
+					break;
+				case 'application':
 
-			case 'software':
-				$this->properties['type'] = self::FILETYPE_SOFTWARE;
-				break;
-			default:
-				$this->properties['type'] = self::FILETYPE_UNKNOWN;
+				case 'software':
+					$this->properties['type'] = self::FILETYPE_APPLICATION;
+					break;
+				default:
+					$this->properties['type'] = self::FILETYPE_UNKNOWN;
 			}
 		}
 		return $this->properties['type'];
@@ -366,7 +386,7 @@ abstract class AbstractFile implements FileInterface {
 
 	/**
 	 * Sets the storage this file is located in. This is only meant for
-	 * t3lib/file/-internal usage; don't use it to move files.
+	 * \TYPO3\CMS\Core\Resource-internal usage; don't use it to move files.
 	 *
 	 * @internal Should only be used by other parts of the File API (e.g. drivers after moving a file)
 	 * @param integer|ResourceStorage $storage
@@ -413,7 +433,7 @@ abstract class AbstractFile implements FileInterface {
 	/**
 	 * Deletes this file from its storage. This also means that this object becomes useless.
 	 *
-	 * @return bool TRUE if deletion succeeded
+	 * @return boolean TRUE if deletion succeeded
 	 */
 	public function delete() {
 		// The storage will mark this file as deleted

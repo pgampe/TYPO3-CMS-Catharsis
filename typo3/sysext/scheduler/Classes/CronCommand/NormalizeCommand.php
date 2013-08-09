@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Scheduler\CronCommand;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010-2011 Christian Kuhn <lolli@schwarzbu.ch>
+ *  (c) 2010-2013 Christian Kuhn <lolli@schwarzbu.ch>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -62,25 +62,25 @@ class NormalizeCommand {
 	 */
 	static protected function convertKeywordsToCronCommand($cronCommand) {
 		switch ($cronCommand) {
-		case '@yearly':
+			case '@yearly':
 
-		case '@annually':
-			$cronCommand = '0 0 1 1 *';
-			break;
-		case '@monthly':
-			$cronCommand = '0 0 1 * *';
-			break;
-		case '@weekly':
-			$cronCommand = '0 0 * * 0';
-			break;
-		case '@daily':
+			case '@annually':
+				$cronCommand = '0 0 1 1 *';
+				break;
+			case '@monthly':
+				$cronCommand = '0 0 1 * *';
+				break;
+			case '@weekly':
+				$cronCommand = '0 0 * * 0';
+				break;
+			case '@daily':
 
-		case '@midnight':
-			$cronCommand = '0 0 * * *';
-			break;
-		case '@hourly':
-			$cronCommand = '0 * * * *';
-			break;
+			case '@midnight':
+				$cronCommand = '0 0 * * *';
+				break;
+			case '@hourly':
+				$cronCommand = '0 * * * *';
+				break;
 		}
 		return $cronCommand;
 	}

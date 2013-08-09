@@ -34,6 +34,7 @@ class Request implements \TYPO3\CMS\Extbase\Mvc\RequestInterface {
 
 	/**
 	 * @var \TYPO3\CMS\Extbase\Object\ObjectManagerInterface
+	 * @inject
 	 */
 	protected $objectManager;
 
@@ -82,14 +83,6 @@ class Request implements \TYPO3\CMS\Extbase\Mvc\RequestInterface {
 	protected $command = NULL;
 
 	/**
-	 * @param \TYPO3\CMS\Extbase\Object\ObjectManagerInterface $objectManager A reference to the object manager
-	 * @return void
-	 */
-	public function injectObjectManager(\TYPO3\CMS\Extbase\Object\ObjectManagerInterface $objectManager) {
-		$this->objectManager = $objectManager;
-	}
-
-	/**
 	 * Sets the dispatched flag
 	 *
 	 * @param boolean $flag If this request has been dispatched
@@ -119,19 +112,9 @@ class Request implements \TYPO3\CMS\Extbase\Mvc\RequestInterface {
 	 * @return void
 	 */
 	public function setControllerObjectName($controllerObjectName) {
-		$matches = array();
-		preg_match('/
-			^Tx
-			_(?P<extensionName>[^_]+)
-			_
-			(
-				Command
-			|
-				(?P<subpackageKey>.+)_Controller
-			)
-			_(?P<controllerName>[a-z_]+)Controller
-			$/ix', $controllerObjectName, $matches);
-		$this->controllerExtensionName = $matches['extensionName'];
+		$nameParts = \TYPO3\CMS\Core\Utility\ClassNamingUtility::explodeObjectControllerName($controllerObjectName);
+
+		$this->controllerExtensionName = $nameParts['extensionName'];
 		$this->controllerObjectName = $controllerObjectName;
 		$this->command = NULL;
 	}

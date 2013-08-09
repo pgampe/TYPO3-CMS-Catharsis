@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Core\Tests\Unit\Resource;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2011 Andreas Wolf <andreas.wolf@ikt-werk.de>
+ *  (c) 2011-2013 Andreas Wolf <andreas.wolf@ikt-werk.de>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -27,8 +27,10 @@ namespace TYPO3\CMS\Core\Tests\Unit\Resource;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use \org\bovigo\vfs\vfsStream;
+
 /**
- * Basic test case for the t3lib_file tests
+ * Basic test case for the \TYPO3\CMS\Core\Resource\File tests
  *
  * @author Andreas Wolf <andreas.wolf@ikt-werk.de>
  */
@@ -46,7 +48,7 @@ abstract class BaseTestCase extends \TYPO3\CMS\Core\Tests\UnitTestCase {
 	public function setUp() {
 		$this->mountDir = uniqid('mount-');
 		$this->basedir = uniqid('base-');
-		\vfsStream::setup($this->basedir);
+		vfsStream::setup($this->basedir);
 		// Add an entry for the mount directory to the VFS contents
 		$this->vfsContents = array($this->mountDir => array());
 	}
@@ -60,10 +62,10 @@ abstract class BaseTestCase extends \TYPO3\CMS\Core\Tests\UnitTestCase {
 	}
 
 	protected function initializeVfs() {
-		if (is_callable('vfsStream::create') === FALSE) {
+		if (is_callable('org\\bovigo\\vfs\\vfsStream::create') === FALSE) {
 			$this->markTestSkipped('vfsStream::create() does not exist');
 		}
-		\vfsStream::create($this->vfsContents);
+		vfsStream::create($this->vfsContents);
 	}
 
 	/**
@@ -83,7 +85,7 @@ abstract class BaseTestCase extends \TYPO3\CMS\Core\Tests\UnitTestCase {
 	 * @return string
 	 */
 	protected function getUrlInMount($path) {
-		return \vfsStream::url($this->basedir . '/' . $this->mountDir . '/' . ltrim($path, '/'));
+		return vfsStream::url($this->basedir . '/' . $this->mountDir . '/' . ltrim($path, '/'));
 	}
 
 	/**
@@ -103,7 +105,7 @@ abstract class BaseTestCase extends \TYPO3\CMS\Core\Tests\UnitTestCase {
 	 * @return string
 	 */
 	protected function getUrl($path) {
-		return \vfsStream::url($this->basedir . '/' . ltrim($path, '/'));
+		return vfsStream::url($this->basedir . '/' . ltrim($path, '/'));
 	}
 
 	/**

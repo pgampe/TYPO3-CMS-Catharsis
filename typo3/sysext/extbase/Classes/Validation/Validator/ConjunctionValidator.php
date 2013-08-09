@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Extbase\Validation\Validator;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010-2012 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
+ *  (c) 2010-2013 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
  *  Extbase is a backport of TYPO3 Flow. All credits go to the TYPO3 Flow team.
  *  All rights reserved
  *
@@ -27,26 +27,37 @@ namespace TYPO3\CMS\Extbase\Validation\Validator;
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
+
 /**
- * Validator to chain many validators in a conjunction (logical and). So every
- * validator has to be valid, to make the whole conjunction valid.
+ * Validator to chain many validators in a conjunction (logical and).
  *
- * @license http://www.gnu.org/licenses/lgpl.html GNU Lesser General Public License, version 3 or later
+ * @api
  */
-class ConjunctionValidator extends \TYPO3\CMS\Extbase\Validation\Validator\AbstractCompositeValidator {
+class ConjunctionValidator extends AbstractCompositeValidator {
 
 	/**
 	 * Checks if the given value is valid according to the validators of the conjunction.
+	 * Every validator has to be valid, to make the whole conjunction valid.
 	 *
 	 * @param mixed $value The value that should be validated
 	 * @return \TYPO3\CMS\Extbase\Error\Result
 	 * @api
 	 */
 	public function validate($value) {
-		$result = new \TYPO3\CMS\Extbase\Error\Result();
-		foreach ($this->validators as $validator) {
-			$result->merge($validator->validate($value));
+		$validators = $this->getValidators();
+		if ($validators->count() > 0) {
+			$result = NULL;
+			foreach ($validators as $validator) {
+				if ($result === NULL) {
+					$result = $validator->validate($value);
+				} else {
+					$result->merge($validator->validate($value));
+				}
+			}
+		} else {
+			$result = new \TYPO3\CMS\Extbase\Error\Result;
 		}
+
 		return $result;
 	}
 
@@ -57,7 +68,7 @@ class ConjunctionValidator extends \TYPO3\CMS\Extbase\Validation\Validator\Abstr
 	 *
 	 * @param mixed $value The value that should be validated
 	 * @return boolean
-	 * @deprecated since Extbase 1.4.0, will be removed in Extbase 6.1
+	 * @deprecated since Extbase 1.4.0, will be removed two versions after Extbase 6.1
 	 */
 	public function isValid($value) {
 		$result = TRUE;

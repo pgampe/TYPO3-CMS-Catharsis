@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Rsaauth\Storage;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2009-2011 Dmitry Dulepov <dmitry@typo3.org>
+ *  (c) 2009-2013 Dmitry Dulepov <dmitry@typo3.org>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -45,7 +45,7 @@ class SplitStorage extends \TYPO3\CMS\Rsaauth\Storage\AbstractStorage {
 	 * Obtains a key from the database
 	 *
 	 * @return string The key or NULL
-	 * @see tx_rsaauth_abstract_storage::get()
+	 * @see \TYPO3\CMS\Rsaauth\Storage\AbstractStorage::get()
 	 */
 	public function get() {
 		$result = NULL;
@@ -67,7 +67,7 @@ class SplitStorage extends \TYPO3\CMS\Rsaauth\Storage\AbstractStorage {
 	 *
 	 * @param string $key The key
 	 * @return void
-	 * @see 	tx_rsaauth_abstract_storage::put()
+	 * @see \TYPO3\CMS\Rsaauth\Storage\AbstractStorage::put()
 	 */
 	public function put($key) {
 		if ($key == NULL) {

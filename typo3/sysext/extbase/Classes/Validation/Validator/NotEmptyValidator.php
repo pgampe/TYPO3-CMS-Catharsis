@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Extbase\Validation\Validator;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010-2012 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
+ *  (c) 2010-2013 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
  *  Extbase is a backport of TYPO3 Flow. All credits go to the TYPO3 Flow team.
  *  All rights reserved
  *
@@ -27,10 +27,21 @@ namespace TYPO3\CMS\Extbase\Validation\Validator;
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
+
 /**
- * Validator for not empty values
+ * Validator for not empty values.
+ *
+ * @api
  */
-class NotEmptyValidator extends \TYPO3\CMS\Extbase\Validation\Validator\AbstractValidator {
+class NotEmptyValidator extends AbstractValidator {
+
+	/**
+	 * This validator always needs to be executed even if the given value is empty.
+	 * See AbstractValidator::validate()
+	 *
+	 * @var boolean
+	 */
+	protected $acceptsEmptyValues = FALSE;
 
 	/**
 	 * Checks if the given property ($propertyValue) is not empty (NULL, empty string, empty array or empty object).
@@ -41,24 +52,34 @@ class NotEmptyValidator extends \TYPO3\CMS\Extbase\Validation\Validator\Abstract
 	 * @return boolean TRUE if the value is valid, FALSE if an error occured
 	 */
 	public function isValid($value) {
-		$this->errors = array();
 		if ($value === NULL) {
-			$this->addError('The given subject was NULL.', 1221560910);
-			return FALSE;
+			$this->addError(
+				\TYPO3\CMS\Extbase\Utility\LocalizationUtility::translate(
+					'validator.notempty.null',
+					'extbase'
+				), 1221560910);
 		}
 		if ($value === '') {
-			$this->addError('The given subject was empty.', 1221560718);
-			return FALSE;
+			$this->addError(
+				\TYPO3\CMS\Extbase\Utility\LocalizationUtility::translate(
+					'validator.notempty.empty',
+					'extbase'
+				), 1221560718);
 		}
 		if (is_array($value) && empty($value)) {
-			$this->addError('The given subject was empty.', 1347992400);
-			return FALSE;
+			$this->addError(
+				\TYPO3\CMS\Extbase\Utility\LocalizationUtility::translate(
+					'validator.notempty.empty',
+					'extbase'
+				), 1347992400);
 		}
 		if (is_object($value) && $value instanceof \Countable && $value->count() === 0) {
-			$this->addError('The given subject was empty.', 1347992453);
-			return FALSE;
+			$this->addError(
+				\TYPO3\CMS\Extbase\Utility\LocalizationUtility::translate(
+					'validator.notempty.empty',
+					'extbase'
+				), 1347992453);
 		}
-		return TRUE;
 	}
 }
 

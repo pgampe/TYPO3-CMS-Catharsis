@@ -1,6 +1,34 @@
 <?php
 namespace TYPO3\CMS\IndexedSearch\Hook;
 
+/***************************************************************
+ *  Copyright notice
+ *
+ *  (c) 2001-2013 Kasper Skårhøj (kasperYYYY@typo3.com)
+ *  All rights reserved
+ *
+ *  This script is part of the TYPO3 project. The TYPO3 project is
+ *  free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  The GNU General Public License can be found at
+ *  http://www.gnu.org/copyleft/gpl.html.
+ *  A copy is found in the textfile GPL.txt and important notices to the license
+ *  from the author is found in LICENSE.txt distributed with these scripts.
+ *
+ *
+ *  This script is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  This copyright notice MUST APPEAR in all copies of the script!
+ ***************************************************************/
+
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+
 /**
  * Crawler hook for indexed search. Works with the "crawler" extension
  *
@@ -26,7 +54,7 @@ class CrawlerHook {
 	/**
 	 * @todo Define visibility
 	 */
-	public $callBack = 'EXT:indexed_search/class.crawler.php:&TYPO3\\CMS\\IndexedSearch\\Controller\\SearchFormController_crawler';
+	public $callBack = '&TYPO3\\CMS\\IndexedSearch\\Hook\\CrawlerHook';
 
 	// The object reference to this class.
 	/**
@@ -48,7 +76,7 @@ class CrawlerHook {
 		// For each configuration, check if it should be executed and if so, start:
 		foreach ($indexingConfigurations as $cfgRec) {
 			// Generate a unique set-ID:
-			$setId = \TYPO3\CMS\Core\Utility\GeneralUtility::md5int(microtime());
+			$setId = GeneralUtility::md5int(microtime());
 			// Get next time:
 			$nextTime = $this->generateNextIndexingTime($cfgRec);
 			// Start process by updating index-config record:
@@ -60,79 +88,78 @@ class CrawlerHook {
 			$GLOBALS['TYPO3_DB']->exec_UPDATEquery('index_config', 'uid=' . intval($cfgRec['uid']), $field_array);
 			// Based on configuration type:
 			switch ($cfgRec['type']) {
-			case 1:
-				// RECORDS:
-				// Parameters:
-				$params = array(
-					'indexConfigUid' => $cfgRec['uid'],
-					'procInstructions' => array('[Index Cfg UID#' . $cfgRec['uid'] . ']'),
-					'url' => 'Records (start)'
-				);
-				//
-				$pObj->addQueueEntry_callBack($setId, $params, $this->callBack, $cfgRec['pid']);
-				break;
-			case 2:
-				// FILES:
-				// Parameters:
-				$params = array(
-					'indexConfigUid' => $cfgRec['uid'],
-					// General
-					'procInstructions' => array('[Index Cfg UID#' . $cfgRec['uid'] . ']'),
-					// General
-					'url' => $cfgRec['filepath'],
-					// Partly general... (for URL and file types)
-					'depth' => 0
-				);
-				$pObj->addQueueEntry_callBack($setId, $params, $this->callBack, $cfgRec['pid']);
-				break;
-			case 3:
-				// External URL:
-				// Parameters:
-				$params = array(
-					'indexConfigUid' => $cfgRec['uid'],
-					// General
-					'procInstructions' => array('[Index Cfg UID#' . $cfgRec['uid'] . ']'),
-					// General
-					'url' => $cfgRec['externalUrl'],
-					// Partly general... (for URL and file types)
-					'depth' => 0
-				);
-				$pObj->addQueueEntry_callBack($setId, $params, $this->callBack, $cfgRec['pid']);
-				break;
-			case 4:
-				// Page tree
-				// Parameters:
-				$params = array(
-					'indexConfigUid' => $cfgRec['uid'],
-					// General
-					'procInstructions' => array('[Index Cfg UID#' . $cfgRec['uid'] . ']'),
-					// General
-					'url' => intval($cfgRec['alternative_source_pid']),
-					// Partly general... (for URL and file types and page tree (root))
-					'depth' => 0
-				);
-				$pObj->addQueueEntry_callBack($setId, $params, $this->callBack, $cfgRec['pid']);
-				break;
-			case 5:
-				// Meta configuration, nothing to do:
-				// NOOP
-				break;
-			default:
-				if ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['indexed_search']['crawler'][$cfgRec['type']]) {
-					$hookObj = \TYPO3\CMS\Core\Utility\GeneralUtility::getUserObj($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['indexed_search']['crawler'][$cfgRec['type']]);
-					if (is_object($hookObj)) {
-						// Parameters:
-						$params = array(
-							'indexConfigUid' => $cfgRec['uid'],
-							// General
-							'procInstructions' => array('[Index Cfg UID#' . $cfgRec['uid'] . '/CUSTOM]'),
-							// General
-							'url' => $hookObj->initMessage($message)
-						);
-						$pObj->addQueueEntry_callBack($setId, $params, $this->callBack, $cfgRec['pid']);
+				case 1:
+					// RECORDS:
+					// Parameters:
+					$params = array(
+						'indexConfigUid' => $cfgRec['uid'],
+						'procInstructions' => array('[Index Cfg UID#' . $cfgRec['uid'] . ']'),
+						'url' => 'Records (start)'
+					);
+					//
+					$pObj->addQueueEntry_callBack($setId, $params, $this->callBack, $cfgRec['pid']);
+					break;
+				case 2:
+					// FILES:
+					// Parameters:
+					$params = array(
+						'indexConfigUid' => $cfgRec['uid'],
+						// General
+						'procInstructions' => array('[Index Cfg UID#' . $cfgRec['uid'] . ']'),
+						// General
+						'url' => $cfgRec['filepath'],
+						// Partly general... (for URL and file types)
+						'depth' => 0
+					);
+					$pObj->addQueueEntry_callBack($setId, $params, $this->callBack, $cfgRec['pid']);
+					break;
+				case 3:
+					// External URL:
+					// Parameters:
+					$params = array(
+						'indexConfigUid' => $cfgRec['uid'],
+						// General
+						'procInstructions' => array('[Index Cfg UID#' . $cfgRec['uid'] . ']'),
+						// General
+						'url' => $cfgRec['externalUrl'],
+						// Partly general... (for URL and file types)
+						'depth' => 0
+					);
+					$pObj->addQueueEntry_callBack($setId, $params, $this->callBack, $cfgRec['pid']);
+					break;
+				case 4:
+					// Page tree
+					// Parameters:
+					$params = array(
+						'indexConfigUid' => $cfgRec['uid'],
+						// General
+						'procInstructions' => array('[Index Cfg UID#' . $cfgRec['uid'] . ']'),
+						// General
+						'url' => intval($cfgRec['alternative_source_pid']),
+						// Partly general... (for URL and file types and page tree (root))
+						'depth' => 0
+					);
+					$pObj->addQueueEntry_callBack($setId, $params, $this->callBack, $cfgRec['pid']);
+					break;
+				case 5:
+					// Meta configuration, nothing to do:
+					// NOOP
+					break;
+				default:
+					if ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['indexed_search']['crawler'][$cfgRec['type']]) {
+						$hookObj = GeneralUtility::getUserObj($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['indexed_search']['crawler'][$cfgRec['type']]);
+						if (is_object($hookObj)) {
+							// Parameters:
+							$params = array(
+								'indexConfigUid' => $cfgRec['uid'],
+								// General
+								'procInstructions' => array('[Index Cfg UID#' . $cfgRec['uid'] . '/CUSTOM]'),
+								// General
+								'url' => $hookObj->initMessage($message)
+							);
+							$pObj->addQueueEntry_callBack($setId, $params, $this->callBack, $cfgRec['pid']);
+						}
 					}
-				}
-				break;
 			}
 		}
 		// Finally, look up all old index configurations which are finished and needs to be reset and done.
@@ -157,36 +184,35 @@ class CrawlerHook {
 				$session_data = unserialize($cfgRec['session_data']);
 				// Select which type:
 				switch ($cfgRec['type']) {
-				case 1:
-					// Records:
-					$this->crawler_execute_type1($cfgRec, $session_data, $params, $pObj);
-					break;
-				case 2:
-					// Files
-					$this->crawler_execute_type2($cfgRec, $session_data, $params, $pObj);
-					break;
-				case 3:
-					// External URL:
-					$this->crawler_execute_type3($cfgRec, $session_data, $params, $pObj);
-					break;
-				case 4:
-					// Page tree:
-					$this->crawler_execute_type4($cfgRec, $session_data, $params, $pObj);
-					break;
-				case 5:
-					// Meta
-					// NOOP (should never enter here!)
-					break;
-				default:
-					if ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['indexed_search']['crawler'][$cfgRec['type']]) {
-						$hookObj = \TYPO3\CMS\Core\Utility\GeneralUtility::getUserObj($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['indexed_search']['crawler'][$cfgRec['type']]);
-						if (is_object($hookObj)) {
-							$this->pObj = $pObj;
-							// For addQueueEntryForHook()
-							$hookObj->indexOperation($cfgRec, $session_data, $params, $this);
+					case 1:
+						// Records:
+						$this->crawler_execute_type1($cfgRec, $session_data, $params, $pObj);
+						break;
+					case 2:
+						// Files
+						$this->crawler_execute_type2($cfgRec, $session_data, $params, $pObj);
+						break;
+					case 3:
+						// External URL:
+						$this->crawler_execute_type3($cfgRec, $session_data, $params, $pObj);
+						break;
+					case 4:
+						// Page tree:
+						$this->crawler_execute_type4($cfgRec, $session_data, $params, $pObj);
+						break;
+					case 5:
+						// Meta
+						// NOOP (should never enter here!)
+						break;
+					default:
+						if ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['indexed_search']['crawler'][$cfgRec['type']]) {
+							$hookObj = GeneralUtility::getUserObj($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['indexed_search']['crawler'][$cfgRec['type']]);
+							if (is_object($hookObj)) {
+								$this->pObj = $pObj;
+								// For addQueueEntryForHook()
+								$hookObj->indexOperation($cfgRec, $session_data, $params, $this);
+							}
 						}
-					}
-					break;
 				}
 				// Save process data which might be modified:
 				$field_array = array(
@@ -256,10 +282,10 @@ class CrawlerHook {
 	public function crawler_execute_type2($cfgRec, &$session_data, $params, &$pObj) {
 		// Prepare path, making it absolute and checking:
 		$readpath = $params['url'];
-		if (!\TYPO3\CMS\Core\Utility\GeneralUtility::isAbsPath($readpath)) {
-			$readpath = \TYPO3\CMS\Core\Utility\GeneralUtility::getFileAbsFileName($readpath);
+		if (!GeneralUtility::isAbsPath($readpath)) {
+			$readpath = GeneralUtility::getFileAbsFileName($readpath);
 		}
-		if (\TYPO3\CMS\Core\Utility\GeneralUtility::isAllowedAbsPath($readpath)) {
+		if (GeneralUtility::isAllowedAbsPath($readpath)) {
 			if (@is_file($readpath)) {
 				// If file, index it!
 				// Get root line (need to provide this when indexing external files)
@@ -267,7 +293,7 @@ class CrawlerHook {
 				// Load indexer if not yet.
 				$this->loadIndexerClass();
 				// (Re)-Indexing file on page.
-				$indexerObj = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\IndexedSearch\\Indexer');
+				$indexerObj = GeneralUtility::makeInstance('TYPO3\\CMS\\IndexedSearch\\Indexer');
 				$indexerObj->backend_initIndexer($cfgRec['pid'], 0, 0, '', $rl);
 				$indexerObj->backend_setFreeIndexUid($cfgRec['uid'], $cfgRec['set_id']);
 				$indexerObj->hash['phash'] = -1;
@@ -277,10 +303,10 @@ class CrawlerHook {
 			} elseif (@is_dir($readpath)) {
 				// If dir, read content and create new pending items for log:
 				// Select files and directories in path:
-				$extList = implode(',', \TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(',', $cfgRec['extensions'], 1));
+				$extList = implode(',', GeneralUtility::trimExplode(',', $cfgRec['extensions'], TRUE));
 				$fileArr = array();
-				$files = \TYPO3\CMS\Core\Utility\GeneralUtility::getAllFilesAndFoldersInPath($fileArr, $readpath, $extList, 0, 0);
-				$directoryList = \TYPO3\CMS\Core\Utility\GeneralUtility::get_dirs($readpath);
+				$files = GeneralUtility::getAllFilesAndFoldersInPath($fileArr, $readpath, $extList, 0, 0);
+				$directoryList = GeneralUtility::get_dirs($readpath);
 				if (is_array($directoryList) && $params['depth'] < $cfgRec['depth']) {
 					foreach ($directoryList as $subdir) {
 						if ((string) $subdir != '') {
@@ -288,7 +314,7 @@ class CrawlerHook {
 						}
 					}
 				}
-				$files = \TYPO3\CMS\Core\Utility\GeneralUtility::removePrefixPathFromList($files, PATH_site);
+				$files = GeneralUtility::removePrefixPathFromList($files, PATH_site);
 				// traverse the items and create log entries:
 				foreach ($files as $path) {
 					$this->instanceCounter++;
@@ -448,7 +474,7 @@ class CrawlerHook {
 		$url = preg_replace('/\\/\\/$/', '/', $url);
 		list($url) = explode('#', $url);
 		if (!strstr($url, '../')) {
-			if (\TYPO3\CMS\Core\Utility\GeneralUtility::isFirstPartOfStr($url, $baseUrl)) {
+			if (GeneralUtility::isFirstPartOfStr($url, $baseUrl)) {
 				if (!in_array($url, $urlLog)) {
 					return $url;
 				}
@@ -471,7 +497,7 @@ class CrawlerHook {
 		// Load indexer if not yet.
 		$this->loadIndexerClass();
 		// Index external URL:
-		$indexerObj = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\IndexedSearch\\Indexer');
+		$indexerObj = GeneralUtility::makeInstance('TYPO3\\CMS\\IndexedSearch\\Indexer');
 		$indexerObj->backend_initIndexer($pageId, 0, 0, '', $rl);
 		$indexerObj->backend_setFreeIndexUid($cfgUid, $setId);
 		$indexerObj->hash['phash'] = -1;
@@ -492,10 +518,10 @@ class CrawlerHook {
 		// Traverse links:
 		foreach ($list as $count => $linkInfo) {
 			// Decode entities:
-			$subUrl = \TYPO3\CMS\Core\Utility\GeneralUtility::htmlspecialchars_decode($linkInfo['href']);
+			$subUrl = GeneralUtility::htmlspecialchars_decode($linkInfo['href']);
 			$qParts = parse_url($subUrl);
 			if (!$qParts['scheme']) {
-				$relativeUrl = \TYPO3\CMS\Core\Utility\GeneralUtility::resolveBackPath($subUrl);
+				$relativeUrl = GeneralUtility::resolveBackPath($subUrl);
 				if ($relativeUrl[0] === '/') {
 					$subUrl = $baseAbsoluteHref . $relativeUrl;
 				} else {
@@ -521,11 +547,11 @@ class CrawlerHook {
 		$this->loadIndexerClass();
 		// Init:
 		$rl = is_array($rl) ? $rl : $this->getUidRootLineForClosestTemplate($cfgRec['pid']);
-		$fieldList = \TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(',', $cfgRec['fieldlist'], 1);
+		$fieldList = GeneralUtility::trimExplode(',', $cfgRec['fieldlist'], TRUE);
 		$languageField = $GLOBALS['TCA'][$cfgRec['table2index']]['ctrl']['languageField'];
 		$sys_language_uid = $languageField ? $r[$languageField] : 0;
 		// (Re)-Indexing a row from a table:
-		$indexerObj = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\IndexedSearch\\Indexer');
+		$indexerObj = GeneralUtility::makeInstance('TYPO3\\CMS\\IndexedSearch\\Indexer');
 		parse_str(str_replace('###UID###', $r['uid'], $cfgRec['get_params']), $GETparams);
 		$indexerObj->backend_initIndexer($cfgRec['pid'], 0, $sys_language_uid, '', $rl, $GETparams, $cfgRec['chashcalc'] ? TRUE : FALSE);
 		$indexerObj->backend_setFreeIndexUid($cfgRec['uid'], $cfgRec['set_id']);
@@ -563,12 +589,12 @@ class CrawlerHook {
 	 */
 	public function getUidRootLineForClosestTemplate($id) {
 		global $TYPO3_CONF_VARS;
-		$tmpl = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Core\\TypoScript\\ExtendedTemplateService');
+		$tmpl = GeneralUtility::makeInstance('TYPO3\\CMS\\Core\\TypoScript\\ExtendedTemplateService');
 		$tmpl->tt_track = 0;
 		// Do not log time-performance information
 		$tmpl->init();
 		// Gets the rootLine
-		$sys_page = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Frontend\\Page\\PageRepository');
+		$sys_page = GeneralUtility::makeInstance('TYPO3\\CMS\\Frontend\\Page\\PageRepository');
 		$rootLine = $sys_page->getRootLine($id);
 		// This generates the constants/config + hierarchy info for the template.
 		$tmpl->runThroughTemplates($rootLine, 0);
@@ -616,9 +642,9 @@ class CrawlerHook {
 	 */
 	public function checkDeniedSuburls($url, $url_deny) {
 		if (trim($url_deny)) {
-			$url_denyArray = \TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(LF, $url_deny, 1);
+			$url_denyArray = GeneralUtility::trimExplode(LF, $url_deny, TRUE);
 			foreach ($url_denyArray as $testurl) {
-				if (\TYPO3\CMS\Core\Utility\GeneralUtility::isFirstPartOfStr($url, $testurl)) {
+				if (GeneralUtility::isFirstPartOfStr($url, $testurl)) {
 					echo $url . ' /// ' . $url_deny . LF;
 					return TRUE;
 				}

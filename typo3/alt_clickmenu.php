@@ -2,7 +2,7 @@
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 1999-2011 Kasper Skårhøj (kasperYYYY@typo3.com)
+ *  (c) 1999-2013 Kasper Skårhøj (kasperYYYY@typo3.com)
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -24,6 +24,7 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
+
 /**
  * Context menu
  *
@@ -35,28 +36,11 @@
  *
  * If you want to integrate a context menu in your scripts, please see template::getContextMenuCode()
  *
- * Revised for TYPO3 3.6 2/2003 by Kasper Skårhøj
- * XHTML compliant
- *
  * @author Kasper Skårhøj <kasperYYYY@typo3.com>
  */
-require 'init.php';
-$LANG->includeLLFile('EXT:lang/locallang_misc.xml');
-/*
- * @deprecated since 6.0, the classname clickMenu and this file is obsolete
- * and will be removed with 6.2. The class was renamed and is now located at:
- * typo3/sysext/backend/Classes/ClickMenu/ClickMenu.php
- */
-require_once \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath('backend') . 'Classes/ClickMenu/ClickMenu.php';
-/*
- * @deprecated since 6.0, the classname SC_alt_clickmenu and this file is obsolete
- * and will be removed with 6.2. The class was renamed and is now located at:
- * typo3/sysext/backend/Classes/Controller/ClickMenuController.php
- */
-require_once \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath('backend') . 'Classes/Controller/ClickMenuController.php';
-// Make instance:
-$SOBE = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Backend\\Controller\\ClickMenuController');
-$SOBE->init();
+require __DIR__ . '/init.php';
+
+$clickMenuController = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Backend\\Controller\\ClickMenuController');
 
 /**
  * Include files for extra click menu options
@@ -66,6 +50,6 @@ foreach ($SOBE->include_once as $INC_FILE) {
 	include_once $INC_FILE;
 }
 
-$SOBE->main();
-$SOBE->printContent();
+$clickMenuController->main();
+$clickMenuController->printContent();
 ?>

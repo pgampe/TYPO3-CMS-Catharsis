@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Frontend\Page;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2011 Daniel Pötzinger (poetzinger@aoemedia.de)
+ *  (c) 2011-2013 Daniel Pötzinger (poetzinger@aoemedia.de)
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -81,7 +81,6 @@ class CacheHashCalculator implements \TYPO3\CMS\Core\SingletonInterface {
 	 *
 	 * @param string $queryString Query-parameters: "&xxx=yyy&zzz=uuu
 	 * @return string Hash of all the values
-	 * @see \TYPO3\CMS\Core\Utility\GeneralUtility::cHashParams(), \TYPO3\CMS\Core\Utility\GeneralUtility::calculateCHash()
 	 */
 	public function generateForParameters($queryString) {
 		$cacheHashParams = $this->getRelevantParameters($queryString);
@@ -114,7 +113,7 @@ class CacheHashCalculator implements \TYPO3\CMS\Core\SingletonInterface {
 	 *
 	 * @param string $queryString Query-parameters: "&xxx=yyy&zzz=uuu
 	 * @return array Array with key/value pairs of query-parameters WITHOUT a certain list of
-	 * @see tslib_fe::makeCacheHash(), tslib_cObj::typoLink(), \TYPO3\CMS\Core\Utility\GeneralUtility::calculateCHash()
+	 * @see \TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController::makeCacheHash(), \TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer::typoLink()
 	 */
 	public function getRelevantParameters($queryString) {
 		$parameters = $this->splitQueryStringToArray($queryString);

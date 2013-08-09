@@ -3,7 +3,7 @@ namespace TYPO3\CMS\Form\Tests\Unit\Validation;
 /***************************************************************
 *  Copyright notice
 *
-*  (c) 2012 Andreas Lappe <a.lappe@kuehlhaus.com>, kuehlhaus AG
+*  (c) 2012-2013 Andreas Lappe <a.lappe@kuehlhaus.com>, kuehlhaus AG
 *
 *  All rights reserved
 *
@@ -70,7 +70,7 @@ class Helper extends \TYPO3\CMS\Extbase\Tests\Unit\BaseTestCase {
 	}
 
 	/**
-	 * Callback for tx_form_System_Request::has.
+	 * Callback for \TYPO3\CMS\Form\Request::has()
 	 *
 	 * Checks whether a value for $key has been stored.
 	 *

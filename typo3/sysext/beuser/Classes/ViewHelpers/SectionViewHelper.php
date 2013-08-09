@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Beuser\ViewHelpers;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2012 Felix Kopp <felix-source@phorax.com>
+ *  (c) 2012-2013 Felix Kopp <felix-source@phorax.com>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -46,7 +46,7 @@ class SectionViewHelper extends \TYPO3\CMS\Fluid\Core\ViewHelper\AbstractViewHel
 			$uniqueId = 'section_' . md5((microtime() . rand()));
 			return '<h3 class="collapsibleSection"><a href="#" onClick="$(\'' . $uniqueId . '\').toggle(); return false;">' . $title . '</a></h3>' . '<div id="' . $uniqueId . '" class="collapsibleSection">' . $this->renderChildren() . '</div>';
 		}
-		return '<h3>' . $title . '</h3>' . $this->renderChildren();
+		return '<h2>' . $title . '</h2>' . $this->renderChildren();
 	}
 
 }

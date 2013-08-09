@@ -2,8 +2,8 @@
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2009-2011 François Suter <francois@typo3.org>
- *  (c) 2005 Christian Jul Jensen <julle@typo3.org>
+ *  (c) 2009-2013 François Suter <francois@typo3.org>
+ *  (c) 2005-2013 Christian Jul Jensen <julle@typo3.org>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -22,8 +22,8 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
-require_once \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath('scheduler') . 'interfaces/interface.tx_scheduler_additionalfieldprovider.php';
-$LANG->includeLLFile('EXT:scheduler/mod1/locallang.xml');
+
+$LANG->includeLLFile('EXT:scheduler/mod1/locallang.xlf');
 $BE_USER->modAccess($MCONF, 1);
 // This checks permissions and exits if the users has no permission for entry.
 // Make instance:

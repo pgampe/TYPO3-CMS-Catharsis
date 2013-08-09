@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Frontend\View;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2011 Georg Ringer <typo3@ringerge.org>
+ *  (c) 2011-2013 Georg Ringer <typo3@ringerge.org>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -26,13 +26,13 @@ namespace TYPO3\CMS\Frontend\View;
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
+
 /**
- * Interface for classes which hook into tslib_adminpanel
+ * Interface for classes which hook into AdminPanelView
  *
  * @author Georg Ringer <typo3@ringerge.org>
  */
-interface AdminPanelViewHookInterface
-{
+interface AdminPanelViewHookInterface {
 	/**
 	 * Extend the adminPanel
 	 *

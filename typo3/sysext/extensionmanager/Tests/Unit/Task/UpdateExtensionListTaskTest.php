@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Extensionmanager\Tests\Unit\Task;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010-2012 Christian Kuhn <lolli@schwarzbu.ch>
+ *  (c) 2010-2013 Christian Kuhn <lolli@schwarzbu.ch>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -54,7 +54,7 @@ class UpdateExtensionListTaskTest extends \TYPO3\CMS\Extbase\Tests\Unit\BaseTest
 	 * @test
 	 */
 	public function updateExtensionListTaskIsInstanceOfAbstractTask() {
-		$taskMock = $this->getMock('TYPO3\CMS\Extensionmanager\Task\\UpdateExtensionListTask');
+		$taskMock = $this->getMock('TYPO3\\CMS\\Extensionmanager\\Task\\UpdateExtensionListTask');
 		$this->assertInstanceOf('TYPO3\\CMS\\Scheduler\\Task\\AbstractTask', $taskMock);
 	}
 
@@ -69,10 +69,45 @@ class UpdateExtensionListTaskTest extends \TYPO3\CMS\Extbase\Tests\Unit\BaseTest
 
 		$objectManagerMock = $this->getMock('TYPO3\\CMS\\Extbase\\Object\\ObjectManager');
 		$objectManagerMock
-				->expects($this->once())
+				->expects($this->at(0))
 				->method('get')
 				->with('TYPO3\\CMS\\Extensionmanager\\Utility\\Repository\\Helper')
 				->will($this->returnValue($repositoryHelperMock));
+
+		$persistenceManagerMock = $this->getMock('TYPO3\\CMS\\Extbase\\Persistence\\Generic\\PersistenceManager');
+		$objectManagerMock
+				->expects($this->at(1))
+				->method('get')
+				->will($this->returnValue($persistenceManagerMock));
+
+		\TYPO3\CMS\Core\Utility\GeneralUtility::setSingletonInstance('TYPO3\\CMS\\Extbase\\Object\\ObjectManager', $objectManagerMock);
+
+		$task = new \TYPO3\CMS\Extensionmanager\Task\UpdateExtensionListTask();
+		$task->execute();
+	}
+
+	/**
+	 * @test
+	 */
+	public function executeCallsPersistAllOnPersistenceManager() {
+		$repositoryHelperMock = $this->getMock('TYPO3\\CMS\\Extensionmanager\\Utility\\Repository\\Helper');
+
+		$objectManagerMock = $this->getMock('TYPO3\\CMS\\Extbase\\Object\\ObjectManager');
+		$objectManagerMock
+			->expects($this->at(0))
+			->method('get')
+			->with('TYPO3\\CMS\\Extensionmanager\\Utility\\Repository\\Helper')
+			->will($this->returnValue($repositoryHelperMock));
+
+		$persistenceManagerMock = $this->getMock('TYPO3\\CMS\\Extbase\\Persistence\\Generic\\PersistenceManager');
+		$persistenceManagerMock
+			->expects($this->once())
+			->method('persistAll');
+
+		$objectManagerMock
+				->expects($this->at(1))
+				->method('get')
+				->will($this->returnValue($persistenceManagerMock));
 
 		\TYPO3\CMS\Core\Utility\GeneralUtility::setSingletonInstance('TYPO3\\CMS\\Extbase\\Object\\ObjectManager', $objectManagerMock);
 

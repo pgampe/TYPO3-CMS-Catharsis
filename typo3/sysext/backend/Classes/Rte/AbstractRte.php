@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Backend\Rte;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2004-2011 Kasper Skårhøj (kasperYYYY@typo3.com)
+ *  (c) 2004-2013 Kasper Skårhøj (kasperYYYY@typo3.com)
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -26,13 +26,12 @@ namespace TYPO3\CMS\Backend\Rte;
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
+
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+
 /**
- * RTE API parent class.
- *
- * @author 	Kasper Skårhøj <kasperYYYY@typo3.com>
- */
-/**
- * RTE base class: Delivers browser-detection, TCEforms binding and transformation routines for the "rte" extension, registering it with the RTE API in TYPO3 3.6.0
+ * RTE base class: Delivers browser-detection, TCEforms binding and transformation routines
+ * for the "rte" extension, registering it with the RTE API
  * See "rte" extension for usage.
  *
  * @author Kasper Skårhøj <kasperYYYY@typo3.com>
@@ -100,7 +99,7 @@ class AbstractRte {
 		// Create item:
 		$item = '
 			' . $this->triggerField($PA['itemFormElName']) . '
-			<textarea name="' . htmlspecialchars($PA['itemFormElName']) . '"' . $pObj->formWidthText('48', 'off') . ' rows="20" wrap="off" style="background-color: #99eebb;">' . \TYPO3\CMS\Core\Utility\GeneralUtility::formatForTextarea($value) . '</textarea>';
+			<textarea name="' . htmlspecialchars($PA['itemFormElName']) . '"' . $pObj->formWidthText('48', 'off') . ' rows="20" wrap="off" style="background-color: #99eebb;">' . GeneralUtility::formatForTextarea($value) . '</textarea>';
 		// Return form item:
 		return $item;
 	}
@@ -129,7 +128,7 @@ class AbstractRte {
 			// There must be a mode set for transformation
 			if ($p['mode']) {
 				// Initialize transformation:
-				$parseHTML = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Core\\Html\\RteHtmlParser');
+				$parseHTML = GeneralUtility::makeInstance('TYPO3\\CMS\\Core\\Html\\RteHtmlParser');
 				$parseHTML->init($table . ':' . $field, $pid);
 				$parseHTML->setRelPath($RTErelPath);
 				// Perform transformation:

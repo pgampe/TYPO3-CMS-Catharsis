@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Extbase\Persistence\Generic\Mapper;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010-2012 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
+ *  (c) 2010-2013 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
  *  Extbase is a backport of TYPO3 Flow. All credits go to the TYPO3 Flow team.
  *  All rights reserved
  *
@@ -34,21 +34,25 @@ class DataMapFactory implements \TYPO3\CMS\Core\SingletonInterface {
 
 	/**
 	 * @var \TYPO3\CMS\Extbase\Reflection\ReflectionService
+	 * @inject
 	 */
 	protected $reflectionService;
 
 	/**
 	 * @var \TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface
+	 * @inject
 	 */
 	protected $configurationManager;
 
 	/**
 	 * @var \TYPO3\CMS\Extbase\Object\ObjectManagerInterface
+	 * @inject
 	 */
 	protected $objectManager;
 
 	/**
 	 * @var \TYPO3\CMS\Core\Cache\CacheManager
+	 * @inject
 	 */
 	protected $cacheManager;
 
@@ -56,39 +60,6 @@ class DataMapFactory implements \TYPO3\CMS\Core\SingletonInterface {
 	 * @var \TYPO3\CMS\Core\Cache\Frontend\VariableFrontend
 	 */
 	protected $dataMapCache;
-
-	/**
-	 * Injects the reflection service
-	 *
-	 * @param \TYPO3\CMS\Extbase\Reflection\ReflectionService $reflectionService
-	 * @return void
-	 */
-	public function injectReflectionService(\TYPO3\CMS\Extbase\Reflection\ReflectionService $reflectionService) {
-		$this->reflectionService = $reflectionService;
-	}
-
-	/**
-	 * @param \TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface $configurationManager
-	 * @return void
-	 */
-	public function injectConfigurationManager(\TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface $configurationManager) {
-		$this->configurationManager = $configurationManager;
-	}
-
-	/**
-	 * @param \TYPO3\CMS\Extbase\Object\ObjectManagerInterface $objectManager
-	 * @return void
-	 */
-	public function injectObjectManager(\TYPO3\CMS\Extbase\Object\ObjectManagerInterface $objectManager) {
-		$this->objectManager = $objectManager;
-	}
-
-	/**
-	 * @param \TYPO3\CMS\Core\Cache\CacheManager $cacheManager
-	 */
-	public function injectCacheManager(\TYPO3\CMS\Core\Cache\CacheManager $cacheManager) {
-		$this->cacheManager = $cacheManager;
-	}
 
 	/**
 	 * Lifecycle method
@@ -173,12 +144,12 @@ class DataMapFactory implements \TYPO3\CMS\Core\SingletonInterface {
 				$propertyName = \TYPO3\CMS\Core\Utility\GeneralUtility::underscoredToLowerCamelCase($columnName);
 			}
 			// if (in_array($propertyName, $classPropertyNames)) { // TODO Enable check for property existance
-			$columnMap = new \TYPO3\CMS\Extbase\Persistence\Generic\Mapper\ColumnMap($columnName, $propertyName);
+			$columnMap = $this->createColumnMap($columnName, $propertyName);
 			$propertyMetaData = $this->reflectionService->getClassSchema($className)->getProperty($propertyName);
 			$columnMap = $this->setRelations($columnMap, $columnDefinition['config'], $propertyMetaData);
+			$columnMap = $this->setFieldEvaluations($columnMap, $columnDefinition['config']);
 			$dataMap->addColumnMap($columnMap);
 		}
-		// debug($dataMap);
 		return $dataMap;
 	}
 
@@ -246,7 +217,7 @@ class DataMapFactory implements \TYPO3\CMS\Core\SingletonInterface {
 
 	/**
 	 * @param DataMap $dataMap
-	 * @param $tableName
+	 * @param string $tableName
 	 * @return DataMap
 	 */
 	protected function addMetaDataColumnNames(\TYPO3\CMS\Extbase\Persistence\Generic\Mapper\DataMap $dataMap, $tableName) {
@@ -318,6 +289,26 @@ class DataMapFactory implements \TYPO3\CMS\Core\SingletonInterface {
 		} else {
 			$columnMap->setTypeOfRelation(\TYPO3\CMS\Extbase\Persistence\Generic\Mapper\ColumnMap::RELATION_NONE);
 		}
+		return $columnMap;
+	}
+
+	/**
+	 * Sets field evaluations based on $TCA column configuration.
+	 *
+	 * @param ColumnMap $columnMap The column map
+	 * @param NULL|array $columnConfiguration The column configuration from $TCA
+	 * @return ColumnMap
+	 */
+	protected function setFieldEvaluations(ColumnMap $columnMap, array $columnConfiguration = NULL) {
+		if (!empty($columnConfiguration['eval'])) {
+			$fieldEvaluations = \TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(',', $columnConfiguration['eval'], TRUE);
+			$dateTimeEvaluations = array('date', 'datetime');
+
+			if (count(array_intersect($dateTimeEvaluations, $fieldEvaluations)) > 0 && !empty($columnConfiguration['dbType'])) {
+				$columnMap->setDateTimeStorageFormat($columnConfiguration['dbType']);
+			}
+		}
+
 		return $columnMap;
 	}
 
@@ -401,6 +392,18 @@ class DataMapFactory implements \TYPO3\CMS\Core\SingletonInterface {
 			$columnMap->setRelationTablePageIdColumnName('pid');
 		}
 		return $columnMap;
+	}
+
+	/**
+	 * Creates the ColumnMap object for the given columnName and propertyName
+	 *
+	 * @param string $columnName
+	 * @param string $propertyName
+	 *
+	 * @return \TYPO3\CMS\Extbase\Persistence\Generic\Mapper\ColumnMap
+	 */
+	protected function createColumnMap($columnName, $propertyName) {
+		return $this->objectManager->get('TYPO3\\CMS\\Extbase\\Persistence\\Generic\\Mapper\\ColumnMap', $columnName, $propertyName);
 	}
 
 }

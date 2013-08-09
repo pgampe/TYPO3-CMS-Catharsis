@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Core\Tests\Unit\TypoScript;
 /***************************************************************
  * Copyright notice
  *
- * (c) 2012 Christian Kuhn <lolli@schwarzbu.ch>
+ * (c) 2012-2013 Christian Kuhn <lolli@schwarzbu.ch>
  * All rights reserved
  *
  * This script is part of the TYPO3 project. The TYPO3 project is
@@ -39,6 +39,36 @@ class TemplateServiceTest extends \TYPO3\CMS\Core\Tests\UnitTestCase {
 	protected $backupGlobals = TRUE;
 
 	/**
+	 * @var \TYPO3\CMS\Core\TypoScript\TemplateService
+	 */
+	protected $templateService;
+
+	/**
+	 * @var \PHPUnit_Framework_MockObject_MockObject|\TYPO3\CMS\Core\Tests\AccessibleObjectInterface|\TYPO3\CMS\Core\TypoScript\TemplateService
+	 */
+	protected $templateServiceMock;
+
+	/**
+	 * Sets up this test case.
+	 *
+	 * @return void
+	 */
+	protected function setUp() {
+		$this->templateService = new \TYPO3\CMS\Core\TypoScript\TemplateService();
+		$this->templateServiceMock = $this->getAccessibleMock('\\TYPO3\\CMS\\Core\\TypoScript\\TemplateService', array('dummy'));
+	}
+
+	/**
+	 * Tears down this test case.
+	 *
+	 * @return void
+	 */
+	protected function tearDown() {
+		unset($this->templateService);
+		unset($this->templateServiceMock);
+	}
+
+	/**
 	 * @test
 	 */
 	public function versionOlCallsVersionOlOfPageSelectClassWithGivenRow() {
@@ -47,8 +77,90 @@ class TemplateServiceTest extends \TYPO3\CMS\Core\Tests\UnitTestCase {
 		$sysPageMock = $this->getMock('TYPO3\\CMS\\Frontend\\Page\\PageRepository');
 		$sysPageMock->expects($this->once())->method('versionOL')->with('sys_template', $row);
 		$GLOBALS['TSFE']->sys_page = $sysPageMock;
-		$instance = new \TYPO3\CMS\Core\TypoScript\TemplateService();
-		$instance->versionOL($row);
+		$this->templateService->versionOL($row);
+	}
+
+	/**
+	 * @test
+	 */
+	public function extensionStaticFilesAreNotProcessedIfNotExplicitlyRequested() {
+		$identifier = uniqid('test');
+		$GLOBALS['TYPO3_LOADED_EXT'] = array(
+			$identifier => array(
+				'ext_typoscript_setup.txt' => \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath(
+					'core', 'Tests/Unit/TypoScript/Fixtures/ext_typoscript_setup.txt'
+				),
+			),
+		);
+
+		$this->templateService->runThroughTemplates(array(), 0);
+		$this->assertFalse(
+			in_array('test.Core.TypoScript = 1', $this->templateService->config)
+		);
+	}
+
+	/**
+	 * @test
+	 */
+	public function extensionStaticsAreProcessedIfExplicitlyRequested() {
+		$identifier = uniqid('test');
+		$GLOBALS['TYPO3_LOADED_EXT'] = array(
+			$identifier => array(
+				'ext_typoscript_setup.txt' => \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath(
+					'core', 'Tests/Unit/TypoScript/Fixtures/ext_typoscript_setup.txt'
+				),
+			),
+		);
+
+		$this->templateService->setProcessExtensionStatics(TRUE);
+		$this->templateService->runThroughTemplates(array(), 0);
+		$this->assertTrue(
+			in_array('test.Core.TypoScript = 1', $this->templateService->config)
+		);
+	}
+
+	/**
+	 * @test
+	 */
+	public function updateRootlineDataOverwritesOwnArrayData() {
+		$originalRootline = array(
+			0 => array('uid' => 2, 'title' => 'originalTitle'),
+			1 => array('uid' => 3, 'title' => 'originalTitle2'),
+		);
+
+		$updatedRootline = array(
+			0 => array('uid' => 1, 'title' => 'newTitle'),
+			1 => array('uid' => 2, 'title' => 'newTitle2'),
+			2 => array('uid' => 3, 'title' => 'newTitle3'),
+		);
+
+		$expectedRootline = array(
+			0 => array('uid' => 2, 'title' => 'newTitle2'),
+			1 => array('uid' => 3, 'title' => 'newTitle3'),
+		);
+
+		$this->templateServiceMock->_set('rootLine', $originalRootline);
+		$this->templateServiceMock->updateRootlineData($updatedRootline);
+		$this->assertEquals($expectedRootline, $this->templateServiceMock->_get('rootLine'));
+	}
+
+	/**
+	 * @test
+	 * @expectedException \RuntimeException
+	 */
+	public function updateRootlineDataWithInvalidNewRootlineThrowsException() {
+		$originalRootline = array(
+			0 => array('uid' => 2, 'title' => 'originalTitle'),
+			1 => array('uid' => 3, 'title' => 'originalTitle2'),
+		);
+
+		$newInvalidRootline = array(
+			0 => array('uid' => 1, 'title' => 'newTitle'),
+			1 => array('uid' => 2, 'title' => 'newTitle2'),
+		);
+
+		$this->templateServiceMock->_set('rootLine', $originalRootline);
+		$this->templateServiceMock->updateRootlineData($newInvalidRootline);
 	}
 
 }

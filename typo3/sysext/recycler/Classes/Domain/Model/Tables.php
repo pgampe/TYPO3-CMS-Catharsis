@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Recycler\Domain\Model;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2009-2011 Julian Kleinhans <typo3@kj187.de>
+ *  (c) 2009-2013 Julian Kleinhans <typo3@kj187.de>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -71,7 +71,7 @@ class Tables {
 				'',
 				$deletedRecordsTotal,
 				'',
-				$GLOBALS['LANG']->sL('LLL:EXT:recycler/mod1/locallang.xml:label_alltables')
+				$GLOBALS['LANG']->sL('LLL:EXT:recycler/mod1/locallang.xlf:label_alltables')
 			));
 		}
 		$output = json_encode($jsonArray);
