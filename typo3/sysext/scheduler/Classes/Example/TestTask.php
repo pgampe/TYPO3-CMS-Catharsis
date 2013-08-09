@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Scheduler\Example;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2008 Markus Friedrich (markus.friedrich@dkd.de)
+ *  (c) 2008-2013 Markus Friedrich (markus.friedrich@dkd.de)
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -24,9 +24,9 @@ namespace TYPO3\CMS\Scheduler\Example;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 /**
- * Class "tx_scheduler_TestTask" provides testing procedures
+ * Provides testing procedures
  *
- * @author 		Markus Friedrich <markus.friedrich@dkd.de>
+ * @author Markus Friedrich <markus.friedrich@dkd.de>
  */
 class TestTask extends \TYPO3\CMS\Scheduler\Task\AbstractTask {
 
@@ -70,7 +70,7 @@ class TestTask extends \TYPO3\CMS\Scheduler\Task\AbstractTask {
 			// Prepare mailer and send the mail
 			try {
 				/** @var $mailer \TYPO3\CMS\Core\Mail\MailMessage */
-				$mailer = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\CMS\Core\Mail\MailMessage');
+				$mailer = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Core\\Mail\\MailMessage');
 				$mailer->setFrom(array($this->email => 'SCHEDULER TEST-TASK'));
 				$mailer->setReplyTo(array($this->email => 'SCHEDULER TEST-TASK'));
 				$mailer->setSubject('SCHEDULER TEST-TASK');
@@ -94,7 +94,7 @@ class TestTask extends \TYPO3\CMS\Scheduler\Task\AbstractTask {
 	 * @return string Information to display
 	 */
 	public function getAdditionalInformation() {
-		return $GLOBALS['LANG']->sL('LLL:EXT:scheduler/mod1/locallang.xml:label.email') . ': ' . $this->email;
+		return $GLOBALS['LANG']->sL('LLL:EXT:scheduler/mod1/locallang.xlf:label.email') . ': ' . $this->email;
 	}
 
 }

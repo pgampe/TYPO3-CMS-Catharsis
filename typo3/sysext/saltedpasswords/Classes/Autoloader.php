@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Saltedpasswords;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2011 Helmut Hummel <helmut.hummel@typo3.org>
+ *  (c) 2011-2013 Helmut Hummel <helmut.hummel@typo3.org>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -41,11 +41,11 @@ class Autoloader {
 	 */
 	public function execute(\TYPO3\CMS\Install\Installer $instObj) {
 		switch ($instObj->step) {
-		case 4:
-			if (!\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::isLoaded('saltedpasswords') && $this->isSaltedPasswordsSupported()) {
-				$this->activateSaltedPasswords();
-			}
-			break;
+			case 4:
+				if (!\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::isLoaded('saltedpasswords') && $this->isSaltedPasswordsSupported()) {
+					$this->activateSaltedPasswords();
+				}
+				break;
 		}
 	}
 
@@ -58,7 +58,7 @@ class Autoloader {
 	 * automatically in this case.
 	 *
 	 * @return boolean TRUE, in case of OpenSSL works and requirements for saltedpasswords are met.
-	 * @see tx_rsaauth_php_backend
+	 * @see \TYPO3\CMS\Rsaauth\Backend\PhpBackend
 	 */
 	protected function isSaltedPasswordsSupported() {
 		$isSupported = FALSE;

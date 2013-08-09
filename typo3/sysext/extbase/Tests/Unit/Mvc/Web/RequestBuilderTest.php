@@ -35,7 +35,7 @@ class RequestBuilderTest extends \TYPO3\CMS\Extbase\Tests\Unit\BaseTestCase {
 	protected $requestBuilder;
 
 	/**
-	 * @var \TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface
+	 * @var \TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface|\PHPUnit_Framework_MockObject_MockObject
 	 */
 	protected $mockConfigurationManager;
 
@@ -45,17 +45,22 @@ class RequestBuilderTest extends \TYPO3\CMS\Extbase\Tests\Unit\BaseTestCase {
 	protected $configuration;
 
 	/**
-	 * @var \TYPO3\CMS\Extbase\Object\ObjectManagerInterface
+	 * @var \TYPO3\CMS\Extbase\Object\ObjectManagerInterface|\PHPUnit_Framework_MockObject_MockObject
 	 */
 	protected $mockObjectManager;
 
 	/**
-	 * @var \TYPO3\CMS\Extbase\Service\ExtensionService
+	 * @var \TYPO3\CMS\Extbase\Service\ExtensionService|\PHPUnit_Framework_MockObject_MockObject
 	 */
 	protected $mockExtensionService;
 
 	/**
-	 * @var \TYPO3\CMS\Extbase\Mvc\Web\Request
+	 * @var \TYPO3\CMS\Extbase\Service\EnvironmentService|\PHPUnit_Framework_MockObject_MockObject
+	 */
+	protected $mockEnvironmentService;
+
+	/**
+	 * @var \TYPO3\CMS\Extbase\Mvc\Web\Request|\PHPUnit_Framework_MockObject_MockObject
 	 */
 	protected $mockRequest;
 
@@ -83,6 +88,7 @@ class RequestBuilderTest extends \TYPO3\CMS\Extbase\Tests\Unit\BaseTestCase {
 		$this->mockRequest = $this->getMock('TYPO3\\CMS\\Extbase\\Mvc\\Web\\Request');
 		$this->mockObjectManager = $this->getMock('TYPO3\\CMS\\Extbase\\Object\\ObjectManagerInterface');
 		$this->mockExtensionService = $this->getMock('TYPO3\\CMS\\Extbase\\Service\\ExtensionService');
+		$this->mockEnvironmentService = $this->getMock('TYPO3\\CMS\\Extbase\\Service\\EnvironmentService', array('getServerRequestMethod'));
 	}
 
 	/**
@@ -90,12 +96,14 @@ class RequestBuilderTest extends \TYPO3\CMS\Extbase\Tests\Unit\BaseTestCase {
 	 */
 	protected function injectDependencies() {
 		$this->mockConfigurationManager->expects($this->any())->method('getConfiguration')->will($this->returnValue($this->configuration));
-		$this->requestBuilder->injectConfigurationManager($this->mockConfigurationManager);
+		$this->requestBuilder->_set('configurationManager', $this->mockConfigurationManager);
 		$this->mockObjectManager->expects($this->any())->method('get')->with('TYPO3\\CMS\\Extbase\\Mvc\\Web\\Request')->will($this->returnValue($this->mockRequest));
-		$this->requestBuilder->injectObjectManager($this->mockObjectManager);
+		$this->requestBuilder->_set('objectManager', $this->mockObjectManager);
 		$pluginNamespace = 'tx_' . strtolower(($this->configuration['extensionName'] . '_' . $this->configuration['pluginName']));
 		$this->mockExtensionService->expects($this->any())->method('getPluginNamespace')->will($this->returnValue($pluginNamespace));
-		$this->requestBuilder->injectExtensionService($this->mockExtensionService);
+		$this->requestBuilder->_set('extensionService', $this->mockExtensionService);
+		$this->mockEnvironmentService->expects($this->any())->method('getServerRequestMethod')->will($this->returnValue('GET'));
+		$this->requestBuilder->_set('environmentService', $this->mockEnvironmentService);
 	}
 
 	/**
@@ -168,8 +176,10 @@ class RequestBuilderTest extends \TYPO3\CMS\Extbase\Tests\Unit\BaseTestCase {
 	 */
 	public function buildSetsRequestMethod() {
 		$this->injectDependencies();
-		$_SERVER['REQUEST_METHOD'] = 'SomeRequestMethod';
 		$expectedMethod = 'SomeRequestMethod';
+		$mockEnvironmentService = $this->getMock('TYPO3\\CMS\\Extbase\\Service\\EnvironmentService', array('getServerRequestMethod'));
+		$mockEnvironmentService->expects($this->once())->method('getServerRequestMethod')->will($this->returnValue($expectedMethod));
+		$this->requestBuilder->_set('environmentService', $mockEnvironmentService);
 		$this->mockRequest->expects($this->once())->method('setMethod')->with($expectedMethod);
 		$this->requestBuilder->build();
 	}
@@ -183,8 +193,8 @@ class RequestBuilderTest extends \TYPO3\CMS\Extbase\Tests\Unit\BaseTestCase {
 		$this->configuration['vendorName'] = $expectedVendor;
 		$mockConfigurationManager = $this->getMock('TYPO3\\CMS\\Extbase\\Configuration\\ConfigurationManagerInterface');
 		$mockConfigurationManager->expects($this->any())->method('getConfiguration')->will($this->returnValue($this->configuration));
-		$this->requestBuilder->injectConfigurationManager($mockConfigurationManager);
-		$this->requestBuilder->injectExtensionService($this->mockExtensionService);
+		$this->requestBuilder->_set('configurationManager', $mockConfigurationManager);
+		$this->requestBuilder->_set('extensionService', $this->mockExtensionService);
 		$this->mockRequest->expects($this->once())->method('setControllerVendorName')->with($expectedVendor);
 		$this->requestBuilder->build();
 	}
@@ -199,7 +209,7 @@ class RequestBuilderTest extends \TYPO3\CMS\Extbase\Tests\Unit\BaseTestCase {
 
 		$mockConfigurationManager = $this->getMock('TYPO3\\CMS\\Extbase\\Configuration\\ConfigurationManagerInterface');
 		$mockConfigurationManager->expects($this->any())->method('getConfiguration')->will($this->returnValue($this->configuration));
-		$this->requestBuilder->injectConfigurationManager($mockConfigurationManager);
+		$this->requestBuilder->_set('configurationManager', $mockConfigurationManager);
 		$this->mockRequest->expects($this->once())->method('setControllerVendorName')->with($expectedVendor);
 
 		$this->requestBuilder->build();
@@ -207,7 +217,7 @@ class RequestBuilderTest extends \TYPO3\CMS\Extbase\Tests\Unit\BaseTestCase {
 		unset($this->configuration['vendorName']);
 		$mockConfigurationManager = $this->getMock('TYPO3\\CMS\\Extbase\\Configuration\\ConfigurationManagerInterface');
 		$mockConfigurationManager->expects($this->any())->method('getConfiguration')->will($this->returnValue($this->configuration));
-		$this->requestBuilder->injectConfigurationManager($mockConfigurationManager);
+		$this->requestBuilder->_set('configurationManager', $mockConfigurationManager);
 
 		$this->mockRequest->expects($this->never())->method('setControllerVendorName');
 		$this->requestBuilder->build();
@@ -221,7 +231,7 @@ class RequestBuilderTest extends \TYPO3\CMS\Extbase\Tests\Unit\BaseTestCase {
 		unset($this->configuration['extensionName']);
 		$mockConfigurationManager = $this->getMock('TYPO3\\CMS\\Extbase\\Configuration\\ConfigurationManagerInterface');
 		$mockConfigurationManager->expects($this->any())->method('getConfiguration')->will($this->returnValue($this->configuration));
-		$this->requestBuilder->injectConfigurationManager($mockConfigurationManager);
+		$this->requestBuilder->_set('configurationManager', $mockConfigurationManager);
 		$this->requestBuilder->build();
 	}
 
@@ -233,8 +243,8 @@ class RequestBuilderTest extends \TYPO3\CMS\Extbase\Tests\Unit\BaseTestCase {
 		unset($this->configuration['pluginName']);
 		$mockConfigurationManager = $this->getMock('TYPO3\\CMS\\Extbase\\Configuration\\ConfigurationManagerInterface');
 		$mockConfigurationManager->expects($this->any())->method('getConfiguration')->will($this->returnValue($this->configuration));
-		$this->requestBuilder->injectConfigurationManager($mockConfigurationManager);
-		$this->requestBuilder->injectExtensionService($this->mockExtensionService);
+		$this->requestBuilder->_set('configurationManager', $mockConfigurationManager);
+		$this->requestBuilder->_set('extensionService', $this->mockExtensionService);
 		$this->requestBuilder->build();
 	}
 
@@ -245,8 +255,8 @@ class RequestBuilderTest extends \TYPO3\CMS\Extbase\Tests\Unit\BaseTestCase {
 	public function buildThrowsExceptionIfControllerConfigurationIsEmptyOrNotSet() {
 		$this->configuration['controllerConfiguration'] = array();
 		$this->mockConfigurationManager->expects($this->any())->method('getConfiguration')->will($this->returnValue($this->configuration));
-		$this->requestBuilder->injectConfigurationManager($this->mockConfigurationManager);
-		$this->requestBuilder->injectExtensionService($this->mockExtensionService);
+		$this->requestBuilder->_set('configurationManager', $this->mockConfigurationManager);
+		$this->requestBuilder->_set('extensionService', $this->mockExtensionService);
 		$this->requestBuilder->build();
 	}
 
@@ -257,8 +267,8 @@ class RequestBuilderTest extends \TYPO3\CMS\Extbase\Tests\Unit\BaseTestCase {
 	public function buildThrowsExceptionIfControllerConfigurationHasNoDefaultActionDefined() {
 		$this->configuration['controllerConfiguration']['TheFirstController'] = array();
 		$this->mockConfigurationManager->expects($this->any())->method('getConfiguration')->will($this->returnValue($this->configuration));
-		$this->requestBuilder->injectConfigurationManager($this->mockConfigurationManager);
-		$this->requestBuilder->injectExtensionService($this->mockExtensionService);
+		$this->requestBuilder->_set('configurationManager', $this->mockConfigurationManager);
+		$this->requestBuilder->_set('extensionService', $this->mockExtensionService);
 		$this->requestBuilder->build();
 	}
 
@@ -273,8 +283,8 @@ class RequestBuilderTest extends \TYPO3\CMS\Extbase\Tests\Unit\BaseTestCase {
 			)
 		);
 		$this->mockConfigurationManager->expects($this->any())->method('getConfiguration')->will($this->returnValue($this->configuration));
-		$this->requestBuilder->injectConfigurationManager($this->mockConfigurationManager);
-		$this->requestBuilder->injectExtensionService($this->mockExtensionService);
+		$this->requestBuilder->_set('configurationManager', $this->mockConfigurationManager);
+		$this->requestBuilder->_set('extensionService', $this->mockExtensionService);
 		$this->requestBuilder->build();
 	}
 
@@ -372,9 +382,9 @@ class RequestBuilderTest extends \TYPO3\CMS\Extbase\Tests\Unit\BaseTestCase {
 	public function buildThrowsExceptionIfDefaultControllerCantBeDetermined() {
 		$this->configuration['controllerConfiguration'] = array();
 		$this->mockConfigurationManager->expects($this->any())->method('getConfiguration')->will($this->returnValue($this->configuration));
-		$this->requestBuilder->injectConfigurationManager($this->mockConfigurationManager);
+		$this->requestBuilder->_set('configurationManager', $this->mockConfigurationManager);
 		$this->mockExtensionService->expects($this->any())->method('getPluginNamespace')->will($this->returnValue('tx_myextension_pi1'));
-		$this->requestBuilder->injectExtensionService($this->mockExtensionService);
+		$this->requestBuilder->_set('extensionService', $this->mockExtensionService);
 		$this->requestBuilder->build();
 	}
 
@@ -412,9 +422,9 @@ class RequestBuilderTest extends \TYPO3\CMS\Extbase\Tests\Unit\BaseTestCase {
 	 */
 	public function buildThrowsInvalidControllerNameExceptionIfSpecifiedControllerIsNotAllowed() {
 		$this->mockConfigurationManager->expects($this->any())->method('getConfiguration')->will($this->returnValue($this->configuration));
-		$this->requestBuilder->injectConfigurationManager($this->mockConfigurationManager);
+		$this->requestBuilder->_set('configurationManager', $this->mockConfigurationManager);
 		$this->mockExtensionService->expects($this->any())->method('getPluginNamespace')->will($this->returnValue('tx_myextension_pi1'));
-		$this->requestBuilder->injectExtensionService($this->mockExtensionService);
+		$this->requestBuilder->_set('extensionService', $this->mockExtensionService);
 		$_GET = array(
 			'tx_myextension_pi1' => array(
 				'controller' => 'SomeInvalidController'
@@ -430,9 +440,9 @@ class RequestBuilderTest extends \TYPO3\CMS\Extbase\Tests\Unit\BaseTestCase {
 	public function buildThrowsPageNotFoundExceptionIfEnabledAndSpecifiedControllerIsNotAllowed() {
 		$this->configuration['mvc']['throwPageNotFoundExceptionIfActionCantBeResolved'] = 1;
 		$this->mockConfigurationManager->expects($this->any())->method('getConfiguration')->will($this->returnValue($this->configuration));
-		$this->requestBuilder->injectConfigurationManager($this->mockConfigurationManager);
+		$this->requestBuilder->_set('configurationManager', $this->mockConfigurationManager);
 		$this->mockExtensionService->expects($this->any())->method('getPluginNamespace')->will($this->returnValue('tx_myextension_pi1'));
-		$this->requestBuilder->injectExtensionService($this->mockExtensionService);
+		$this->requestBuilder->_set('extensionService', $this->mockExtensionService);
 		$_GET = array(
 			'tx_myextension_pi1' => array(
 				'controller' => 'SomeInvalidController'
@@ -447,7 +457,7 @@ class RequestBuilderTest extends \TYPO3\CMS\Extbase\Tests\Unit\BaseTestCase {
 	public function buildSetsDefaultControllerNameIfSpecifiedControllerIsNotAllowedAndCallDefaultActionIfActionCantBeResolvedIsSet() {
 		$this->configuration['mvc']['callDefaultActionIfActionCantBeResolved'] = 1;
 		$this->injectDependencies();
-		$this->requestBuilder->injectExtensionService($this->mockExtensionService);
+		$this->requestBuilder->_set('extensionService', $this->mockExtensionService);
 		$_GET = array(
 			'tx_myextension_pi1' => array(
 				'controller' => 'SomeInvalidController'
@@ -464,9 +474,9 @@ class RequestBuilderTest extends \TYPO3\CMS\Extbase\Tests\Unit\BaseTestCase {
 	public function buildThrowsExceptionIfDefaultActionCantBeDetermined() {
 		$this->configuration['controllerConfiguration'] = array();
 		$this->mockConfigurationManager->expects($this->any())->method('getConfiguration')->will($this->returnValue($this->configuration));
-		$this->requestBuilder->injectConfigurationManager($this->mockConfigurationManager);
+		$this->requestBuilder->_set('configurationManager', $this->mockConfigurationManager);
 		$this->mockExtensionService->expects($this->any())->method('getPluginNamespace')->will($this->returnValue('tx_myextension_pi1'));
-		$this->requestBuilder->injectExtensionService($this->mockExtensionService);
+		$this->requestBuilder->_set('extensionService', $this->mockExtensionService);
 		$this->requestBuilder->build();
 	}
 
@@ -519,9 +529,9 @@ class RequestBuilderTest extends \TYPO3\CMS\Extbase\Tests\Unit\BaseTestCase {
 	 */
 	public function buildThrowsInvalidActionNameExceptionIfSpecifiedActionIsNotAllowed() {
 		$this->mockConfigurationManager->expects($this->any())->method('getConfiguration')->will($this->returnValue($this->configuration));
-		$this->requestBuilder->injectConfigurationManager($this->mockConfigurationManager);
+		$this->requestBuilder->_set('configurationManager', $this->mockConfigurationManager);
 		$this->mockExtensionService->expects($this->any())->method('getPluginNamespace')->will($this->returnValue('tx_myextension_pi1'));
-		$this->requestBuilder->injectExtensionService($this->mockExtensionService);
+		$this->requestBuilder->_set('extensionService', $this->mockExtensionService);
 		$_GET = array(
 			'tx_myextension_pi1' => array(
 				'action' => 'someInvalidAction'
@@ -537,9 +547,9 @@ class RequestBuilderTest extends \TYPO3\CMS\Extbase\Tests\Unit\BaseTestCase {
 	public function buildThrowsPageNotFoundExceptionIfEnabledAndSpecifiedActionIsNotAllowed() {
 		$this->configuration['mvc']['throwPageNotFoundExceptionIfActionCantBeResolved'] = 1;
 		$this->mockConfigurationManager->expects($this->any())->method('getConfiguration')->will($this->returnValue($this->configuration));
-		$this->requestBuilder->injectConfigurationManager($this->mockConfigurationManager);
+		$this->requestBuilder->_set('configurationManager', $this->mockConfigurationManager);
 		$this->mockExtensionService->expects($this->any())->method('getPluginNamespace')->will($this->returnValue('tx_myextension_pi1'));
-		$this->requestBuilder->injectExtensionService($this->mockExtensionService);
+		$this->requestBuilder->_set('extensionService', $this->mockExtensionService);
 		$_GET = array(
 			'tx_myextension_pi1' => array(
 				'action' => 'someInvalidAction'
@@ -554,7 +564,7 @@ class RequestBuilderTest extends \TYPO3\CMS\Extbase\Tests\Unit\BaseTestCase {
 	public function buildSetsDefaultActionNameIfSpecifiedActionIsNotAllowedAndCallDefaultActionIfActionCantBeResolvedIsSet() {
 		$this->configuration['mvc']['callDefaultActionIfActionCantBeResolved'] = 1;
 		$this->injectDependencies();
-		$this->requestBuilder->injectExtensionService($this->mockExtensionService);
+		$this->requestBuilder->_set('extensionService', $this->mockExtensionService);
 		$_GET = array(
 			'tx_myextension_pi1' => array(
 				'controller' => 'TheThirdController',

@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Extbase\Persistence\Generic;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010-2012 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
+ *  (c) 2010-2013 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
  *  Extbase is a backport of TYPO3 Flow. All credits go to the TYPO3 Flow team.
  *  All rights reserved
  *
@@ -35,6 +35,7 @@ class LazyLoadingProxy implements \Iterator, \TYPO3\CMS\Extbase\Persistence\Gene
 
 	/**
 	 * @var \TYPO3\CMS\Extbase\Persistence\Generic\Mapper\DataMapper
+	 * @inject
 	 */
 	protected $dataMapper;
 
@@ -70,16 +71,6 @@ class LazyLoadingProxy implements \Iterator, \TYPO3\CMS\Extbase\Persistence\Gene
 		$this->parentObject = $parentObject;
 		$this->propertyName = $propertyName;
 		$this->fieldValue = $fieldValue;
-	}
-
-	/**
-	 * Injects the DataMapper to map nodes to objects
-	 *
-	 * @param \TYPO3\CMS\Extbase\Persistence\Generic\Mapper\DataMapper $dataMapper
-	 * @return void
-	 */
-	public function injectDataMapper(\TYPO3\CMS\Extbase\Persistence\Generic\Mapper\DataMapper $dataMapper) {
-		$this->dataMapper = $dataMapper;
 	}
 
 	/**
@@ -195,7 +186,7 @@ class LazyLoadingProxy implements \Iterator, \TYPO3\CMS\Extbase\Persistence\Gene
 	/**
 	 * Returns the next position of the storage array
 	 *
-	 * @return mixed
+	 * @return void
 	 */
 	public function next() {
 		$realInstance = $this->_loadRealInstance();

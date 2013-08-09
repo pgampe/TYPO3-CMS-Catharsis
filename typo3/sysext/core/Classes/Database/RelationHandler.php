@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Core\Database;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 1999-2011 Kasper Skårhøj (kasperYYYY@typo3.com)
+ *  (c) 1999-2013 Kasper Skårhøj (kasperYYYY@typo3.com)
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -26,13 +26,7 @@ namespace TYPO3\CMS\Core\Database;
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
-/**
- * Contains class for loading database groups
- *
- * Revised for TYPO3 3.6 September/2003 by Kasper Skårhøj
- *
- * @author Kasper Skårhøj <kasperYYYY@typo3.com>
- */
+
 /**
  * Load database groups (relations)
  * Used to process the relations created by the TCA element types "group" and "select" for database records. Manages MM-relations as well.
@@ -41,12 +35,10 @@ namespace TYPO3\CMS\Core\Database;
  */
 class RelationHandler {
 
-	// External, static
-	// Means that only uid and the label-field is returned
 	/**
-	 * @todo Define visibility
+	 * @var boolean $fetchAllFields if false getFromDB() fetches only uid, pid, thumbnail and label fields (as defined in TCA)
 	 */
-	public $fromTC = 1;
+	protected $fetchAllFields = FALSE;
 
 	// If set, values that are not ids in tables are normally discarded. By this options they will be preserved.
 	/**
@@ -210,7 +202,7 @@ class RelationHandler {
 			$tablelist = implode(',', array_keys($GLOBALS['TCA']));
 		}
 		// The tables are traversed and internal arrays are initialized:
-		$tempTableArray = \TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(',', $tablelist, 1);
+		$tempTableArray = \TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(',', $tablelist, TRUE);
 		foreach ($tempTableArray as $key => $val) {
 			$tName = trim($val);
 			$this->tableArray[$tName] = array();
@@ -250,6 +242,32 @@ class RelationHandler {
 				$this->sortList($conf['foreign_default_sortby']);
 			}
 		}
+	}
+
+	/**
+	 * Magic setter method.
+	 * Used for compatibility with changed attribute visibility
+	 *
+	 * @param string $name name of the attribute
+	 * @param mixed $value value to set the attribute to
+	 * @deprecated since 6.1, only required as compatibility layer for renamed attribute $fromTC
+	 */
+	public function __set($name, $value) {
+		if($name === 'fromTC') {
+			\TYPO3\CMS\Core\Utility\GeneralUtility::deprecationLog(
+				'$fromTC is protected since TYPO3 6.1. Use setFetchAllFields() instead!'
+			);
+			$this->setFetchAllFields(!$value);
+		}
+	}
+
+	/**
+	 * Sets $fetchAllFields
+	 *
+	 * @param boolean $allFields enables fetching of all fields in getFromDB()
+	 */
+	public function setFetchAllFields($allFields) {
+		$this->fetchAllFields = (bool)$allFields;
 	}
 
 	/**
@@ -805,7 +823,7 @@ class RelationHandler {
 
 	/**
 	 * Reads all records from internal tableArray into the internal ->results array where keys are table names and for each table, records are stored with uids as their keys.
-	 * If $this->fromTC is set you can save a little memory since only uid,pid and a few other fields are selected.
+	 * If $this->fetchAllFields is false you can save a little memory since only uid,pid and a few other fields are selected.
 	 *
 	 * @return 	void
 	 * @todo Define visibility
@@ -816,8 +834,9 @@ class RelationHandler {
 			if (is_array($val)) {
 				$itemList = implode(',', $val);
 				if ($itemList) {
-					$from = '*';
-					if ($this->fromTC) {
+					if ($this->fetchAllFields) {
+						$from = '*';
+					} else {
 						$from = 'uid,pid';
 						if ($GLOBALS['TCA'][$key]['ctrl']['label']) {
 							// Titel

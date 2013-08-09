@@ -84,6 +84,11 @@ class t3lib_contextmenu_Action extends \TYPO3\CMS\Backend\ContextMenu\ContextMen
 /**
  * @deprecated since 6.0 will be removed in 7.0
  */
+class t3lib_formmail extends \TYPO3\CMS\Frontend\Controller\DataSubmissionController {}
+
+/**
+ * @deprecated since 6.0 will be removed in 7.0
+ */
 class t3lib_contextmenu_ActionCollection extends \TYPO3\CMS\Backend\ContextMenu\ContextMenuActionCollection {}
 
 /**
@@ -680,11 +685,6 @@ class TYPO3Logo extends \TYPO3\CMS\Backend\View\LogoView {}
  * @deprecated since 6.0 will be removed in 7.0
  */
 interface cms_newContentElementWizardsHook extends \TYPO3\CMS\Backend\Wizard\NewContentElementWizardHookInterface {}
-
-/**
- * @deprecated since 6.0 will be removed in 7.0
- */
-class SC_wizard_tsconfig extends \TYPO3\CMS\Backend\Wizard\TsconfigWizard {}
 
 /**
  * @deprecated since 6.0 will be removed in 7.0
@@ -1464,22 +1464,7 @@ class ux_t3lib_sqlparser extends \TYPO3\CMS\Dbal\Database\SqlParser {}
 /**
  * @deprecated since 6.0 will be removed in 7.0
  */
-class tx_dbal_autoloader extends \TYPO3\CMS\Dbal\Autoloader {}
-
-/**
- * @deprecated since 6.0 will be removed in 7.0
- */
 class tx_dbal_module1 extends \TYPO3\CMS\Dbal\Controller\ModuleController {}
-
-/**
- * @deprecated since 6.0 will be removed in 7.0
- */
-class tx_dbal_tsparserext extends \TYPO3\CMS\Dbal\ExtensionManager\MessageDisplay {}
-
-/**
- * @deprecated since 6.0 will be removed in 7.0
- */
-class tx_dbal_installtool extends \TYPO3\CMS\Dbal\Hooks\InstallToolHooks {}
 
 /**
  * @deprecated since 6.0 will be removed in 7.0
@@ -5049,12 +5034,12 @@ class tslib_gmenu extends \TYPO3\CMS\Frontend\ContentObject\Menu\GraphicalMenuCo
 /**
  * @deprecated since 6.0 will be removed in 7.0
  */
-class tslib_gmenu_foldout extends \TYPO3\CMS\Frontend\ContentObject\Menu\GraphicalMenuFoldout {}
+class tslib_gmenu_foldout extends \TYPO3\CMS\Frontend\ContentObject\Menu\GraphicalMenuFoldoutContentObject {}
 
 /**
  * @deprecated since 6.0 will be removed in 7.0
  */
-class tslib_gmenu_layers extends \TYPO3\CMS\Frontend\ContentObject\Menu\GraphicalMenuLayers {}
+class tslib_gmenu_layers extends \TYPO3\CMS\Frontend\ContentObject\Menu\GraphicalMenuLayersContentObject {}
 
 /**
  * @deprecated since 6.0 will be removed in 7.0
@@ -5074,7 +5059,7 @@ class tslib_tmenu extends \TYPO3\CMS\Frontend\ContentObject\Menu\TextMenuContent
 /**
  * @deprecated since 6.0 will be removed in 7.0
  */
-class tslib_tmenu_layers extends \TYPO3\CMS\Frontend\ContentObject\Menu\TextMenuLayers {}
+class tslib_tmenu_layers extends \TYPO3\CMS\Frontend\ContentObject\Menu\TextMenuLayersContentObject {}
 
 /**
  * @deprecated since 6.0 will be removed in 7.0
@@ -5409,16 +5394,6 @@ class tx_infopagetsconfig_webinfo extends \TYPO3\CMS\InfoPagetsconfig\Controller
 /**
  * @deprecated since 6.0 will be removed in 7.0
  */
-interface Tx_Install_Interfaces_CheckTheDatabaseHook extends \TYPO3\CMS\Install\CheckTheDatabaseHookInterface {}
-
-/**
- * @deprecated since 6.0 will be removed in 7.0
- */
-class tx_install_mod1 extends \TYPO3\CMS\Install\Controller\InstallToolModuleController {}
-
-/**
- * @deprecated since 6.0 will be removed in 7.0
- */
 class tx_coreupdates_addflexformstoacl extends \TYPO3\CMS\Install\CoreUpdates\AddFlexFormsToAclUpdate {}
 
 /**
@@ -5489,17 +5464,7 @@ class tx_coreupdates_t3skin extends \TYPO3\CMS\Install\CoreUpdates\T3skinUpdate 
 /**
  * @deprecated since 6.0 will be removed in 7.0
  */
-class tx_install_ajax extends \TYPO3\CMS\Install\EidHandler {}
-
-/**
- * @deprecated since 6.0 will be removed in 7.0
- */
-class Tx_Install_Service_BasicService extends \TYPO3\CMS\Install\EnableFileService {}
-
-/**
- * @deprecated since 6.0 will be removed in 7.0
- */
-class tx_install extends \TYPO3\CMS\Install\Installer {}
+class Tx_Install_Service_BasicService extends \TYPO3\CMS\Install\Service\EnableFileService {}
 
 /**
  * @deprecated since 6.0 will be removed in 7.0
@@ -5509,12 +5474,12 @@ class tx_install_report_InstallStatus extends \TYPO3\CMS\Install\Report\InstallS
 /**
  * @deprecated since 6.0 will be removed in 7.0
  */
-class tx_install_session extends \TYPO3\CMS\Install\Session {}
+class tx_install_session extends \TYPO3\CMS\Install\Service\SessionService {}
 
 /**
  * @deprecated since 6.0 will be removed in 7.0
  */
-class t3lib_install_Sql extends \TYPO3\CMS\Install\Sql\SchemaMigrator {}
+class t3lib_install_Sql extends \TYPO3\CMS\Install\Service\SqlSchemaMigrationService {}
 
 /**
  * @deprecated since 6.0 will be removed in 7.0
@@ -6429,42 +6394,32 @@ class tx_taskcenter_status extends \TYPO3\CMS\Taskcenter\TaskStatus {}
 /**
  * @deprecated since 6.0 will be removed in 7.0
  */
-class tx_tsconfighelp_module1 extends \TYPO3\CMS\TsconfigHelp\Controller\TypoScriptConfigHelpModuleController {}
-
-/**
- * @deprecated since 6.0 will be removed in 7.0
- */
 class SC_mod_web_ts_index extends \TYPO3\CMS\Tstemplate\Controller\TypoScriptTemplateModuleController {}
 
 /**
  * @deprecated since 6.0 will be removed in 7.0
  */
-class tx_tstemplateanalyzer extends \TYPO3\CMS\TstemplateAnalyzer\Controller\TemplateAnalyzerModuleFunctionController {}
+class tx_tstemplateanalyzer extends \TYPO3\CMS\Tstemplate\Controller\TemplateAnalyzerModuleFunctionController {}
 
 /**
  * @deprecated since 6.0 will be removed in 7.0
  */
-class tx_tstemplateceditor extends \TYPO3\CMS\TstemplateCeditor\Controller\TypoScriptTemplateConstantEditorModuleFunctionController {}
+class tx_tstemplateceditor extends \TYPO3\CMS\Tstemplate\Controller\TypoScriptTemplateConstantEditorModuleFunctionController {}
 
 /**
  * @deprecated since 6.0 will be removed in 7.0
  */
-class tx_tstemplateinfo extends \TYPO3\CMS\TstemplateInfo\Controller\TypoScriptTemplateInformationModuleFunctionController {}
+class tx_tstemplateinfo extends \TYPO3\CMS\Tstemplate\Controller\TypoScriptTemplateInformationModuleFunctionController {}
 
 /**
  * @deprecated since 6.0 will be removed in 7.0
  */
-class tx_tstemplateobjbrowser extends \TYPO3\CMS\TstemplateObjbrowser\Controller\TypoScriptTemplateObjectBrowserModuleFunctionController {}
+class tx_tstemplateobjbrowser extends \TYPO3\CMS\Tstemplate\Controller\TypoScriptTemplateObjectBrowserModuleFunctionController {}
 
 /**
  * @deprecated since 6.0 will be removed in 7.0
  */
 class tx_version_cm1 extends \TYPO3\CMS\Version\Controller\VersionModuleController {}
-
-/**
- * @deprecated since 6.0 will be removed in 7.0
- */
-class SC_mod_user_ws_index extends \TYPO3\CMS\Version\Controller\WorkspaceModuleController {}
 
 /**
  * @deprecated since 6.0 will be removed in 7.0

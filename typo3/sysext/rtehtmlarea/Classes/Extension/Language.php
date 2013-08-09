@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Rtehtmlarea\Extension;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2008-2011 Stanislas Rolland <typo3(arobas)sjbr.ca>
+ *  (c) 2008-2013 Stanislas Rolland <typo3(arobas)sjbr.ca>
  *  All rights reserved
  *
  *  This script is part of the Typo3 project. The Typo3 project is
@@ -36,7 +36,7 @@ class Language extends \TYPO3\CMS\Rtehtmlarea\RteHtmlAreaApi {
 	protected $pluginName = 'Language';
 
 	// The name of the plugin registered by the extension
-	protected $relativePathToLocallangFile = 'extensions/Language/locallang.xml';
+	protected $relativePathToLocallangFile = 'extensions/Language/locallang.xlf';
 
 	// Path to this main locallang file of the extension relative to the extension dir.
 	protected $relativePathToSkin = 'extensions/Language/skin/htmlarea.css';

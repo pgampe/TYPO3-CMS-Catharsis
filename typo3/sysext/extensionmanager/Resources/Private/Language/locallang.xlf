@@ -81,6 +81,9 @@
 			<trans-unit id="extensionList.update" xml:space="preserve">
 				<source>Update</source>
 			</trans-unit>
+			<trans-unit id="extensionList.updateToVersion" xml:space="preserve">
+				<source>Update to version %s</source>
+			</trans-unit>
 			<trans-unit id="extensionList.deactivate" xml:space="preserve">
 				<source>Deactivate</source>
 			</trans-unit>
@@ -117,6 +120,9 @@
 			<trans-unit id="extensionList.header.extensionName" xml:space="preserve">
 				<source>Extension</source>
 			</trans-unit>
+			<trans-unit id="extensionList.header.version" xml:space="preserve">
+				<source>Version</source>
+			</trans-unit>
 			<trans-unit id="extensionList.header.extensionKey" xml:space="preserve">
 				<source>Key</source>
 			</trans-unit>
@@ -141,14 +147,23 @@
 			<trans-unit id="extensionList.header.author" xml:space="preserve">
 				<source>Author</source>
 			</trans-unit>
+			<trans-unit id="searchTemplate.searchExtensions" xml:space="preserve">
+				<source>Search extensions</source>
+			</trans-unit>
+			<trans-unit id="extensionList.search" xml:space="preserve">
+				<source>Search:</source>
+			</trans-unit>
 			<trans-unit id="searchTemplate.submitButton" xml:space="preserve">
-				<source>Submit</source>
+				<source>Go</source>
 			</trans-unit>
 			<trans-unit id="searchTemplate.resetSearchButton" xml:space="preserve">
 				<source>Reset Search</source>
 			</trans-unit>
 			<trans-unit id="searchTemplate.yourSearch" xml:space="preserve">
 				<source>Your search</source>
+			</trans-unit>
+			<trans-unit id="searchTemplate.searchAgain" xml:space="preserve">
+				<source>Search again</source>
 			</trans-unit>
 			<trans-unit id="uploadTemplate.uploadButton" xml:space="preserve">
 				<source>Upload!</source>
@@ -238,8 +253,60 @@
 			<trans-unit id="extensionList.showAllVersions.label" xml:space="preserve">
 				<source>Show all versions</source>
 			</trans-unit>
+			<trans-unit id="extensionList.showAllVersions.extensionKey" xml:space="preserve">
+				<source>Extension key</source>
+			</trans-unit>
+			<trans-unit id="extensionList.showAllVersions.version" xml:space="preserve">
+				<source>Version</source>
+			</trans-unit>
+			<trans-unit id="extensionList.showAllVersions.lastUploaded" xml:space="preserve">
+				<source>Last uploaded</source>
+			</trans-unit>
+			<trans-unit id="extensionList.showAllVersions.downloads" xml:space="preserve">
+				<source>Downloads</source>
+			</trans-unit>
+			<trans-unit id="extensionList.showAllVersions.category" xml:space="preserve">
+				<source>Category</source>
+			</trans-unit>
+			<trans-unit id="extensionList.showAllVersions.manual" xml:space="preserve">
+				<source>Manual</source>
+			</trans-unit>
+			<trans-unit id="extensionList.showAllVersions.author" xml:space="preserve">
+				<source>Author</source>
+			</trans-unit>
+			<trans-unit id="extensionList.showAllVersions.readOnline" xml:space="preserve">
+				<source>Read online</source>
+			</trans-unit>
+
 			<trans-unit id="extensionList.updateFromTer.label" xml:space="preserve">
 				<source>Retrieving Extension-List from TYPO3 Extension Repository (TER)</source>
+			</trans-unit>
+			<trans-unit id="extensionList.updateFromTer.buttonLabel" xml:space="preserve">
+				<source>Update now</source>
+			</trans-unit>
+			<trans-unit id="extensionList.updateFromTer.lastUpdate.label" xml:space="preserve">
+				<source>Last update:</source>
+			</trans-unit>
+			<trans-unit id="extensionList.updateFromTer.lastUpdate.timeSinceLastUpdateLabel" xml:space="preserve">
+				<source>Time since last update:</source>
+			</trans-unit>
+			<trans-unit id="extensionList.updateFromTer.lastUpdate.noInfo" xml:space="preserve">
+				<source>unknown</source>
+			</trans-unit>
+			<trans-unit id="extensionList.updateFromTer.lastUpdate.fullTimeFormat" xml:space="preserve">
+				<source>Y-m-d H:i:s</source>
+			</trans-unit>
+			<trans-unit id="extensionList.updateFromTer.lastUpdate.timeOfLastUpdate" xml:space="preserve">
+				<source>Time of last update: </source>
+			</trans-unit>
+			<trans-unit id="extensionList.updateFromTer.lastUpdate.noTimeOfLastUpdate" xml:space="preserve">
+				<source>No last update time known.</source>
+			</trans-unit>
+			<trans-unit id="extensionList.updateFromTer.never" xml:space="preserve">
+				<source>Never</source>
+			</trans-unit>
+			<trans-unit id="extensionList.uninstall.dependencyError" xml:space="preserve">
+				<source>Cannot deactivate extension '%s' - The extension(s) '%s' depend on it.</source>
 			</trans-unit>
 
 			<trans-unit id="task.updateExtensionListTask.name" xml:space="preserve">
@@ -294,6 +361,36 @@
 				<source>The following extensions were found on your system, but are currently not installed. Please delete the extensions using the extension manager:&lt;br&gt;&lt;br&gt;%s</source>
 			</trans-unit>
 			<trans-unit id="report.status.existingExtensions.insecureExtensionExists.message.extension" xml:space="preserve">
+				<source>&lt;strong&gt;%1s&lt;/strong&gt; (version %2s)&lt;br&gt;</source>
+			</trans-unit>
+			<trans-unit id="report.status.loadedOutdatedExtensions.title" xml:space="preserve">
+				<source>Outdated status of loaded extensions</source>
+			</trans-unit>
+			<trans-unit id="report.status.loadedOutdatedExtensions.noOutdatedExtensionLoaded.value" xml:space="preserve">
+				<source>OK</source>
+			</trans-unit>
+			<trans-unit id="report.status.loadedOutdatedExtensions.outdatedExtensionLoaded.value" xml:space="preserve">
+				<source>%s outdated extension(s) found</source>
+			</trans-unit>
+			<trans-unit id="report.status.loadedOutdatedExtensions.outdatedExtensionLoaded.message" xml:space="preserve">
+				<source>The following extensions are outdated and may not be compatible with your installation. Please make sure these extensions are compatible and ask the extension author to publish updates:&lt;br&gt;&lt;br&gt;%s</source>
+			</trans-unit>
+			<trans-unit id="report.status.loadedOutdatedExtensions.outdatedExtensionLoaded.message.extension" xml:space="preserve">
+				<source>&lt;strong&gt;%1s&lt;/strong&gt; (version %2s)&lt;br&gt;</source>
+			</trans-unit>
+			<trans-unit id="report.status.existingOutdatedExtensions.title" xml:space="preserve">
+				<source>Outdated status of existing, but not loaded extensions</source>
+			</trans-unit>
+			<trans-unit id="report.status.existingOutdatedExtensions.noOutdatedExtensionExists.value" xml:space="preserve">
+				<source>OK</source>
+			</trans-unit>
+			<trans-unit id="report.status.existingOutdatedExtensions.outdatedExtensionExists.value" xml:space="preserve">
+				<source>%s outdated extension(s) found</source>
+			</trans-unit>
+			<trans-unit id="report.status.existingOutdatedExtensions.outdatedExtensionExists.message" xml:space="preserve">
+				<source>The following extensions were found on your system, but are currently not installed. Please make sure they are compatible with your system before installing them:&lt;br&gt;&lt;br&gt;%s</source>
+			</trans-unit>
+			<trans-unit id="report.status.existingOutdatedExtensions.outdatedExtensionExists.message.extension" xml:space="preserve">
 				<source>&lt;strong&gt;%1s&lt;/strong&gt; (version %2s)&lt;br&gt;</source>
 			</trans-unit>
 		</body>

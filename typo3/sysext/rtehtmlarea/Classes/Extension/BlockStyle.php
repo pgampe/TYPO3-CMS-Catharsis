@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Rtehtmlarea\Extension;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2007-2011 Stanislas Rolland <typo3(arobas)sjbr.ca>
+ *  (c) 2007-2013 Stanislas Rolland <typo3(arobas)sjbr.ca>
  *  All rights reserved
  *
  *  This script is part of the Typo3 project. The Typo3 project is
@@ -36,7 +36,7 @@ class BlockStyle extends \TYPO3\CMS\Rtehtmlarea\RteHtmlAreaApi {
 	protected $pluginName = 'BlockStyle';
 
 	// The name of the plugin registered by the extension
-	protected $relativePathToLocallangFile = 'extensions/BlockStyle/locallang.xml';
+	protected $relativePathToLocallangFile = 'extensions/BlockStyle/locallang.xlf';
 
 	// Path to this main locallang file of the extension relative to the extension dir.
 	protected $relativePathToSkin = '';

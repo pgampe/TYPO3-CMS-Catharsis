@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Extensionmanager\Tests\Unit\Utility;
 /***************************************************************
  * Copyright notice
  *
- * (c) 2012 Oliver Hader <oliver.hader@typo3.org>
+ * (c) 2012-2013 Oliver Hader <oliver.hader@typo3.org>
  * All rights reserved
  *
  * This script is part of the TYPO3 project. The TYPO3 project is
@@ -96,7 +96,7 @@ class ConfigurationUtilityTest extends \TYPO3\CMS\Extbase\Tests\Unit\BaseTestCas
 				'cat' => 'basic',
 				'subcat_name' => 'enable',
 				'subcat' => 'a/enable/z',
-				'type' => 'user[EXT:saltedpasswords/classes/class.tx_saltedpasswords_emconfhelper.php:TYPO3\\CMS\\Saltedpasswords\\Utility\\ExtensionManagerConfigurationUtility->checkConfigurationFrontend]',
+				'type' => 'user[TYPO3\\CMS\\Saltedpasswords\\Utility\\ExtensionManagerConfigurationUtility->checkConfigurationFrontend]',
 				'label' => 'Frontend configuration check',
 				'name' => 'checkConfigurationFE',
 				'value' => '0',
@@ -130,7 +130,7 @@ class ConfigurationUtilityTest extends \TYPO3\CMS\Extbase\Tests\Unit\BaseTestCas
 				'cat' => 'basic',
 				'subcat_name' => 'enable',
 				'subcat' => 'a/enable/z',
-				'type' => 'user[EXT:saltedpasswords/classes/class.tx_saltedpasswords_emconfhelper.php:TYPO3\\CMS\\Saltedpasswords\\Utility\\ExtensionManagerConfigurationUtility->checkConfigurationFrontend]',
+				'type' => 'user[TYPO3\\CMS\\Saltedpasswords\\Utility\\ExtensionManagerConfigurationUtility->checkConfigurationFrontend]',
 				'label' => 'Frontend configuration check',
 				'name' => 'checkConfigurationFE',
 				'value' => '0',

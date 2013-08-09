@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Version\ClickMenu;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2004-2011 Kasper Skårhøj (kasperYYYY@typo3.com)
+ *  (c) 2004-2013 Kasper Skårhøj (kasperYYYY@typo3.com)
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -75,7 +75,7 @@ class VersionClickMenu {
 	 * @todo Define visibility
 	 */
 	public function includeLL() {
-		return $GLOBALS['LANG']->includeLLFile('EXT:version/locallang.xml', FALSE);
+		return $GLOBALS['LANG']->includeLLFile('EXT:version/locallang.xlf', FALSE);
 	}
 
 }

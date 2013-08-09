@@ -11,9 +11,9 @@ namespace TYPO3\CMS\Fluid\Tests\Unit\ViewHelpers\Form;
  * The TYPO3 project - inspiring people to share!                         *
  *                                                                        */
 
-require_once(dirname(__FILE__) . '/Fixtures/EmptySyntaxTreeNode.php');
-require_once(dirname(__FILE__) . '/Fixtures/Fixture_UserDomainClass.php');
-require_once(dirname(__FILE__) . '/FormFieldViewHelperBaseTestcase.php');
+require_once(__DIR__ . '/Fixtures/EmptySyntaxTreeNode.php');
+require_once(__DIR__ . '/Fixtures/Fixture_UserDomainClass.php');
+require_once(__DIR__ . '/FormFieldViewHelperBaseTestcase.php');
 
 /**
  * Test for the "Textfield" Form view helper
@@ -73,6 +73,29 @@ class TextfieldViewHelperTest extends \TYPO3\CMS\Fluid\Tests\Unit\ViewHelpers\Fo
 	 */
 	public function renderCallsSetErrorClassAttribute() {
 		$this->viewHelper->expects($this->once())->method('setErrorClassAttribute');
+		$this->viewHelper->render();
+	}
+
+
+	/**
+	 * @test
+	 */
+	public function renderAddsPlaceholder() {
+		$mockTagBuilder = $this->getMock('TYPO3\\CMS\\Fluid\\Core\\ViewHelper\\TagBuilder', array('addAttribute', 'setContent', 'render'), array(), '', FALSE);
+		$mockTagBuilder->expects($this->at(0))->method('addAttribute')->with('placeholder', 'SomePlaceholder');
+		$mockTagBuilder->expects($this->at(1))->method('addAttribute')->with('type', 'text');
+		$mockTagBuilder->expects($this->at(2))->method('addAttribute')->with('name', 'NameOfTextfield');
+		$mockTagBuilder->expects($this->once())->method('render');
+		$this->viewHelper->injectTagBuilder($mockTagBuilder);
+
+		$arguments = array(
+			'name' => 'NameOfTextfield',
+			'placeholder' => 'SomePlaceholder'
+		);
+		$this->viewHelper->setArguments($arguments);
+
+		$this->viewHelper->setViewHelperNode(new \TYPO3\CMS\Fluid\Tests\Unit\ViewHelpers\Form\Fixtures\EmptySyntaxTreeNode());
+		$this->viewHelper->initialize();
 		$this->viewHelper->render();
 	}
 }

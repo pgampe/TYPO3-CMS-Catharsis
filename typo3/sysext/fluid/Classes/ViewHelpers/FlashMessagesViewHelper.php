@@ -100,13 +100,13 @@ class FlashMessagesViewHelper extends \TYPO3\CMS\Fluid\Core\ViewHelper\AbstractT
 	 * Note: This disables the current page cache in order to prevent FlashMessage output
 	 * from being cached.
 	 *
-	 * @see tslib_fe::no_cache
+	 * @see \TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController::no_cache
 	 * @param string $renderMode one of the RENDER_MODE_* constants
 	 * @return string rendered Flash Messages, if there are any.
 	 * @api
 	 */
 	public function render($renderMode = self::RENDER_MODE_UL) {
-		$flashMessages = $this->controllerContext->getFlashMessageContainer()->getAllMessagesAndFlush();
+		$flashMessages = $this->controllerContext->getFlashMessageQueue()->getAllMessagesAndFlush();
 		if ($flashMessages === NULL || count($flashMessages) === 0) {
 			return '';
 		}
@@ -126,7 +126,7 @@ class FlashMessagesViewHelper extends \TYPO3\CMS\Fluid\Core\ViewHelper\AbstractT
 	/**
 	 * Renders the flash messages as unordered list
 	 *
-	 * @param array $flashMessages array<t3lib_FlashMessage>
+	 * @param array $flashMessages array<\TYPO3\CMS\Core\Messaging\FlashMessage>
 	 * @return string
 	 */
 	protected function renderUl(array $flashMessages) {
@@ -142,10 +142,10 @@ class FlashMessagesViewHelper extends \TYPO3\CMS\Fluid\Core\ViewHelper\AbstractT
 		return $this->tag->render();
 	}
 
-	/*
+	/**
 	 * Renders the flash messages as nested divs
 	 *
-	 * @param array $flashMessages array<t3lib_FlashMessage>
+	 * @param array $flashMessages array<\TYPO3\CMS\Core\Messaging\FlashMessage>
 	 * @return string
 	 */
 	protected function renderDiv(array $flashMessages) {

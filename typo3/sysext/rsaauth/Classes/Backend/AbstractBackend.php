@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Rsaauth\Backend;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2009-2011 Dmitry Dulepov <dmitry@typo3.org>
+ *  (c) 2009-2013 Dmitry Dulepov <dmitry@typo3.org>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -32,7 +32,7 @@ namespace TYPO3\CMS\Rsaauth\Backend;
  * - decode incoming data
  *
  * To prepare data for encoding, the createNewKeyPair() method should be called.
- * This method returns an instance of tx_rsaauth_keypair class, which contains
+ * This method returns an instance of \TYPO3\CMS\Rsaauth\Keypair class, which contains
  * the private and public keys. Public key is sent to the client to encode data.
  * Private key should be stored somewhere (preferrably in user's session).
  *

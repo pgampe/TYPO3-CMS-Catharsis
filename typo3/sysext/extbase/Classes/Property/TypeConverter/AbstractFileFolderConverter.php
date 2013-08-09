@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Extbase\Property\TypeConverter;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010-2012 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
+ *  (c) 2010-2013 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
  *  Extbase is a backport of TYPO3 Flow. All credits go to the TYPO3 Flow team.
  *  All rights reserved
  *
@@ -46,15 +46,9 @@ abstract class AbstractFileFolderConverter extends \TYPO3\CMS\Extbase\Property\T
 
 	/**
 	 * @var \TYPO3\CMS\Core\Resource\ResourceFactory
+	 * @inject
 	 */
 	protected $fileFactory;
-
-	/**
-	 * @param \TYPO3\CMS\Core\Resource\ResourceFactory $fileFactory
-	 */
-	public function injectFileFactory(\TYPO3\CMS\Core\Resource\ResourceFactory $fileFactory) {
-		$this->fileFactory = $fileFactory;
-	}
 
 	/**
 	 * Actually convert from $source to $targetType, taking into account the fully

@@ -4,7 +4,7 @@ namespace TYPO3\CMS\IndexedSearch;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2001-2011 Kasper Skårhøj (kasperYYYY@typo3.com)
+ *  (c) 2001-2013 Kasper Skårhøj (kasperYYYY@typo3.com)
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -284,7 +284,7 @@ class Lexer {
 			return array('alpha');
 		}
 		// Looking for CJK (Chinese / Japanese / Korean)
-		// Ranges are not certain - deducted from the translation tables in t3lib/csconvtbl/
+		// Ranges are not certain - deducted from the translation tables in typo3/sysext/core/Resources/Private/Charsets/csconvtbl/
 		// Verified with http://www.unicode.org/charts/ (16/2) - may still not be complete.
 		if ($cp >= 12352 && $cp <= 12543 || $cp >= 12592 && $cp <= 12687 || $cp >= 13312 && $cp <= 19903 || $cp >= 19968 && $cp <= 40879 || $cp >= 44032 && $cp <= 55215 || $cp >= 131072 && $cp <= 195103) {
 			return array('cjk');

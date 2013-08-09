@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Scheduler\Task;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2009-2011 Christian Kuhn <lolli@schwarzbu.ch>
+ *  (c) 2009-2013 Christian Kuhn <lolli@schwarzbu.ch>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -59,8 +59,8 @@ class CachingFrameworkGarbageCollectionAdditionalFieldProvider implements \TYPO3
 		$fieldHtml = '<select name="' . $fieldName . '" id="' . $fieldId . '" class="wide" size="10" multiple="multiple">' . $fieldOptions . '</select>';
 		$additionalFields[$fieldId] = array(
 			'code' => $fieldHtml,
-			'label' => 'LLL:EXT:scheduler/mod1/locallang.xml:label.cachingFrameworkGarbageCollection.selectBackends',
-			'cshKey' => '_MOD_tools_txschedulerM1',
+			'label' => 'LLL:EXT:scheduler/mod1/locallang.xlf:label.cachingFrameworkGarbageCollection.selectBackends',
+			'cshKey' => '_MOD_system_txschedulerM1',
 			'cshLabel' => $fieldId
 		);
 		return $additionalFields;
@@ -79,11 +79,11 @@ class CachingFrameworkGarbageCollectionAdditionalFieldProvider implements \TYPO3
 		if (is_array($submittedData['scheduler_cachingFrameworkGarbageCollection_selectedBackends'])) {
 			$invalidBackends = array_diff($submittedData['scheduler_cachingFrameworkGarbageCollection_selectedBackends'], $availableBackends);
 			if (!empty($invalidBackends)) {
-				$parentObject->addMessage($GLOBALS['LANG']->sL('LLL:EXT:scheduler/mod1/locallang.xml:msg.selectionOfNonExistingCacheBackends'), \TYPO3\CMS\Core\Messaging\FlashMessage::ERROR);
+				$parentObject->addMessage($GLOBALS['LANG']->sL('LLL:EXT:scheduler/mod1/locallang.xlf:msg.selectionOfNonExistingCacheBackends'), \TYPO3\CMS\Core\Messaging\FlashMessage::ERROR);
 				$validData = FALSE;
 			}
 		} else {
-			$parentObject->addMessage($GLOBALS['LANG']->sL('LLL:EXT:scheduler/mod1/locallang.xml:msg.noCacheBackendSelected'), \TYPO3\CMS\Core\Messaging\FlashMessage::ERROR);
+			$parentObject->addMessage($GLOBALS['LANG']->sL('LLL:EXT:scheduler/mod1/locallang.xlf:msg.noCacheBackendSelected'), \TYPO3\CMS\Core\Messaging\FlashMessage::ERROR);
 			$validData = FALSE;
 		}
 		return $validData;

@@ -4,8 +4,8 @@ namespace TYPO3\CMS\Rtehtmlarea;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 1999-2011 Kasper Skårhøj (kasper@typo3.com)
- *  (c) 2005-2012 Stanislas Rolland <typo3(arobas)sjbr.ca>
+ *  (c) 1999-2013 Kasper Skårhøj (kasper@typo3.com)
+ *  (c) 2005-2013 Stanislas Rolland <typo3(arobas)sjbr.ca>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -178,7 +178,7 @@ class User {
 	 */
 	public function main_user($openKeys) {
 		// Starting content:
-		$content = $this->doc->startPage($GLOBALS['LANG']->getLL('Insert Custom Element', 1));
+		$content = $this->doc->startPage($GLOBALS['LANG']->getLL('Insert Custom Element', TRUE));
 		$RTEtsConfigParts = explode(':', \TYPO3\CMS\Core\Utility\GeneralUtility::_GP('RTEtsConfigParams'));
 		$RTEsetup = $GLOBALS['BE_USER']->getTSConfig('RTE', \TYPO3\CMS\Backend\Utility\BackendUtility::getPagesTSconfig($RTEtsConfigParts[5]));
 		$thisConfig = \TYPO3\CMS\Backend\Utility\BackendUtility::RTEsetup($RTEsetup['properties'], $RTEtsConfigParts[0], $RTEtsConfigParts[2], $RTEtsConfigParts[4]);
@@ -192,8 +192,7 @@ class User {
 					$openK = $ki;
 					if ($openKeys[$openK]) {
 						$mArray = '';
-						switch ((string) $v['load']) {
-						case 'images_from_folder':
+						if ($v['load'] === 'images_from_folder') {
 							$mArray = array();
 							if ($v['path'] && @is_dir((PATH_site . $v['path']))) {
 								$files = \TYPO3\CMS\Core\Utility\GeneralUtility::getFilesInDir(PATH_site . $v['path'], 'gif,jpg,jpeg,png', 0, '');
@@ -213,7 +212,6 @@ class User {
 									}
 								}
 							}
-							break;
 						}
 						if (is_array($mArray)) {
 							if ($v['merge']) {
@@ -227,7 +225,7 @@ class User {
 							if (substr($k2, -1) == '.' && is_array($v[$k2i . '.'])) {
 								$title = trim($v[$k2i]);
 								if (!$title) {
-									$title = '[' . $GLOBALS['LANG']->getLL('noTitle', 1) . ']';
+									$title = '[' . $GLOBALS['LANG']->getLL('noTitle', TRUE) . ']';
 								} else {
 									$title = $GLOBALS['LANG']->sL($title, 1);
 								}
@@ -238,24 +236,23 @@ class User {
 								$logo = $v[$k2i . '.']['_icon'] ? $v[$k2i . '.']['_icon'] : '';
 								$onClickEvent = '';
 								switch ((string) $v[($k2i . '.')]['mode']) {
-								case 'wrap':
-									$wrap = explode('|', $v[$k2i . '.']['content']);
-									$onClickEvent = 'wrapHTML(' . $GLOBALS['LANG']->JScharCode($wrap[0]) . ',' . $GLOBALS['LANG']->JScharCode($wrap[1]) . ',false);';
-									break;
-								case 'processor':
-									$script = trim($v[$k2i . '.']['submitToScript']);
-									if (substr($script, 0, 4) != 'http') {
-										$script = $this->siteUrl . $script;
-									}
-									if ($script) {
-										$onClickEvent = 'processSelection(' . $GLOBALS['LANG']->JScharCode($script) . ');';
-									}
-									break;
-								case 'insert':
+									case 'wrap':
+										$wrap = explode('|', $v[$k2i . '.']['content']);
+										$onClickEvent = 'wrapHTML(' . $GLOBALS['LANG']->JScharCode($wrap[0]) . ',' . $GLOBALS['LANG']->JScharCode($wrap[1]) . ',false);';
+										break;
+									case 'processor':
+										$script = trim($v[$k2i . '.']['submitToScript']);
+										if (substr($script, 0, 4) != 'http') {
+											$script = $this->siteUrl . $script;
+										}
+										if ($script) {
+											$onClickEvent = 'processSelection(' . $GLOBALS['LANG']->JScharCode($script) . ');';
+										}
+										break;
+									case 'insert':
 
-								default:
-									$onClickEvent = 'insertHTML(' . $GLOBALS['LANG']->JScharCode($v[($k2i . '.')]['content']) . ');';
-									break;
+									default:
+										$onClickEvent = 'insertHTML(' . $GLOBALS['LANG']->JScharCode($v[($k2i . '.')]['content']) . ');';
 								}
 								$A = array('<a href="#" onClick="' . $onClickEvent . 'return false;">', '</a>');
 								$subcats[$k2i] = '<tr>
@@ -277,11 +274,11 @@ class User {
 				$title = trim($thisConfig['userElements.'][$k]);
 				$openK = $k;
 				if (!$title) {
-					$title = '[' . $GLOBALS['LANG']->getLL('noTitle', 1) . ']';
+					$title = '[' . $GLOBALS['LANG']->getLL('noTitle', TRUE) . ']';
 				} else {
 					$title = $GLOBALS['LANG']->sL($title, 1);
 				}
-				$lines[] = '<tr><td colspan="3" class="bgColor5"><a href="#" title="' . $GLOBALS['LANG']->getLL('expand', 1) . '" onClick="jumpToUrl(\'?OC_key=' . ($openKeys[$openK] ? 'C|' : 'O|') . $openK . '\');return false;"><img' . \TYPO3\CMS\Backend\Utility\IconUtility::skinImg($GLOBALS['BACK_PATH'], ('gfx/ol/' . ($openKeys[$openK] ? 'minus' : 'plus') . 'bullet.gif'), 'width="18" height="16"') . ' title="' . $GLOBALS['LANG']->getLL('expand', 1) . '" /><strong>' . $title . '</strong></a></td></tr>';
+				$lines[] = '<tr><td colspan="3" class="bgColor5"><a href="#" title="' . $GLOBALS['LANG']->getLL('expand', TRUE) . '" onClick="jumpToUrl(\'?OC_key=' . ($openKeys[$openK] ? 'C|' : 'O|') . $openK . '\');return false;"><img' . \TYPO3\CMS\Backend\Utility\IconUtility::skinImg($GLOBALS['BACK_PATH'], ('gfx/ol/' . ($openKeys[$openK] ? 'minus' : 'plus') . 'bullet.gif'), 'width="18" height="16"') . ' title="' . $GLOBALS['LANG']->getLL('expand', TRUE) . '" /><strong>' . $title . '</strong></a></td></tr>';
 				$lines[] = $v;
 			}
 			$content .= '<table border="0" cellpadding="1" cellspacing="1">' . implode('', $lines) . '</table>';

@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Frontend\Tests\Unit\ContentObject;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2012 Christian Kuhn <lolli@schwarzbu.ch>
+ *  (c) 2012-2013 Christian Kuhn <lolli@schwarzbu.ch>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -575,6 +575,41 @@ class FluidTemplateContentObjectTest extends \TYPO3\CMS\Core\Tests\UnitTestCase 
 			->method('stdWrap')
 			->with('baz', array('foo' => 'bar'));
 		$this->fixture->render($configuration);
+	}
+
+	/**
+	 * @test
+	 */
+	public function renderWorksWithNestedFluidtemplate() {
+		$this->addMockViewToFixture();
+		$configuration = array(
+			'10' => 'FLUIDTEMPLATE',
+			'10.' => array(
+				'template' => 'TEXT',
+				'template.' => array(
+					'value' => 'A{anotherFluidTemplate}C'
+				),
+				'variables.' => array(
+					'anotherFluidTemplate' => 'FLUIDTEMPLATE',
+					'anotherFluidTemplate.' => array(
+						'template' => 'TEXT',
+						'template.' => array(
+							'value' => 'B',
+						),
+					),
+				),
+			),
+		);
+		$expectedResult = 'ABC';
+
+		// not using mocks - actual rendering
+		$contentObjectRenderer = new \TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
+		$fluidTemplateContentObject = new \TYPO3\CMS\Frontend\ContentObject\ContentObjectArrayContentObject(
+			$contentObjectRenderer
+		);
+		$result = $fluidTemplateContentObject->render($configuration);
+
+		$this->assertEquals($expectedResult, $result);
 	}
 }
 ?>

@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Extbase\Scheduler;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010-2012 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
+ *  (c) 2010-2013 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
  *  Extbase is a backport of TYPO3 Flow. All credits go to the TYPO3 Flow team.
  *  All rights reserved
  *
@@ -68,8 +68,8 @@ class FieldProvider implements \TYPO3\CMS\Scheduler\AdditionalFieldProviderInter
 	/**
 	 * Render additional information fields within the scheduler backend.
 	 *
-	 * @param array $taskInfo Array information of task to return
-	 * @param mixed $task \TYPO3\CMS\Scheduler\Task\AbstractTask or tx_scheduler_Execution instance
+	 * @param array &$taskInfo Array information of task to return
+	 * @param mixed $task \TYPO3\CMS\Scheduler\Task\AbstractTask or \TYPO3\CMS\Scheduler\Execution instance
 	 * @param \TYPO3\CMS\Scheduler\Controller\SchedulerModuleController $schedulerModule Reference to the calling object (BE module of the Scheduler)
 	 * @return array Additional fields
 	 * @see \TYPO3\CMS\Scheduler\AdditionalFieldProvider#getAdditionalFields($taskInfo, $task, $schedulerModule)
@@ -94,7 +94,7 @@ class FieldProvider implements \TYPO3\CMS\Scheduler\AdditionalFieldProviderInter
 	/**
 	 * Validates additional selected fields
 	 *
-	 * @param array $submittedData
+	 * @param array &$submittedData
 	 * @param \TYPO3\CMS\Scheduler\Controller\SchedulerModuleController $schedulerModule
 	 * @return boolean
 	 */

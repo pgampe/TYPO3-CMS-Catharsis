@@ -78,8 +78,9 @@ class UriBuilderTest extends \TYPO3\CMS\Extbase\Tests\Unit\BaseTestCase {
 		$this->uriBuilder = $this->getAccessibleMock('TYPO3\\CMS\\Extbase\\Mvc\\Web\\Routing\\UriBuilder', array('build'));
 		$this->uriBuilder->setRequest($this->mockRequest);
 		$this->uriBuilder->_set('contentObject', $this->mockContentObject);
-		$this->uriBuilder->injectConfigurationManager($this->mockConfigurationManager);
-		$this->uriBuilder->injectExtensionService($this->mockExtensionService);
+		$this->uriBuilder->_set('configurationManager', $this->mockConfigurationManager);
+		$this->uriBuilder->_set('extensionService', $this->mockExtensionService);
+		$this->uriBuilder->_set('environmentService', $this->objectManager->get('TYPO3\\CMS\\Extbase\\Service\\EnvironmentService'));
 	}
 
 	public function tearDown() {
@@ -199,9 +200,60 @@ class UriBuilderTest extends \TYPO3\CMS\Extbase\Tests\Unit\BaseTestCase {
 	 */
 	public function buildBackendUriRemovesSpecifiedQueryParametersIfArgumentsToBeExcludedFromQueryStringIsSetDataProvider() {
 		return array(
-			'Arguments to be excluded in the beginning' => array(array('M' => 'moduleKey', 'id' => 'pageId', 'foo' => 'bar'), array('M', 'id'), 'mod.php?foo=bar'),
-			'Arguments to be excluded in the end' => array(array('foo' => 'bar', 'id' => 'pageId', 'M' => 'moduleKey'), array('M', 'id'), 'mod.php?foo=bar'),
-			'Arguments in nested array to be excluded' => array(array('tx_foo' => array('bar' => 'baz'), 'id' => 'pageId', 'M' => 'moduleKey'), array('id', 'tx_foo[bar]'), 'mod.php?M=moduleKey'),
+			'Arguments to be excluded in the beginning' => array(
+				array(
+					'M' => 'moduleKey',
+					'id' => 'pageId',
+					'foo' => 'bar'
+				),
+				array(
+					'M',
+					'id'
+				),
+				'mod.php?foo=bar'
+			),
+			'Arguments to be excluded in the end' => array(
+				array(
+					'foo' => 'bar',
+					'id' => 'pageId',
+					'M' => 'moduleKey'
+				),
+				array(
+					'M',
+					'id'
+				),
+				'mod.php?foo=bar'
+			),
+			'Arguments in nested array to be excluded' => array(
+				array(
+					'tx_foo' => array(
+						'bar' => 'baz'
+					),
+					'id' => 'pageId',
+					'M' => 'moduleKey'
+				),
+				array(
+					'id',
+					'tx_foo[bar]'
+				),
+				'mod.php?M=moduleKey'
+			),
+			'Arguments in multidimensional array to be excluded' => array(
+				array(
+					'tx_foo' => array(
+						'bar' => array(
+							'baz' => 'bay'
+						)
+					),
+					'id' => 'pageId',
+					'M' => 'moduleKey'
+				),
+				array(
+					'id',
+					'tx_foo[bar][baz]'
+				),
+				'mod.php?M=moduleKey'
+			),
 		);
 	}
 
@@ -423,13 +475,67 @@ class UriBuilderTest extends \TYPO3\CMS\Extbase\Tests\Unit\BaseTestCase {
 	/**
 	 * @test
 	 */
-	public function buildTypolinkConfigurationConsidersPageType() {
+	public function buildTypolinkConfigurationResolvesPageTypeFromFormat() {
 		$this->uriBuilder->setTargetPageUid(123);
-		$this->uriBuilder->setTargetPageType(2);
+		$this->uriBuilder->setFormat('txt');
+
+		$mockConfigurationManager = $this->getMock('TYPO3\\CMS\\Extbase\\Configuration\\ConfigurationManager');
+		$mockConfigurationManager->expects($this->any())->method('getConfiguration')
+			->will($this->returnValue(array('view' => array('formatToPageTypeMapping' => array('txt' => 2)))));
+		$this->uriBuilder->_set('configurationManager', $mockConfigurationManager);
+
+		$this->mockExtensionService->expects($this->any())->method('getTargetPageTypeByFormat')
+			->with(NULL, 'txt')
+			->will($this->returnValue(2));
+
 		$expectedConfiguration = array('parameter' => '123,2', 'useCacheHash' => 1);
 		$actualConfiguration = $this->uriBuilder->_call('buildTypolinkConfiguration');
 		$this->assertEquals($expectedConfiguration, $actualConfiguration);
 	}
+
+	/**
+	 * @test
+	 */
+	public function buildTypolinkConfigurationResolvesDefaultPageTypeFromFormatIfNoMappingIsConfigured() {
+		$this->uriBuilder->setTargetPageUid(123);
+		$this->uriBuilder->setFormat('txt');
+
+		$mockConfigurationManager = $this->getMock('TYPO3\\CMS\\Extbase\\Configuration\\ConfigurationManager');
+		$mockConfigurationManager->expects($this->any())->method('getConfiguration')->will($this->returnValue(array()));
+		$this->uriBuilder->_set('configurationManager', $mockConfigurationManager);
+
+		$this->mockExtensionService->expects($this->any())->method('getTargetPageTypeByFormat')
+			->with(NULL, 'txt')
+			->will($this->returnValue(0));
+
+		$expectedConfiguration = array('parameter' => '123,0', 'useCacheHash' => 1);
+		$actualConfiguration = $this->uriBuilder->_call('buildTypolinkConfiguration');
+
+		$this->assertEquals($expectedConfiguration, $actualConfiguration);
+	}
+
+	/**
+	 * @test
+	 */
+	public function buildTypolinkConfigurationResolvesDefaultPageTypeFromFormatIfFormatIsNotMapped() {
+		$this->uriBuilder->setTargetPageUid(123);
+		$this->uriBuilder->setFormat('txt');
+
+		$mockConfigurationManager = $this->getMock('TYPO3\\CMS\\Extbase\\Configuration\\ConfigurationManager');
+		$mockConfigurationManager->expects($this->any())->method('getConfiguration')
+			->will($this->returnValue(array(array('view' => array('formatToPageTypeMapping' => array('pdf' => 2))))));
+		$this->uriBuilder->_set('configurationManager', $mockConfigurationManager);
+
+		$this->mockExtensionService->expects($this->any())->method('getTargetPageTypeByFormat')
+			->with(NULL, 'txt')
+			->will($this->returnValue(0));
+
+		$expectedConfiguration = array('parameter' => '123,0', 'useCacheHash' => 1);
+		$actualConfiguration = $this->uriBuilder->_call('buildTypolinkConfiguration');
+
+		$this->assertEquals($expectedConfiguration, $actualConfiguration);
+	}
+
 
 	/**
 	 * @test
@@ -492,9 +598,10 @@ class UriBuilderTest extends \TYPO3\CMS\Extbase\Tests\Unit\BaseTestCase {
 	 * @test
 	 */
 	public function conversionOfTansientObjectsIsInvoked() {
-		$className = uniqid('Tx_Extbase_Tests_Fixtures_Object');
-		eval('class ' . $className . ' extends TYPO3\\CMS\\Extbase\\DomainObject\\AbstractValueObject { public $name; public $uid; }');
-		$mockValueObject = new $className();
+		$className = uniqid('FixturesObject_');
+		$classNameWithNS = __NAMESPACE__ . '\\' . $className;
+		eval('namespace ' . __NAMESPACE__ . '; class ' . $className . ' extends \\TYPO3\\CMS\\Extbase\\DomainObject\\AbstractValueObject { public $name; public $uid; }');
+		$mockValueObject = new $classNameWithNS();
 		$mockValueObject->name = 'foo';
 		$mockUriBuilder = $this->getAccessibleMock('TYPO3\\CMS\\Extbase\\Mvc\\Web\\Routing\\UriBuilder', array('convertTransientObjectToArray'));
 		$mockUriBuilder->expects($this->once())->method('convertTransientObjectToArray')->will($this->returnValue(array('foo' => 'bar')));
@@ -508,9 +615,10 @@ class UriBuilderTest extends \TYPO3\CMS\Extbase\Tests\Unit\BaseTestCase {
 	 * @expectedException \TYPO3\CMS\Extbase\Mvc\Exception\InvalidArgumentValueException
 	 */
 	public function conversionOfTansientObjectsThrowsExceptionForOtherThanValueObjects() {
-		$className = uniqid('Tx_Extbase_Tests_Fixtures_Object');
-		eval('class ' . $className . ' extends TYPO3\\CMS\\Extbase\\DomainObject\\AbstractEntity { public $name; public $uid; }');
-		$mockEntity = new $className();
+		$className = uniqid('FixturesObject_');
+		$classNameWithNS = __NAMESPACE__ . '\\' . $className;
+		eval('namespace ' . __NAMESPACE__ . '; class ' . $className . ' extends \\TYPO3\\CMS\\Extbase\\DomainObject\\AbstractEntity { public $name; public $uid; }');
+		$mockEntity = new $classNameWithNS();
 		$mockEntity->name = 'foo';
 		$mockUriBuilder = $this->getAccessibleMock('TYPO3\\CMS\\Extbase\\Mvc\\Web\\Routing\\UriBuilder', array('dummy'));
 		$mockUriBuilder->_call('convertDomainObjectsToIdentityArrays', array('object' => $mockEntity));
@@ -520,9 +628,10 @@ class UriBuilderTest extends \TYPO3\CMS\Extbase\Tests\Unit\BaseTestCase {
 	 * @test
 	 */
 	public function tansientObjectsAreConvertedToAnArrayOfProperties() {
-		$className = uniqid('Tx_Extbase_Tests_Fixtures_Object');
-		eval('class ' . $className . ' extends TYPO3\\CMS\\Extbase\\DomainObject\\AbstractValueObject { public $name; public $uid; }');
-		$mockValueObject = new $className();
+		$className = uniqid('FixturesObject_');
+		$classNameWithNS = __NAMESPACE__ . '\\' . $className;
+		eval('namespace ' . __NAMESPACE__ . '; class ' . $className . ' extends \\TYPO3\\CMS\\Extbase\\DomainObject\\AbstractValueObject { public $name; public $uid; }');
+		$mockValueObject = new $classNameWithNS();
 		$mockValueObject->name = 'foo';
 		$mockUriBuilder = $this->getAccessibleMock('TYPO3\\CMS\\Extbase\\Mvc\\Web\\Routing\\UriBuilder', array('dummy'));
 		$actualResult = $mockUriBuilder->_call('convertTransientObjectToArray', $mockValueObject);
@@ -534,18 +643,21 @@ class UriBuilderTest extends \TYPO3\CMS\Extbase\Tests\Unit\BaseTestCase {
 	 * @test
 	 */
 	public function tansientObjectsAreRecursivelyConverted() {
-		$className = uniqid('Tx_Extbase_Tests_Fixtures_Object');
-		eval('class ' . $className . ' extends TYPO3\\CMS\\Extbase\\DomainObject\\AbstractValueObject { public $name; public $uid; }');
-		$mockInnerValueObject2 = new $className();
+		$className = uniqid('FixturesObject_');
+		$classNameWithNS = __NAMESPACE__ . '\\' . $className;
+		eval('namespace ' . __NAMESPACE__ . '; class ' . $className . ' extends \\TYPO3\\CMS\\Extbase\\DomainObject\\AbstractValueObject { public $name; public $uid; }');
+		$mockInnerValueObject2 = new $classNameWithNS();
 		$mockInnerValueObject2->name = 'foo';
 		$mockInnerValueObject2->uid = 99;
-		$className = uniqid('Tx_Extbase_Tests_Fixtures_Object');
-		eval('class ' . $className . ' extends TYPO3\\CMS\\Extbase\\DomainObject\\AbstractValueObject { public $object; public $uid; }');
-		$mockInnerValueObject1 = new $className();
+		$className = uniqid('FixturesObject_');
+		$classNameWithNS = __NAMESPACE__ . '\\' . $className;
+		eval('namespace ' . __NAMESPACE__ . '; class ' . $className . ' extends \\TYPO3\\CMS\\Extbase\\DomainObject\\AbstractValueObject { public $object; public $uid; }');
+		$mockInnerValueObject1 = new $classNameWithNS();
 		$mockInnerValueObject1->object = $mockInnerValueObject2;
-		$className = uniqid('Tx_Extbase_Tests_Fixtures_Object');
-		eval('class ' . $className . ' extends TYPO3\\CMS\\Extbase\\DomainObject\\AbstractValueObject { public $object; public $uid; }');
-		$mockValueObject = new $className();
+		$className = uniqid('FixturesObject_');
+		$classNameWithNS = __NAMESPACE__ . '\\' . $className;
+		eval('namespace ' . __NAMESPACE__ . '; class ' . $className . ' extends \\TYPO3\\CMS\\Extbase\\DomainObject\\AbstractValueObject { public $object; public $uid; }');
+		$mockValueObject = new $classNameWithNS();
 		$mockValueObject->object = $mockInnerValueObject1;
 		$mockUriBuilder = $this->getAccessibleMock('TYPO3\\CMS\\Extbase\\Mvc\\Web\\Routing\\UriBuilder', array('dummy'));
 		$actualResult = $mockUriBuilder->_call('convertTransientObjectToArray', $mockValueObject);

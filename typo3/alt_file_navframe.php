@@ -2,7 +2,7 @@
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 1999-2011 Kasper Skårhøj (kasperYYYY@typo3.com)
+ *  (c) 1999-2013 Kasper Skårhøj (kasperYYYY@typo3.com)
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -24,28 +24,21 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
+
 /**
  * Folder tree in the File main module.
  *
- * Revised for TYPO3 3.6 2/2003 by Kasper Skårhøj
- * XHTML compliant
- *
  * @author Kasper Skårhøj <kasperYYYY@typo3.com>
  */
-$BACK_PATH = '';
 require_once 'init.php';
-/*
- * @deprecated since 6.0, the classname SC_alt_file_navframe and this file is obsolete
- * and will be removed with 6.2. The class was renamed and is now located at:
- * typo3/sysext/backend/Classes/Controller/FileSystemNavigationFrameController.php
- */
-require_once \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath('backend') . 'Classes/Controller/FileSystemNavigationFrameController.php';
+
 // Make instance if it is not an AJAX call
 if (!(TYPO3_REQUESTTYPE & TYPO3_REQUESTTYPE_AJAX)) {
-	$SOBE = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Backend\\Controller\\FileSystemNavigationFrameController');
-	$SOBE->init();
-	$SOBE->initPage();
-	$SOBE->main();
-	$SOBE->printContent();
+	$fileSystemNavigationFrameController = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
+		'TYPO3\\CMS\\Backend\\Controller\\FileSystemNavigationFrameController'
+	);
+	$fileSystemNavigationFrameController->initPage();
+	$fileSystemNavigationFrameController->main();
+	$fileSystemNavigationFrameController->printContent();
 }
 ?>

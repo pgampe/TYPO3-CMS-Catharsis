@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Extbase\Reflection;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010-2012 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
+ *  (c) 2010-2013 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
  *  Extbase is a backport of TYPO3 Flow. All credits go to the TYPO3 Flow team.
  *  All rights reserved
  *
@@ -84,6 +84,7 @@ class ClassSchema {
 
 	/**
 	 * @var \TYPO3\CMS\Extbase\Service\TypeHandlingService
+	 * @inject
 	 */
 	protected $typeHandlingService;
 
@@ -94,14 +95,6 @@ class ClassSchema {
 	 */
 	public function __construct($className) {
 		$this->className = $className;
-	}
-
-	/**
-	 * @param \TYPO3\CMS\Extbase\Service\TypeHandlingService $typeHandlingService
-	 * @return void
-	 */
-	public function injectTypeHandlingService(\TYPO3\CMS\Extbase\Service\TypeHandlingService $typeHandlingService) {
-		$this->typeHandlingService = $typeHandlingService;
 	}
 
 	/**

@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Core\Http;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2008-2011 Benjamin Mack <mack@xnos.org>
+ *  (c) 2008-2013 Benjamin Mack <mack@xnos.org>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -191,21 +191,21 @@ class AjaxRequestHandler {
 			die;
 		}
 		switch ($this->contentFormat) {
-		case 'jsonhead':
+			case 'jsonhead':
 
-		case 'jsonbody':
+			case 'jsonbody':
 
-		case 'json':
-			$this->renderAsJSON();
-			break;
-		case 'javascript':
-			$this->renderAsJavascript();
-			break;
-		case 'xml':
-			$this->renderAsXML();
-			break;
-		default:
-			$this->renderAsPlain();
+			case 'json':
+				$this->renderAsJSON();
+				break;
+			case 'javascript':
+				$this->renderAsJavascript();
+				break;
+			case 'xml':
+				$this->renderAsXML();
+				break;
+			default:
+				$this->renderAsPlain();
 		}
 		die;
 	}

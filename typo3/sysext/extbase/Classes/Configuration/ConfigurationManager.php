@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Extbase\Configuration;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010-2012 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
+ *  (c) 2010-2013 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
  *  Extbase is a backport of TYPO3 Flow. All credits go to the TYPO3 Flow team.
  *  All rights reserved
  *
@@ -37,6 +37,7 @@ class ConfigurationManager implements \TYPO3\CMS\Extbase\Configuration\Configura
 
 	/**
 	 * @var \TYPO3\CMS\Extbase\Object\ObjectManagerInterface
+	 * @inject
 	 */
 	protected $objectManager;
 
@@ -46,11 +47,17 @@ class ConfigurationManager implements \TYPO3\CMS\Extbase\Configuration\Configura
 	protected $concreteConfigurationManager;
 
 	/**
-	 * @param \TYPO3\CMS\Extbase\Object\ObjectManagerInterface $objectManager
+	 * @var \TYPO3\CMS\Extbase\Service\EnvironmentService
+	 * @inject
+	 */
+	protected $environmentService;
+
+	/**
+	 * Initializes the object
+	 *
 	 * @return void
 	 */
-	public function injectObjectManager(\TYPO3\CMS\Extbase\Object\ObjectManagerInterface $objectManager) {
-		$this->objectManager = $objectManager;
+	public function initializeObject() {
 		$this->initializeConcreteConfigurationManager();
 	}
 
@@ -58,7 +65,7 @@ class ConfigurationManager implements \TYPO3\CMS\Extbase\Configuration\Configura
 	 * @return void
 	 */
 	protected function initializeConcreteConfigurationManager() {
-		if (TYPO3_MODE === 'FE') {
+		if ($this->environmentService->isEnvironmentInFrontendMode()) {
 			$this->concreteConfigurationManager = $this->objectManager->get('TYPO3\\CMS\\Extbase\\Configuration\\FrontendConfigurationManager');
 		} else {
 			$this->concreteConfigurationManager = $this->objectManager->get('TYPO3\\CMS\\Extbase\\Configuration\\BackendConfigurationManager');

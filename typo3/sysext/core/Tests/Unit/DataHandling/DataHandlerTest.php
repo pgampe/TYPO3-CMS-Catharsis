@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Core\Tests\Unit\DataHandler;
 /***************************************************************
  * Copyright notice
  *
- * (c) 2009-2011 Oliver Klee (typo3-coding@oliverklee.de)
+ * (c) 2009-2013 Oliver Klee (typo3-coding@oliverklee.de)
  * All rights reserved
  *
  * This script is part of the TYPO3 project. The TYPO3 project is
@@ -32,20 +32,6 @@ namespace TYPO3\CMS\Core\Tests\Unit\DataHandler;
 class DataHandlerTest extends \TYPO3\CMS\Core\Tests\UnitTestCase {
 
 	/**
-	 * Enable backup of global and system variables
-	 *
-	 * @var boolean
-	 */
-	protected $backupGlobals = TRUE;
-
-	/**
-	 * a backup of the global database
-	 *
-	 * @var \TYPO3\CMS\Core\Database\DatabaseConnection
-	 */
-	protected $databaseBackup = NULL;
-
-	/**
 	 * @var array A backup of registered singleton instances
 	 */
 	protected $singletonInstances = array();
@@ -62,7 +48,6 @@ class DataHandlerTest extends \TYPO3\CMS\Core\Tests\UnitTestCase {
 
 	public function setUp() {
 		$this->singletonInstances = \TYPO3\CMS\Core\Utility\GeneralUtility::getSingletonInstances();
-		$this->databaseBackup = $GLOBALS['TYPO3_DB'];
 		$this->backEndUser = $this->getMock('TYPO3\\CMS\\Core\\Authentication\\BackendUserAuthentication');
 		$this->fixture = new \TYPO3\CMS\Core\DataHandling\DataHandler();
 		$this->fixture->start(array(), '', $this->backEndUser);
@@ -70,8 +55,7 @@ class DataHandlerTest extends \TYPO3\CMS\Core\Tests\UnitTestCase {
 
 	public function tearDown() {
 		\TYPO3\CMS\Core\Utility\GeneralUtility::resetSingletonInstances($this->singletonInstances);
-		$GLOBALS['TYPO3_DB'] = $this->databaseBackup;
-		unset($this->fixture->BE_USER, $this->fixture, $this->backEndUser, $this->databaseBackup);
+		unset($this->fixture->BE_USER, $this->fixture, $this->backEndUser);
 	}
 
 	//////////////////////////////////////
@@ -299,6 +283,18 @@ class DataHandlerTest extends \TYPO3\CMS\Core\Tests\UnitTestCase {
 		$createdTceMain->expects($this->once())->method('process_cmdmap');
 		\TYPO3\CMS\Core\Utility\GeneralUtility::addInstance('TYPO3\\CMS\\Core\\DataHandling\\DataHandler', $createdTceMain);
 		$fixture->process_datamap();
+	}
+
+	/**
+	 * @test
+	 */
+	public function doesCheckFlexFormValueHookGetsCalled() {
+		$hookClass = uniqid('tx_coretest');
+		$hookMock = $this->getMock($hookClass, array('checkFlexFormValue_beforeMerge'));
+		$hookMock->expects($this->once())->method('checkFlexFormValue_beforeMerge');
+		$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['checkFlexFormValue'][] = $hookClass;
+		$GLOBALS['T3_VAR']['getUserObj'][$hookClass] = $hookMock;
+		$this->fixture->checkValue_flex(array(), array(), array(), array(), array(), '');
 	}
 
 	/////////////////////////////////////

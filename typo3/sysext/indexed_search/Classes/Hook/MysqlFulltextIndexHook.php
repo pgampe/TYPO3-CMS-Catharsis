@@ -4,7 +4,7 @@ namespace TYPO3\CMS\IndexedSearch\Hook;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2011 Michael Stucki (michael@typo3.org)
+ *  (c) 2011-2013 Michael Stucki (michael@typo3.org)
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -47,8 +47,8 @@ class MysqlFulltextIndexHook {
 	 * Gets a SQL result pointer to traverse for the search records.
 	 *
 	 * @param array $searchWordsArray Search words
-	 * @param int $freeIndexUid Pointer to which indexing configuration you want to search in. -1 means no filtering. 0 means only regular indexed content.
-	 * @return resource|false
+	 * @param integer $freeIndexUid Pointer to which indexing configuration you want to search in. -1 means no filtering. 0 means only regular indexed content.
+	 * @return boolean|\mysqli_result|object MySQLi result object / DBAL object
 	 */
 	public function getResultRows_SQLpointer($searchWordsArray, $freeIndexUid = -1) {
 		// Build the search string, detect which fulltext index to use, and decide whether boolean search is needed or not
@@ -90,43 +90,43 @@ class MysqlFulltextIndexHook {
 				$searchType = self::SENTENCE;
 			}
 			switch ($searchType) {
-			case self::ANY_PART_OF_THE_WORD:
+				case self::ANY_PART_OF_THE_WORD:
 
-			case self::LAST_PART_OF_THE_WORD:
+				case self::LAST_PART_OF_THE_WORD:
 
-			case self::FIRST_PART_OF_THE_WORD:
-				// First part of word
-				$wildcard = '*';
-				// Part-of-word search requires boolean mode!
-				$searchBoolean = TRUE;
-				break;
-			case self::SOUNDS_LIKE:
-				$indexerObj = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\IndexedSearch\\Indexer');
-				// Initialize the indexer-class
-				/** @var \TYPO3\CMS\IndexedSearch\Indexer $indexerObj */
-				$searchWord = $indexerObj->metaphone($searchWord, $indexerObj->storeMetaphoneInfoAsWords);
-				unset($indexerObj);
-				$fulltextIndex = 'index_fulltext.metaphonedata';
-				break;
-			case self::SENTENCE:
-				$searchBoolean = TRUE;
-				// Remove existing quotes and fix misplaced quotes.
-				$searchWord = trim(str_replace('"', ' ', $searchWord));
-				break;
-			}
-			// Perform search for word:
-			switch ($searchWordData['oper']) {
-			case 'AND NOT':
-				$booleanSearchString .= ' -' . $searchWord . $wildcard;
-				$searchBoolean = TRUE;
-				break;
-			case 'OR':
-				$booleanSearchString .= ' ' . $searchWord . $wildcard;
-				$searchBoolean = TRUE;
-				break;
-			default:
-				$booleanSearchString .= ' +' . $searchWord . $wildcard;
-				$naturalSearchString .= ' ' . $searchWord;
+				case self::FIRST_PART_OF_THE_WORD:
+					// First part of word
+					$wildcard = '*';
+					// Part-of-word search requires boolean mode!
+					$searchBoolean = TRUE;
+					break;
+				case self::SOUNDS_LIKE:
+					$indexerObj = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\IndexedSearch\\Indexer');
+					// Initialize the indexer-class
+					/** @var \TYPO3\CMS\IndexedSearch\Indexer $indexerObj */
+					$searchWord = $indexerObj->metaphone($searchWord, $indexerObj->storeMetaphoneInfoAsWords);
+					unset($indexerObj);
+					$fulltextIndex = 'index_fulltext.metaphonedata';
+					break;
+				case self::SENTENCE:
+					$searchBoolean = TRUE;
+					// Remove existing quotes and fix misplaced quotes.
+					$searchWord = trim(str_replace('"', ' ', $searchWord));
+					break;
+				}
+				// Perform search for word:
+				switch ($searchWordData['oper']) {
+					case 'AND NOT':
+						$booleanSearchString .= ' -' . $searchWord . $wildcard;
+						$searchBoolean = TRUE;
+						break;
+					case 'OR':
+						$booleanSearchString .= ' ' . $searchWord . $wildcard;
+						$searchBoolean = TRUE;
+						break;
+					default:
+						$booleanSearchString .= ' +' . $searchWord . $wildcard;
+						$naturalSearchString .= ' ' . $searchWord;
 			}
 			$count++;
 		}
@@ -148,8 +148,8 @@ class MysqlFulltextIndexHook {
 	 * Execute final query, based on phash integer list. The main point is sorting the result in the right order.
 	 *
 	 * @param array $searchData Array with search string, boolean indicator, and fulltext index reference
-	 * @param int $freeIndexUid Pointer to which indexing configuration you want to search in. -1 means no filtering. 0 means only regular indexed content.
-	 * @return resource Query result
+	 * @param integer $freeIndexUid Pointer to which indexing configuration you want to search in. -1 means no filtering. 0 means only regular indexed content.
+	 * @return boolean|\mysqli_result|object MySQLi result object / DBAL object
 	 */
 	protected function execFinalQuery_fulltext($searchData, $freeIndexUid = -1) {
 		// Setting up methods of filtering results based on page types, access, etc.

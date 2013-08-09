@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Extensionmanager\Controller;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2012 Susanne Moog, <typo3@susannemoog.de>
+ *  (c) 2012-2013 Susanne Moog, <typo3@susannemoog.de>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -35,50 +35,27 @@ class ListController extends \TYPO3\CMS\Extensionmanager\Controller\AbstractCont
 
 	/**
 	 * @var \TYPO3\CMS\Extensionmanager\Domain\Repository\ExtensionRepository
+	 * @inject
 	 */
 	protected $extensionRepository;
 
 	/**
 	 * @var \TYPO3\CMS\Extensionmanager\Utility\ListUtility
+	 * @inject
 	 */
 	protected $listUtility;
 
 	/**
-	 * Dependency injection of the Extension Repository
-	 *
-	 * @param \TYPO3\CMS\Extensionmanager\Domain\Repository\ExtensionRepository $extensionRepository
-	 * @return void
-	 */
-	public function injectExtensionRepository(\TYPO3\CMS\Extensionmanager\Domain\Repository\ExtensionRepository $extensionRepository) {
-		$this->extensionRepository = $extensionRepository;
-	}
-
-	/**
-	 * @param \TYPO3\CMS\Extensionmanager\Utility\ListUtility $listUtility
-	 * @return void
-	 */
-	public function injectListUtility(\TYPO3\CMS\Extensionmanager\Utility\ListUtility $listUtility) {
-		$this->listUtility = $listUtility;
-	}
-
-	/**
 	 * @var \TYPO3\CMS\Core\Page\PageRenderer
+	 * @inject
 	 */
 	protected $pageRenderer;
-
-	/**
-	 * @param \TYPO3\CMS\Core\Page\PageRenderer $pageRenderer
-	 * @return void
-	 */
-	public function injectPageRenderer(\TYPO3\CMS\Core\Page\PageRenderer $pageRenderer) {
-		$this->pageRenderer = $pageRenderer;
-	}
 
 	/**
 	 * Add the needed JavaScript files for all actions
 	 */
 	public function initializeAction() {
-		$this->pageRenderer->addJsFile('../t3lib/js/extjs/notifications.js');
+		$this->pageRenderer->addJsFile('sysext/backend/Resources/Public/JavaScript/notifications.js');
 		$this->pageRenderer->addInlineLanguageLabelFile('EXT:extensionmanager/Resources/Private/Language/locallang.xlf');
 	}
 
@@ -119,8 +96,16 @@ class ListController extends \TYPO3\CMS\Extensionmanager\Controller\AbstractCont
 	 * @param string $extensionKey
 	 */
 	public function showAllVersionsAction($extensionKey) {
+		$currentVersion = $this->extensionRepository->findOneByCurrentVersionByExtensionKey($extensionKey);
 		$extensions = $this->extensionRepository->findByExtensionKeyOrderedByVersion($extensionKey);
-		$this->view->assign('extensions', $extensions)->assign('extensionKey', $extensionKey);
+
+		$this->view->assignMultiple(
+			array(
+				'extensionKey' => $extensionKey,
+				'currentVersion' => $currentVersion,
+				'extensions' => $extensions
+			)
+		);
 	}
 }
 ?>

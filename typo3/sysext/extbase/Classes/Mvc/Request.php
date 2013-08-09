@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Extbase\Mvc;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010-2012 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
+ *  (c) 2010-2013 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
  *  Extbase is a backport of TYPO3 Flow. All credits go to the TYPO3 Flow team.
  *  All rights reserved
  *
@@ -126,7 +126,7 @@ class Request implements \TYPO3\CMS\Extbase\Mvc\RequestInterface {
 
 	/**
 	 * @var array Errors that occured during this request
-	 * @deprecated since Extbase 1.4.0, will be removed with Extbase 6.1
+	 * @deprecated since Extbase 1.4.0, will be removed two versions after Extbase 6.1
 	 */
 	protected $errors = array();
 
@@ -316,7 +316,7 @@ class Request implements \TYPO3\CMS\Extbase\Mvc\RequestInterface {
 	 *
 	 * Note that the action name must start with a lower case letter and is case sensitive.
 	 *
-	 * @param string $actionName: Name of the action to execute by the controller
+	 * @param string $actionName Name of the action to execute by the controller
 	 *
 	 * @return void
 	 * @throws \TYPO3\CMS\Extbase\Mvc\Exception\InvalidActionNameException if the action name is not valid
@@ -497,7 +497,7 @@ class Request implements \TYPO3\CMS\Extbase\Mvc\RequestInterface {
 	 * @param array $errors An array of \TYPO3\CMS\Extbase\Error\Error objects
 	 *
 	 * @return void
-	 * @deprecated since Extbase 1.4.0, will be removed with Extbase 6.1
+	 * @deprecated since Extbase 1.4.0, will be removed two versions after Extbase 6.1
 	 */
 	public function setErrors(array $errors) {
 		$this->errors = $errors;
@@ -507,7 +507,7 @@ class Request implements \TYPO3\CMS\Extbase\Mvc\RequestInterface {
 	 * Get errors that occured during the request (e.g. argument mapping errors)
 	 *
 	 * @return array The errors that occured during the request
-	 * @deprecated since Extbase 1.4.0, will be removed with Extbase 6.1
+	 * @deprecated since Extbase 1.4.0, will be removed two versions after Extbase 6.1
 	 */
 	public function getErrors() {
 		return $this->errors;

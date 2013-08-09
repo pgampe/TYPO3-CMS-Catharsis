@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Extbase\Utility;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010-2012 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
+ *  (c) 2010-2013 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
  *  Extbase is a backport of TYPO3 Flow. All credits go to the TYPO3 Flow team.
  *  All rights reserved
  *
@@ -253,7 +253,7 @@ class ArrayUtility {
 	/**
 	 * Sorts multidimensional arrays by recursively calling ksort on its elements.
 	 *
-	 * @param array $array the array to sort
+	 * @param array &$array the array to sort
 	 * @param integer $sortFlags may be used to modify the sorting behavior using these values (see http://www.php.net/manual/en/function.sort.php)
 	 * @return boolean TRUE on success, FALSE on failure
 	 * @see asort()

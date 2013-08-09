@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Extbase\Property;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010-2012 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
+ *  (c) 2010-2013 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
  *  Extbase is a backport of TYPO3 Flow. All credits go to the TYPO3 Flow team.
  *  All rights reserved
  *
@@ -48,7 +48,7 @@ namespace TYPO3\CMS\Extbase\Property;
  * Now the target object equals the source object.
  *
  * @api
- * @deprecated since Extbase 1.4.0
+ * @deprecated since Extbase 1.4.0, will be removed two versions after Extbase 6.1
  */
 class Mapper implements \TYPO3\CMS\Core\SingletonInterface {
 
@@ -61,68 +61,33 @@ class Mapper implements \TYPO3\CMS\Core\SingletonInterface {
 
 	/**
 	 * @var \TYPO3\CMS\Extbase\Validation\ValidatorResolver
+	 * @inject
 	 */
 	protected $validatorResolver;
 
 	/**
 	 * @var \TYPO3\CMS\Extbase\Reflection\ReflectionService
+	 * @inject
 	 */
 	protected $reflectionService;
 
 	/**
 	 * @var \TYPO3\CMS\Extbase\Persistence\PersistenceManagerInterface
+	 * @inject
 	 */
 	protected $persistenceManager;
 
 	/**
 	 * @var \TYPO3\CMS\Extbase\Object\ObjectManagerInterface
+	 * @inject
 	 */
 	protected $objectManager;
 
 	/**
 	 * @var \TYPO3\CMS\Extbase\Persistence\Generic\QueryFactoryInterface
+	 * @inject
 	 */
 	protected $queryFactory;
-
-	/**
-	 * @param \TYPO3\CMS\Extbase\Validation\ValidatorResolver $validatorResolver
-	 * @return void
-	 */
-	public function injectValidatorResolver(\TYPO3\CMS\Extbase\Validation\ValidatorResolver $validatorResolver) {
-		$this->validatorResolver = $validatorResolver;
-	}
-
-	/**
-	 * @param \TYPO3\CMS\Extbase\Persistence\Generic\QueryFactoryInterface $queryFactory
-	 * @return void
-	 */
-	public function injectQueryFactory(\TYPO3\CMS\Extbase\Persistence\Generic\QueryFactoryInterface $queryFactory) {
-		$this->queryFactory = $queryFactory;
-	}
-
-	/**
-	 * @param \TYPO3\CMS\Extbase\Persistence\PersistenceManagerInterface $persistenceManager
-	 * @return void
-	 */
-	public function injectPersistenceManager(\TYPO3\CMS\Extbase\Persistence\PersistenceManagerInterface $persistenceManager) {
-		$this->persistenceManager = $persistenceManager;
-	}
-
-	/**
-	 * @param \TYPO3\CMS\Extbase\Reflection\ReflectionService $reflectionService
-	 * @return void
-	 */
-	public function injectReflectionService(\TYPO3\CMS\Extbase\Reflection\ReflectionService $reflectionService) {
-		$this->reflectionService = $reflectionService;
-	}
-
-	/**
-	 * @param \TYPO3\CMS\Extbase\Object\ObjectManagerInterface $objectManager
-	 * @return void
-	 */
-	public function injectObjectManager(\TYPO3\CMS\Extbase\Object\ObjectManagerInterface $objectManager) {
-		$this->objectManager = $objectManager;
-	}
 
 	/**
 	 * Maps the given properties to the target object and validates the properties according to the defined
@@ -135,8 +100,9 @@ class Mapper implements \TYPO3\CMS\Core\SingletonInterface {
 	 * @param array $propertyNames Names of the properties to map.
 	 * @param mixed $source Source containing the properties to map to the target object. Must either be an array, ArrayObject or any other object.
 	 * @param object $target The target object
-	 * @param \TYPO3\CMS\Extbase\Validation\Validator\ObjectValidatorInterface $targetObjectValidator A validator used for validating the target object
 	 * @param array $optionalPropertyNames Names of optional properties. If a property is specified here and it doesn't exist in the source, no error is issued.
+	 * @param \TYPO3\CMS\Extbase\Validation\Validator\ObjectValidatorInterface $targetObjectValidator A validator used for validating the target object
+	 *
 	 * @return boolean TRUE if the mapped properties are valid, otherwise FALSE
 	 * @see getMappingResults()
 	 * @see map()
@@ -164,7 +130,7 @@ class Mapper implements \TYPO3\CMS\Core\SingletonInterface {
 	/**
 	 * Add errors to the mapping result from an object validator (property errors).
 	 *
-	 * @param array Array of \TYPO3\CMS\Extbase\Validation\PropertyError
+	 * @param array $errors Array of \TYPO3\CMS\Extbase\Validation\PropertyError
 	 * @return void
 	 */
 	protected function addErrorsFromObjectValidator($errors) {

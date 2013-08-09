@@ -9,8 +9,8 @@
  * writing. "version" and "dependencies" must not be touched!
  ***************************************************************/
 $EM_CONF[$_EXTKEY] = array(
-	'title' => 'Linkvalidator',
-	'description' => 'Linkvalidator checks the links in your website for validity. It can validate all kinds of links: internal, external and file links. Scheduler is supported to run Linkvalidator via Cron including the option to send status mails, if broken links were detected.',
+	'title' => 'Link Validator',
+	'description' => 'Link Validator checks the links in your website for validity. It can validate all kinds of links: internal, external and file links. Scheduler is supported to run Link Validator via Cron including the option to send status mails, if broken links were detected.',
 	'category' => 'module',
 	'author' => 'Jochen Rieger / Dimitri König / Michael Miousse',
 	'author_email' => 'j.rieger@connecta.ag, mmiousse@infoglobe.ca',
@@ -28,11 +28,11 @@ $EM_CONF[$_EXTKEY] = array(
 	'doNotLoadInFE' => 1,
 	'lockType' => '',
 	'author_company' => 'Connecta AG / cab services ag / Infoglobe',
-	'version' => '6.0.0',
+	'version' => '6.2.0',
 	'constraints' => array(
 		'depends' => array(
-			'typo3' => '6.0.0-0.0.0',
-			'info' => '6.0.0-0.0.0'
+			'typo3' => '6.2.0-6.2.99',
+			'info' => '6.2.0-6.2.99',
 		),
 		'conflicts' => array(),
 		'suggests' => array()

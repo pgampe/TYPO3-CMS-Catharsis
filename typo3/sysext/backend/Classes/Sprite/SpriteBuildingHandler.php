@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Backend\Sprite;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010-2011 Steffen Ritter <info@steffen-ritter.net>
+ *  (c) 2010-2013 Steffen Ritter <info@steffen-ritter.net>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -26,6 +26,10 @@ namespace TYPO3\CMS\Backend\Sprite;
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
+
+use TYPO3\CMS\Backend\Sprite\SpriteManager;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+
 /**
  * Sprite build handler
  *
@@ -45,11 +49,11 @@ class SpriteBuildingHandler extends \TYPO3\CMS\Backend\Sprite\AbstractSpriteHand
 	 * @return void
 	 */
 	public function generate() {
-		$this->generatorInstance = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Backend\\Sprite\\SpriteGenerator', 'GeneratorHandler');
-		$this->generatorInstance->setOmmitSpriteNameInIconName(TRUE)->setIncludeTimestampInCSS(TRUE)->setSpriteFolder(\TYPO3\CMS\Backend\Sprite\SpriteManager::$tempPath)->setCSSFolder(\TYPO3\CMS\Backend\Sprite\SpriteManager::$tempPath);
+		$this->generatorInstance = GeneralUtility::makeInstance('TYPO3\\CMS\\Backend\\Sprite\\SpriteGenerator', 'GeneratorHandler');
+		$this->generatorInstance->setOmmitSpriteNameInIconName(TRUE)->setIncludeTimestampInCSS(TRUE)->setSpriteFolder(SpriteManager::$tempPath)->setCSSFolder(SpriteManager::$tempPath);
 		$iconsToProcess = array_merge((array) $GLOBALS['TBE_STYLES']['spritemanager']['singleIcons'], $this->collectTcaSpriteIcons());
 		foreach ($iconsToProcess as $iconName => $iconFile) {
-			$iconsToProcess[$iconName] = \TYPO3\CMS\Core\Utility\GeneralUtility::resolveBackPath('typo3/' . $iconFile);
+			$iconsToProcess[$iconName] = GeneralUtility::resolveBackPath('typo3/' . $iconFile);
 		}
 		$generatorResponse = $this->generatorInstance->generateSpriteFromArray($iconsToProcess);
 		$this->iconNames = array_merge($this->iconNames, $generatorResponse['iconNames']);

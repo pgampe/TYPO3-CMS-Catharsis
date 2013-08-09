@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Impexp;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 1999-2011 Kasper Skårhøj (kasperYYYY@typo3.com)
+ *  (c) 1999-2013 Kasper Skårhøj (kasperYYYY@typo3.com)
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -50,7 +50,7 @@ class LocalPageTree extends \TYPO3\CMS\Backend\Tree\View\BrowseTreeView {
 	 * @todo Define visibility
 	 */
 	public function wrapTitle($title, $v) {
-		$title = !strcmp(trim($title), '') ? '<em>[' . $GLOBALS['LANG']->sL('LLL:EXT:lang/locallang_core.php:labels.no_title', 1) . ']</em>' : htmlspecialchars($title);
+		$title = !strcmp(trim($title), '') ? '<em>[' . $GLOBALS['LANG']->sL('LLL:EXT:lang/locallang_core.xlf:labels.no_title', 1) . ']</em>' : htmlspecialchars($title);
 		return $title;
 	}
 

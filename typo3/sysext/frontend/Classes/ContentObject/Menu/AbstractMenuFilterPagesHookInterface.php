@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Frontend\ContentObject\Menu;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010-2011 Tolleiv Nietsch <nietsch@aoemedia.de>
+ *  (c) 2010-2013 Tolleiv Nietsch <nietsch@aoemedia.de>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -26,13 +26,13 @@ namespace TYPO3\CMS\Frontend\ContentObject\Menu;
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
+
 /**
- * interface for classes which hook into tslib_menu
+ * interface for classes which hook into AbstractMenuContentObject
  *
  * @author Tolleiv Nietsch <nietsch@aoemedia.de>
  */
-interface AbstractMenuFilterPagesHookInterface
-{
+interface AbstractMenuFilterPagesHookInterface {
 	/**
 	 * Checks if a page is OK to include in the final menu item array.
 	 *

@@ -2,7 +2,7 @@
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 1999-2011 Kasper Skårhøj (kasperYYYY@typo3.com)
+ *  (c) 1999-2013 Kasper Skårhøj (kasperYYYY@typo3.com)
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -24,27 +24,17 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
+
 /**
  * Colorpicker wizard
- *
- * Revised for TYPO3 3.7 May/2004 by Kasper Skårhøj
  *
  * @author Mathias Schreiber <schreiber@wmdb.de>
  * @author Peter Kühn <peter@kuehn.com>
  * @author Kasper Skårhøj <typo3@typo3.com>
  */
-$GLOBALS['BACK_PATH'] = '';
-require 'init.php';
-$GLOBALS['LANG']->includeLLFile('EXT:lang/locallang_wizards.xml');
-/*
- * @deprecated since 6.0, the classname SC_wizard_colorpicker and this file is obsolete
- * and will be removed with 6.2. The class was renamed and is now located at:
- * typo3/sysext/backend/Classes/Controller/Wizard/ColorpickerController.php
- */
-require_once \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath('backend') . 'Classes/Controller/Wizard/ColorpickerController.php';
-// Make instance:
-$SOBE = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Backend\\Controller\\Wizard\\ColorpickerController');
-$SOBE->init();
-$SOBE->main();
-$SOBE->printContent();
+require __DIR__ . '/init.php';
+
+$colorpickerController = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Backend\\Controller\\Wizard\\ColorpickerController');
+$colorpickerController->main();
+$colorpickerController->printContent();
 ?>

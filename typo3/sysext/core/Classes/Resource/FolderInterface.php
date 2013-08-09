@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Core\Resource;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2012 Andreas Wolf <andreas.wolf@typo3.org>
+ *  (c) 2012-2013 Andreas Wolf <andreas.wolf@typo3.org>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -33,6 +33,15 @@ namespace TYPO3\CMS\Core\Resource;
  */
 interface FolderInterface extends ResourceInterface
 {
+	/**
+	 * Roles for folders
+	 */
+	const ROLE_DEFAULT = 'default';
+	const ROLE_RECYCLER = 'recycler';
+	const ROLE_PROCESSING = 'processing';
+	const ROLE_TEMPORARY = 'temporary';
+	const ROLE_USERUPLOAD = 'userupload';
+
 	/**
 	 * Returns a list of all subfolders
 	 *

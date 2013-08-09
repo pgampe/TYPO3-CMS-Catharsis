@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Workspaces\Service;
 /***************************************************************
  * Copyright notice
  *
- * (c) 2012 Oliver Hader <oliver.hader@typo3.org>
+ * (c) 2012-2013 Oliver Hader <oliver.hader@typo3.org>
  * All rights reserved
  *
  * This script is part of the TYPO3 project. The TYPO3 project is
@@ -52,7 +52,6 @@ class HistoryService implements \TYPO3\CMS\Core\SingletonInterface {
 	 * Creates this object.
 	 */
 	public function __construct() {
-		require_once PATH_typo3 . 'class.show_rechis.inc';
 		$this->backendUserNames = \TYPO3\CMS\Backend\Utility\BackendUtility::getUserNames();
 	}
 

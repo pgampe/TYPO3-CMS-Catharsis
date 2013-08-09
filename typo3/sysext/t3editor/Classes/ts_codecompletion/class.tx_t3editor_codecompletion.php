@@ -2,7 +2,7 @@
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2008-2011 Stephan Petzl <spetzl@gmx.at> and Christian Kartnig <office@hahnepeter.de>
+ *  (c) 2008-2013 Stephan Petzl <spetzl@gmx.at> and Christian Kartnig <office@hahnepeter.de>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -24,8 +24,7 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
-require_once PATH_t3lib . 'class.t3lib_page.php';
-$GLOBALS['LANG']->includeLLFile('EXT:t3editor/locallang.xml');
+$GLOBALS['LANG']->includeLLFile('EXT:t3editor/locallang.xlf');
 /*
  * @deprecated since 6.0, the classname tx_t3editor_codecompletion and this file is obsolete
  * and will be removed with 6.2. The class was renamed and is now located at:

@@ -2,7 +2,7 @@
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 1999-2011 Kasper Skårhøj (kasperYYYY@typo3.com)
+ *  (c) 1999-2013 Kasper Skårhøj (kasperYYYY@typo3.com)
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -29,16 +29,13 @@
  *
  * This module lets you view a page in a more Content Management like style than the ordinary record-list
  *
- * Revised for TYPO3 3.6 November/2003 by Kasper Skårhøj
- * XHTML compliant
- *
  * @author Kasper Skårhøj <kasperYYYY@typo3.com>
  */
 unset($MCONF);
-require 'conf.php';
+require __DIR__ . '/conf.php';
 require $BACK_PATH . 'init.php';
-$LANG->includeLLFile('EXT:cms/layout/locallang.xml');
-require_once 'class.tx_cms_layout.php';
+$LANG->includeLLFile('EXT:cms/layout/locallang.xlf');
+
 $BE_USER->modAccess($MCONF, 1);
 // Will open up records locked by current user. It's assumed that the locking should end if this script is hit.
 \TYPO3\CMS\Backend\Utility\BackendUtility::lockRecords();

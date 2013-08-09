@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Core\Category\Collection;
 /***************************************************************
  * Copyright notice
  *
- * (c) 2012 Fabien Udriot <fabien.udriot@typo3.org>
+ * (c) 2012-2013 Fabien Udriot <fabien.udriot@typo3.org>
  * All rights reserved
  *
  * This script is part of the TYPO3 project. The TYPO3 project is
@@ -100,7 +100,14 @@ class CategoryCollection extends \TYPO3\CMS\Core\Collection\AbstractRecordCollec
 	protected function getCollectedRecords() {
 		$relatedRecords = array();
 		/** @var $GLOBALS['TYPO3_DB'] \TYPO3\CMS\Core\Database\DatabaseConnection */
-		$resource = $this->getDatabase()->exec_SELECT_mm_query($this->getItemTableName() . '.*', self::$storageTableName, 'sys_category_record_mm', $this->getItemTableName(), 'AND ' . self::$storageTableName . '.uid=' . intval($this->getIdentifier()));
+		$resource = $this->getDatabase()->exec_SELECT_mm_query(
+			$this->getItemTableName() . '.*',
+			self::$storageTableName,
+			'sys_category_record_mm',
+			$this->getItemTableName(),
+			'AND ' . self::$storageTableName . '.uid=' . intval($this->getIdentifier())
+				. ' AND sys_category_record_mm.tablenames = "' . $this->getItemTableName() . '"'
+		);
 		if ($resource) {
 			while ($record = $this->getDatabase()->sql_fetch_assoc($resource)) {
 				$relatedRecords[] = $record;

@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Version\Task;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010-2011 François Suter <francois@typo3.org>
+ *  (c) 2010-2013 François Suter <francois@typo3.org>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -40,7 +40,6 @@ class AutoPublishTask extends \TYPO3\CMS\Scheduler\Task\AbstractTask {
 	 */
 	public function execute() {
 		// Load the workspace library class and instatiate it
-		require_once \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath('version') . 'ws/class.wslib.php';
 		$autopubObj = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Version\\Utility\\WorkspacesUtility');
 		// Publish the workspaces that need to be
 		$autopubObj->autoPublishWorkspaces();

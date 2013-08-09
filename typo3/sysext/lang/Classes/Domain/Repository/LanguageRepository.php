@@ -3,7 +3,7 @@ namespace TYPO3\CMS\Lang\Domain\Repository;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2012 Sebastian Fischer <typo3@evoweb.de>
+ *  (c) 2012-2013 Sebastian Fischer <typo3@evoweb.de>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -101,7 +101,7 @@ class LanguageRepository {
 			array_shift($languages);
 
 			foreach ($languages as $locale => $language) {
-				$label = htmlspecialchars($GLOBALS['LANG']->sL('LLL:EXT:setup/mod/locallang.xml:lang_' . $locale));
+				$label = htmlspecialchars($GLOBALS['LANG']->sL('LLL:EXT:setup/mod/locallang.xlf:lang_' . $locale));
 				if ($label === '') {
 					$label = htmlspecialchars($language);
 				}

@@ -2,7 +2,7 @@
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 1999-2011 Kasper Skårhøj (kasperYYYY@typo3.com)
+ *  (c) 1999-2013 Kasper Skårhøj (kasperYYYY@typo3.com)
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -24,30 +24,20 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
+
 /**
  * Shortcut frame
  * Appears in the bottom frame of the backend frameset.
  * Provides links to registered shortcuts
  * If the 'cms' extension is loaded you will also have a field for entering page id/alias which will be found/edited
  *
- * Revised for TYPO3 3.6 2/2003 by Kasper Skårhøj
- * XHTML compliant output
- *
  * @author Kasper Skårhøj <kasperYYYY@typo3.com>
  */
-require 'init.php';
-$LANG->includeLLFile('EXT:lang/locallang_misc.xml');
-/*
- * @deprecated since 6.0, the classname SC_alt_shortcut and this file is obsolete
- * and will be removed with 6.2. The class was renamed and is now located at:
- * typo3/sysext/backend/Classes/Controller/ShortcutFrameController.php
- */
-require_once \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath('backend') . 'Classes/Controller/ShortcutFrameController.php';
-// Make instance:
-$SOBE = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Backend\\Controller\\ShortcutFrameController');
-$SOBE->preinit();
-$SOBE->preprocess();
-$SOBE->init();
-$SOBE->main();
-$SOBE->printContent();
+require __DIR__ . '/init.php';
+
+$shortcutFrameController = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Backend\\Controller\\ShortcutFrameController');
+$shortcutFrameController->preprocess();
+$shortcutFrameController->init();
+$shortcutFrameController->main();
+$shortcutFrameController->printContent();
 ?>

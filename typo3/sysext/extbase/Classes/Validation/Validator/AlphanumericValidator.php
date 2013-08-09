@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Extbase\Validation\Validator;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010-2012 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
+ *  (c) 2010-2013 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
  *  Extbase is a backport of TYPO3 Flow. All credits go to the TYPO3 Flow team.
  *  All rights reserved
  *
@@ -29,26 +29,26 @@ namespace TYPO3\CMS\Extbase\Validation\Validator;
  ***************************************************************/
 /**
  * Validator for alphanumeric strings
+ *
+ * @api
  */
-class AlphanumericValidator extends \TYPO3\CMS\Extbase\Validation\Validator\AbstractValidator {
+class AlphanumericValidator extends AbstractValidator {
 
 	/**
-	 * Returns TRUE, if the given property ($propertyValue) is a valid
-	 * alphanumeric string, which is defined as [a-zA-Z0-9]*.
-	 *
-	 * If at least one error occurred, the result is FALSE.
+	 * The given $value is valid if it is an alphanumeric string, which is defined as [\pL\d]*.
 	 *
 	 * @param mixed $value The value that should be validated
-	 * @return boolean TRUE if the value is valid, FALSE if an error occured
+	 * @return void
+	 * @api
 	 */
 	public function isValid($value) {
-		$this->errors = array();
 		if (!is_string($value) || preg_match('/^[\pL\d]*$/u', $value) !== 1) {
-			$this->addError('The given subject was not a valid alphanumeric string.', 1221551320);
-			return FALSE;
+			$this->addError(
+				\TYPO3\CMS\Extbase\Utility\LocalizationUtility::translate(
+					'validator.alphanumeric.notvalid',
+					'extbase'
+				), 1221551320);
 		}
-
-		return TRUE;
 	}
 }
 

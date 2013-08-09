@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Extbase\Object\Container;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010-2012 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
+ *  (c) 2010-2013 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
  *  Extbase is a backport of TYPO3 Flow. All credits go to the TYPO3 Flow team.
  *  All rights reserved
  *
@@ -65,6 +65,7 @@ class ClassInfoCache {
 	 * Gets the cache for the id
 	 *
 	 * @param string $id
+	 * @return mixed
 	 */
 	public function get($id) {
 		if (!isset($this->level1Cache[$id])) {
@@ -76,8 +77,8 @@ class ClassInfoCache {
 	/**
 	 * sets the cache for the id
 	 *
-	 * @param $id
-	 * @param $value
+	 * @param string $id
+	 * @param mixed $value
 	 */
 	public function set($id, $value) {
 		$this->level1Cache[$id] = $value;

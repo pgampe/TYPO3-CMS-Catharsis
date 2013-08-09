@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Lowlevel;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 1999-2011 Kasper Skårhøj (kasperYYYY@typo3.com)
+ *  (c) 1999-2013 Kasper Skårhøj (kasperYYYY@typo3.com)
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -26,12 +26,7 @@ namespace TYPO3\CMS\Lowlevel;
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
-/**
- * Cleaner module: Orphan records
- * User function called from tx_lowlevel_cleaner_core configured in ext_localconf.php
- *
- * @author Kasper Skårhøj <kasperYYYY@typo3.com>
- */
+
 /**
  * Looking for Orphan Records
  *

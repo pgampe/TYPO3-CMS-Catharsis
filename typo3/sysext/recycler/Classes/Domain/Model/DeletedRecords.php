@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Recycler\Domain\Model;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2009-2011 Julian Kleinhans <typo3@kj187.de>
+ *  (c) 2009-2013 Julian Kleinhans <typo3@kj187.de>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -227,7 +227,7 @@ class DeletedRecords {
 			if ($allowDepth && $depth >= 1) {
 				// check recursively for elements beneath this page
 				$resPages = $GLOBALS['TYPO3_DB']->exec_SELECTquery('uid', 'pages', 'pid=' . $id, '', 'sorting');
-				if (is_resource($resPages)) {
+				if ($resPages) {
 					while ($rowPages = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($resPages)) {
 						$this->setData($rowPages['uid'], $table, $depth - 1, $tcaCtrl, $filter);
 						// some records might have been added, check if we still have the limit for further queries

@@ -1,10 +1,33 @@
 <?php
 namespace TYPO3\CMS\Perm\Controller;
 
+/***************************************************************
+ *  Copyright notice
+ *
+ *  (c) 2007-2013 mehrwert (typo3@mehrwert.de)
+ *  All rights reserved
+ *
+ *  This script is part of the TYPO3 project. The TYPO3 project is
+ *  free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  The GNU General Public License can be found at
+ *  http://www.gnu.org/copyleft/gpl.html.
+ *
+ *  This script is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  This copyright notice MUST APPEAR in all copies of the script!
+ ***************************************************************/
+
 /**
  * This class extends the permissions module in the TYPO3 Backend to provide
  * convenient methods of editing of page permissions (including page ownership
- * (user and group)) via new TYPO3AJAX facility
+ * (user and group)) via new AjaxRequestHandler facility
  *
  * @author Andreas Kundoch <typo3@mehrwert.de>
  * @license GPL
@@ -58,7 +81,7 @@ class PermissionAjaxController {
 	 * The main dispatcher function. Collect data and prepare HTML output.
 	 *
 	 * @param array $params array of parameters from the AJAX interface, currently unused
-	 * @param \TYPO3\CMS\Core\Http\AjaxRequestHandler $ajaxObj object of type TYPO3AJAX
+	 * @param \TYPO3\CMS\Core\Http\AjaxRequestHandler $ajaxObj object of type AjaxRequestHandler
 	 * @return void
 	 */
 	public function dispatch($params = array(), \TYPO3\CMS\Core\Http\AjaxRequestHandler &$ajaxObj = NULL) {
@@ -71,60 +94,60 @@ class PermissionAjaxController {
 			$tce->stripslashes_values = 1;
 			// Determine the scripts to execute
 			switch ($this->conf['action']) {
-			case 'show_change_owner_selector':
-				$content = $this->renderUserSelector($this->conf['page'], $this->conf['ownerUid'], $this->conf['username']);
-				break;
-			case 'change_owner':
-				if (is_int($this->conf['new_owner_uid'])) {
+				case 'show_change_owner_selector':
+					$content = $this->renderUserSelector($this->conf['page'], $this->conf['ownerUid'], $this->conf['username']);
+					break;
+				case 'change_owner':
+					if (is_int($this->conf['new_owner_uid'])) {
+						// Prepare data to change
+						$data = array();
+						$data['pages'][$this->conf['page']]['perms_userid'] = $this->conf['new_owner_uid'];
+						// Execute TCE Update
+						$tce->start($data, array());
+						$tce->process_datamap();
+						$content = self::renderOwnername($this->conf['page'], $this->conf['new_owner_uid'], $this->conf['new_owner_username']);
+					} else {
+						$ajaxObj->setError('An error occured: No page owner uid specified.');
+					}
+					break;
+				case 'show_change_group_selector':
+					$content = $this->renderGroupSelector($this->conf['page'], $this->conf['groupUid'], $this->conf['groupname']);
+					break;
+				case 'change_group':
+					if (is_int($this->conf['new_group_uid'])) {
+						// Prepare data to change
+						$data = array();
+						$data['pages'][$this->conf['page']]['perms_groupid'] = $this->conf['new_group_uid'];
+						// Execute TCE Update
+						$tce->start($data, array());
+						$tce->process_datamap();
+						$content = self::renderGroupname($this->conf['page'], $this->conf['new_group_uid'], $this->conf['new_group_username']);
+					} else {
+						$ajaxObj->setError('An error occured: No page group uid specified.');
+					}
+					break;
+				case 'toggle_edit_lock':
 					// Prepare data to change
 					$data = array();
-					$data['pages'][$this->conf['page']]['perms_userid'] = $this->conf['new_owner_uid'];
+					$data['pages'][$this->conf['page']]['editlock'] = $this->conf['editLockState'] === 1 ? 0 : 1;
 					// Execute TCE Update
 					$tce->start($data, array());
 					$tce->process_datamap();
-					$content = self::renderOwnername($this->conf['page'], $this->conf['new_owner_uid'], $this->conf['new_owner_username']);
-				} else {
-					$ajaxObj->setError('An error occured: No page owner uid specified.');
-				}
-				break;
-			case 'show_change_group_selector':
-				$content = $this->renderGroupSelector($this->conf['page'], $this->conf['groupUid'], $this->conf['groupname']);
-				break;
-			case 'change_group':
-				if (is_int($this->conf['new_group_uid'])) {
+					$content = $this->renderToggleEditLock($this->conf['page'], $data['pages'][$this->conf['page']]['editlock']);
+					break;
+				default:
+					if ($this->conf['mode'] == 'delete') {
+						$this->conf['permissions'] = intval($this->conf['permissions'] - $this->conf['bits']);
+					} else {
+						$this->conf['permissions'] = intval($this->conf['permissions'] + $this->conf['bits']);
+					}
 					// Prepare data to change
 					$data = array();
-					$data['pages'][$this->conf['page']]['perms_groupid'] = $this->conf['new_group_uid'];
+					$data['pages'][$this->conf['page']]['perms_' . $this->conf['who']] = $this->conf['permissions'];
 					// Execute TCE Update
 					$tce->start($data, array());
 					$tce->process_datamap();
-					$content = self::renderGroupname($this->conf['page'], $this->conf['new_group_uid'], $this->conf['new_group_username']);
-				} else {
-					$ajaxObj->setError('An error occured: No page group uid specified.');
-				}
-				break;
-			case 'toggle_edit_lock':
-				// Prepare data to change
-				$data = array();
-				$data['pages'][$this->conf['page']]['editlock'] = $this->conf['editLockState'] === 1 ? 0 : 1;
-				// Execute TCE Update
-				$tce->start($data, array());
-				$tce->process_datamap();
-				$content = $this->renderToggleEditLock($this->conf['page'], $data['pages'][$this->conf['page']]['editlock']);
-				break;
-			default:
-				if ($this->conf['mode'] == 'delete') {
-					$this->conf['permissions'] = intval($this->conf['permissions'] - $this->conf['bits']);
-				} else {
-					$this->conf['permissions'] = intval($this->conf['permissions'] + $this->conf['bits']);
-				}
-				// Prepare data to change
-				$data = array();
-				$data['pages'][$this->conf['page']]['perms_' . $this->conf['who']] = $this->conf['permissions'];
-				// Execute TCE Update
-				$tce->start($data, array());
-				$tce->process_datamap();
-				$content = self::renderPermissions($this->conf['permissions'], $this->conf['page'], $this->conf['who']);
+					$content = self::renderPermissions($this->conf['permissions'], $this->conf['page'], $this->conf['who']);
 			}
 		} else {
 			$ajaxObj->setError('This script cannot be called directly.');

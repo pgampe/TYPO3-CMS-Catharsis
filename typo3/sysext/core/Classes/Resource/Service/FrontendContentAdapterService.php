@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Core\Resource\Service;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2011 Ingmar Schlecht <ingmar@typo3.org>
+ *  (c) 2011-2013 Ingmar Schlecht <ingmar@typo3.org>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -70,7 +70,7 @@ class FrontendContentAdapterService {
 	 * backwards compatibility for some file fields which have switched to using
 	 * the new File API instead of the old uploads/ folder for storing files.
 	 *
-	 * This method is called by the render() method of tslib_content_Content.
+	 * This method is called by the render() method of \TYPO3\CMS\Frontend\ContentObject\ContentContentObject
 	 *
 	 * @param array $row typically an array, but can also be null (in extensions or e.g. FLUID viewhelpers)
 	 * @param string $table the database table where the record is from
@@ -96,9 +96,11 @@ class FrontendContentAdapterService {
 						'captions' => array(),
 						'links' => array(),
 						'alternativeTexts' => array(),
-						$migrateFieldName . '_fileUids' => array()
+						$migrateFieldName . '_fileUids' => array(),
+						$migrateFieldName . '_fileReferenceUids' => array(),
 					);
 					$oldFieldNames[$migrateFieldName . '_fileUids'] = $migrateFieldName . '_fileUids';
+					$oldFieldNames[$migrateFieldName . '_fileReferenceUids'] = $migrateFieldName . '_fileReferenceUids';
 
 					foreach ($files as $file) {
 						/** @var $file \TYPO3\CMS\Core\Resource\FileReference */
@@ -109,13 +111,14 @@ class FrontendContentAdapterService {
 						$fileFieldContents['links'][] = $fileProperties['link'];
 						$fileFieldContents['alternativeTexts'][] = $fileProperties['alternative'];
 						$fileFieldContents[$migrateFieldName .  '_fileUids'][] = $file->getOriginalFile()->getUid();
+						$fileFieldContents[$migrateFieldName .  '_fileReferenceUids'][] = $file->getUid();
 					}
 					foreach ($oldFieldNames as $oldFieldType => $oldFieldName) {
 						if ($oldFieldType === '__typeMatch') {
 							continue;
 						}
-						// For paths, make comma separated list
-						if ($oldFieldType === 'paths' || substr($oldFieldType, -9) == '_fileUids') {
+						if ($oldFieldType === 'paths' || substr($oldFieldType, -9) == '_fileUids' || substr($oldFieldType, -18) == '_fileReferenceUids') {
+							// For paths and uids, make comma separated list
 							$fieldContents = implode(',', $fileFieldContents[$oldFieldType]);
 						} else {
 							// For all other fields, separate by newline

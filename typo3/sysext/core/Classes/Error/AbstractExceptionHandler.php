@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Core\Error;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2009-2011 Ingo Renner <ingo@typo3.org>
+ *  (c) 2009-2013 Ingo Renner <ingo@typo3.org>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -42,11 +42,11 @@ abstract class AbstractExceptionHandler implements \TYPO3\CMS\Core\Error\Excepti
 	 */
 	public function handleException(\Exception $exception) {
 		switch (PHP_SAPI) {
-		case 'cli':
-			$this->echoExceptionCLI($exception);
-			break;
-		default:
-			$this->echoExceptionWeb($exception);
+			case 'cli':
+				$this->echoExceptionCLI($exception);
+				break;
+			default:
+				$this->echoExceptionWeb($exception);
 		}
 	}
 
@@ -73,11 +73,6 @@ abstract class AbstractExceptionHandler implements \TYPO3\CMS\Core\Error\Excepti
 		// caused by this. Therefor we cannot do any database operation,
 		// otherwise this will lead into recurring exceptions.
 		try {
-			// In case an error occurs before a database connection exists, try
-			// to connect to the DB to be able to write the devlog/sys_log entry
-			if (isset($GLOBALS['TYPO3_DB']) && is_object($GLOBALS['TYPO3_DB']) && empty($GLOBALS['TYPO3_DB']->link)) {
-				$GLOBALS['TYPO3_DB']->connectDB();
-			}
 			// Write error message to devlog
 			// see: $TYPO3_CONF_VARS['SYS']['enable_exceptionDLOG']
 			if (TYPO3_EXCEPTION_DLOG) {
@@ -117,7 +112,7 @@ abstract class AbstractExceptionHandler implements \TYPO3\CMS\Core\Error\Excepti
 				'action' => 0,
 				'error' => 2,
 				'details_nr' => 0,
-				'details' => $logMessage,
+				'details' => str_replace('%', '%%', $logMessage),
 				'IP' => \TYPO3\CMS\Core\Utility\GeneralUtility::getIndpEnv('REMOTE_ADDR'),
 				'tstamp' => $GLOBALS['EXEC_TIME'],
 				'workspace' => $workspace

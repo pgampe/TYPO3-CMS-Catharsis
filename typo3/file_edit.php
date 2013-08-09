@@ -2,7 +2,7 @@
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 1999-2011 Kasper Skårhøj (kasperYYYY@typo3.com)
+ *  (c) 1999-2013 Kasper Skårhøj (kasperYYYY@typo3.com)
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -24,25 +24,15 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
+
 /**
  * Web>File: Editing documents
  *
- * Revised for TYPO3 3.6 2/2003 by Kasper Skårhøj
- * XHTML compliant (except textarea field)
- *
  * @author Kasper Skårhøj <kasperYYYY@typo3.com>
  */
-$GLOBALS['BACK_PATH'] = '';
-require 'init.php';
-/*
- * @deprecated since 6.0, the classname SC_file_edit and this file is obsolete
- * and will be removed with 6.2. The class was renamed and is now located at:
- * typo3/sysext/backend/Classes/Controller/File/EditFileController.php
- */
-require_once \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath('backend') . 'Classes/Controller/File/EditFileController.php';
-// Make instance:
-$SOBE = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Backend\\Controller\\File\\EditFileController');
-$SOBE->init();
-$SOBE->main();
-$SOBE->printContent();
+require __DIR__ . '/init.php';
+
+$editFileController = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Backend\\Controller\\File\\EditFileController');
+$editFileController->main();
+$editFileController->printContent();
 ?>

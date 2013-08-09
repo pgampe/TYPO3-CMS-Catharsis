@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Backend\Tests\Unit\Sprite;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010-2011 Fabien Udriot <fabien.udriot@ecodev.ch>
+ *  (c) 2010-2013 Fabien Udriot <fabien.udriot@ecodev.ch>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -23,19 +23,15 @@ namespace TYPO3\CMS\Backend\Tests\Unit\Sprite;
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
+
+use TYPO3\CMS\Backend\Sprite\SpriteManager;
+
 /**
  * Testcase for TYPO3\CMS\Backend\Sprite\SpriteManager
  *
  * @author Fabien Udriot <fabien.udriot@ecodev.ch>
  */
 class SpriteManagerTest extends \TYPO3\CMS\Core\Tests\UnitTestCase {
-
-	/**
-	 * Enable backup of global and system variables
-	 *
-	 * @var boolean
-	 */
-	protected $backupGlobals = TRUE;
 
 	//////////////////////////////////////////
 	// Tests concerning addTcaTypeIcon
@@ -44,7 +40,7 @@ class SpriteManagerTest extends \TYPO3\CMS\Core\Tests\UnitTestCase {
 	 * @test
 	 */
 	public function addTcaTypeIconWithEmptyValueSetsArrayKey() {
-		\TYPO3\CMS\Backend\Sprite\SpriteManager::addTcaTypeIcon('', '', '');
+		SpriteManager::addTcaTypeIcon('', '', '');
 		$this->assertArrayHasKey('tcarecords--', $GLOBALS['TBE_STYLES']['spritemanager']['singleIcons']);
 	}
 
@@ -52,7 +48,7 @@ class SpriteManagerTest extends \TYPO3\CMS\Core\Tests\UnitTestCase {
 	 * @test
 	 */
 	public function addTcaTypeIconWithEmptyValueSetsEmptyArrayValue() {
-		\TYPO3\CMS\Backend\Sprite\SpriteManager::addTcaTypeIcon('', '', '');
+		SpriteManager::addTcaTypeIcon('', '', '');
 		$this->assertEquals('', $GLOBALS['TBE_STYLES']['spritemanager']['singleIcons']['tcarecords--']);
 	}
 
@@ -62,7 +58,7 @@ class SpriteManagerTest extends \TYPO3\CMS\Core\Tests\UnitTestCase {
 	public function addTcaTypeIconWithTableAndTypeSetsArrayKey() {
 		$table = 'tt_content';
 		$type = 'contains-news';
-		\TYPO3\CMS\Backend\Sprite\SpriteManager::addTcaTypeIcon($table, $type, '');
+		SpriteManager::addTcaTypeIcon($table, $type, '');
 		$this->assertArrayHasKey('tcarecords-' . $table . '-' . $type, $GLOBALS['TBE_STYLES']['spritemanager']['singleIcons']);
 	}
 
@@ -73,7 +69,7 @@ class SpriteManagerTest extends \TYPO3\CMS\Core\Tests\UnitTestCase {
 		$imagePath = 'path/to/my-icon.png';
 		$table = 'tt_content';
 		$type = 'contains-news';
-		\TYPO3\CMS\Backend\Sprite\SpriteManager::addTcaTypeIcon($table, $type, $imagePath);
+		SpriteManager::addTcaTypeIcon($table, $type, $imagePath);
 		$this->assertEquals($imagePath, $GLOBALS['TBE_STYLES']['spritemanager']['singleIcons']['tcarecords-' . $table . '-' . $type]);
 	}
 
@@ -88,7 +84,7 @@ class SpriteManagerTest extends \TYPO3\CMS\Core\Tests\UnitTestCase {
 		$imagePath = 'path/to/my-icon.png';
 		$icons = array($type => $imagePath);
 		$extensionKey = 'dummy';
-		\TYPO3\CMS\Backend\Sprite\SpriteManager::addSingleIcons($icons, $extensionKey);
+		SpriteManager::addSingleIcons($icons, $extensionKey);
 		$this->assertArrayHasKey('extensions-' . $extensionKey . '-' . $type, $GLOBALS['TBE_STYLES']['spritemanager']['singleIcons']);
 	}
 
@@ -100,7 +96,7 @@ class SpriteManagerTest extends \TYPO3\CMS\Core\Tests\UnitTestCase {
 		$imagePath = 'path/to/my-icon.png';
 		$icons = array($type => $imagePath);
 		$extensionKey = 'dummy';
-		\TYPO3\CMS\Backend\Sprite\SpriteManager::addSingleIcons($icons, $extensionKey);
+		SpriteManager::addSingleIcons($icons, $extensionKey);
 		$this->assertEquals($imagePath, $GLOBALS['TBE_STYLES']['spritemanager']['singleIcons']['extensions-' . $extensionKey . '-' . $type]);
 	}
 
@@ -112,7 +108,7 @@ class SpriteManagerTest extends \TYPO3\CMS\Core\Tests\UnitTestCase {
 		$imagePath = 'path/to/my-icon.png';
 		$icons = array($type => $imagePath);
 		$extensionKey = 'dummy';
-		\TYPO3\CMS\Backend\Sprite\SpriteManager::addSingleIcons($icons, $extensionKey);
+		SpriteManager::addSingleIcons($icons, $extensionKey);
 		$this->assertArrayHasKey('extensions-' . $extensionKey . '-' . $type, $GLOBALS['TBE_STYLES']['spritemanager']['singleIcons']);
 	}
 
@@ -124,7 +120,7 @@ class SpriteManagerTest extends \TYPO3\CMS\Core\Tests\UnitTestCase {
 		$imagePath = 'path/to/my-icon.png';
 		$icons = array($type => $imagePath);
 		$extensionKey = 'dummy';
-		\TYPO3\CMS\Backend\Sprite\SpriteManager::addSingleIcons($icons, $extensionKey);
+		SpriteManager::addSingleIcons($icons, $extensionKey);
 		$this->assertEquals($imagePath, $GLOBALS['TBE_STYLES']['spritemanager']['singleIcons']['extensions-' . $extensionKey . '-' . $type]);
 	}
 

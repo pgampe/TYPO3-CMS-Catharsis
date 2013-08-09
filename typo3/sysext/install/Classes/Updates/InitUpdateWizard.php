@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Install\Updates;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2012 Tolleiv Nietsch <info@tolleiv.de>
+ *  (c) 2012-2013 Tolleiv Nietsch <info@tolleiv.de>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -23,14 +23,14 @@ namespace TYPO3\CMS\Install\Updates;
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
+
 /**
  * Upgrade wizard which creates all sys_file* tables. Required to ensure that all
  * other FAL migration wizards can run properly.
  *
  * @author Tolleiv Nietsch <info@tolleiv.de>
- * @license http://www.gnu.org/copyleft/gpl.html
  */
-class InitUpdateWizard extends \TYPO3\CMS\Install\Updates\AbstractUpdate {
+class InitUpdateWizard extends AbstractUpdate {
 
 	/**
 	 * @var string
@@ -38,7 +38,7 @@ class InitUpdateWizard extends \TYPO3\CMS\Install\Updates\AbstractUpdate {
 	protected $title = 'Initialize database tables for the File Abstraction Layer (FAL)';
 
 	/**
-	 * @var \TYPO3\CMS\Install\Sql\SchemaMigrator
+	 * @var \TYPO3\CMS\Install\Service\SqlSchemaMigrationService
 	 */
 	protected $installerSql;
 
@@ -46,14 +46,14 @@ class InitUpdateWizard extends \TYPO3\CMS\Install\Updates\AbstractUpdate {
 	 * Creates this object.
 	 */
 	public function __construct() {
-		$this->installerSql = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Install\\Sql\\SchemaMigrator');
+		$this->installerSql = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Install\\Service\\SqlSchemaMigrationService');
 	}
 
 	/**
 	 * Checks if an update is needed
 	 *
-	 * @param 	string		&$description: The description for the update
-	 * @return 	boolean		TRUE if an update is needed, FALSE otherwise
+	 * @param string &$description The description for the update
+	 * @return boolean TRUE if an update is needed, FALSE otherwise
 	 */
 	public function checkForUpdate(&$description) {
 		$description = 'Create the database tables which are required for the File Abstraction Layer in order to work. Do this as the first step for all further wizards related to FAL.';
@@ -63,9 +63,9 @@ class InitUpdateWizard extends \TYPO3\CMS\Install\Updates\AbstractUpdate {
 	/**
 	 * Performs the database update.
 	 *
-	 * @param 	array		&$dbQueries: queries done in this update
-	 * @param 	mixed		&$customMessages: custom messages
-	 * @return 	boolean		TRUE on success, FALSE on error
+	 * @param array &$dbQueries Queries done in this update
+	 * @param mixed &$customMessages Custom messages
+	 * @return boolean TRUE on success, FALSE on error
 	 */
 	public function performUpdate(array &$dbQueries, &$customMessages) {
 		$updates = $this->getRequiredUpdates();
@@ -99,6 +99,5 @@ class InitUpdateWizard extends \TYPO3\CMS\Install\Updates\AbstractUpdate {
 	}
 
 }
-
 
 ?>

@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Backend\Form\Element;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2007-2011 Andreas Wolf <andreas.wolf@ikt-werk.de>
+ *  (c) 2007-2013 Andreas Wolf <andreas.wolf@ikt-werk.de>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -26,6 +26,10 @@ namespace TYPO3\CMS\Backend\Form\Element;
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
+
+use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+
 /**
  * TCEforms wizard for rendering an AJAX selector for records
  *
@@ -76,9 +80,9 @@ class SuggestElement {
 		}
 		$selector = '
 		<div class="' . $containerCssClass . '" id="' . $suggestId . '">
-			<input type="text" id="' . $fieldname . 'Suggest" value="' . $GLOBALS['LANG']->sL('LLL:EXT:lang/locallang_core.xml:labels.findRecord') . '" class="' . $this->cssClass . '-search" />
+			<input type="text" id="' . $fieldname . 'Suggest" value="' . $GLOBALS['LANG']->sL('LLL:EXT:lang/locallang_core.xlf:labels.findRecord') . '" class="' . $this->cssClass . '-search" />
 			<div class="' . $this->cssClass . '-indicator" style="display: none;" id="' . $fieldname . 'SuggestIndicator">
-				<img src="' . $GLOBALS['BACK_PATH'] . 'gfx/spinner.gif" alt="' . $GLOBALS['LANG']->sL('LLL:EXT:lang/locallang_core.xml:alttext.suggestSearching') . '" />
+				<img src="' . $GLOBALS['BACK_PATH'] . 'gfx/spinner.gif" alt="' . $GLOBALS['LANG']->sL('LLL:EXT:lang/locallang_core.xlf:alttext.suggestSearching') . '" />
 			</div>
 			<div class="' . $this->cssClass . '-choices" style="display: none;" id="' . $fieldname . 'SuggestChoices"></div>
 
@@ -93,10 +97,10 @@ class SuggestElement {
 		}
 		$minChars = $minChars > 0 ? $minChars : 2;
 		// Replace "-" with ucwords for the JS object name
-		$jsObj = str_replace(' ', '', ucwords(str_replace('-', ' ', \TYPO3\CMS\Core\Utility\GeneralUtility::strtolower($suggestId))));
+		$jsObj = str_replace(' ', '', ucwords(str_replace('-', ' ', GeneralUtility::strtolower($suggestId))));
 		$this->TCEformsObj->additionalJS_post[] = '
 			var ' . $jsObj . ' = new TCEForms.Suggest("' . $fieldname . '", "' . $table . '", "' . $field . '", "' . $row['uid'] . '", ' . $row['pid'] . ', ' . $minChars . ');
-			' . $jsObj . '.defaultValue = "' . \TYPO3\CMS\Core\Utility\GeneralUtility::slashJS($GLOBALS['LANG']->sL('LLL:EXT:lang/locallang_core.xml:labels.findRecord')) . '";
+			' . $jsObj . '.defaultValue = "' . GeneralUtility::slashJS($GLOBALS['LANG']->sL('LLL:EXT:lang/locallang_core.xlf:labels.findRecord')) . '";
 		';
 		return $selector;
 	}
@@ -110,11 +114,11 @@ class SuggestElement {
 	 */
 	public function processAjaxRequest($params, &$ajaxObj) {
 		// Get parameters from $_GET/$_POST
-		$search = \TYPO3\CMS\Core\Utility\GeneralUtility::_GP('value');
-		$table = \TYPO3\CMS\Core\Utility\GeneralUtility::_GP('table');
-		$field = \TYPO3\CMS\Core\Utility\GeneralUtility::_GP('field');
-		$uid = \TYPO3\CMS\Core\Utility\GeneralUtility::_GP('uid');
-		$pageId = \TYPO3\CMS\Core\Utility\GeneralUtility::_GP('pid');
+		$search = GeneralUtility::_GP('value');
+		$table = GeneralUtility::_GP('table');
+		$field = GeneralUtility::_GP('field');
+		$uid = GeneralUtility::_GP('uid');
+		$pageId = GeneralUtility::_GP('pid');
 		// If the $uid is numeric, we have an already existing element, so get the
 		// TSconfig of the page itself or the element container (for non-page elements)
 		// otherwise it's a new element, so use given id of parent page (i.e., don't modify it here)
@@ -122,11 +126,11 @@ class SuggestElement {
 			if ($table == 'pages') {
 				$pageId = $uid;
 			} else {
-				$row = \TYPO3\CMS\Backend\Utility\BackendUtility::getRecord($table, $uid);
+				$row = BackendUtility::getRecord($table, $uid);
 				$pageId = $row['pid'];
 			}
 		}
-		$TSconfig = \TYPO3\CMS\Backend\Utility\BackendUtility::getPagesTSconfig($pageId);
+		$TSconfig = BackendUtility::getPagesTSconfig($pageId);
 		$queryTables = array();
 		$foreign_table_where = '';
 		$fieldConfig = $GLOBALS['TCA'][$table]['columns'][$field]['config'];
@@ -134,8 +138,8 @@ class SuggestElement {
 		if ($GLOBALS['TCA'][$table]['columns'][$parts[0]]['config']['type'] === 'flex') {
 			if (is_array($row) && count($row) > 0) {
 				$flexfieldTCAConfig = $GLOBALS['TCA'][$table]['columns'][$parts[0]]['config'];
-				$flexformDSArray = \TYPO3\CMS\Backend\Utility\BackendUtility::getFlexFormDS($flexfieldTCAConfig, $row, $table);
-				$flexformDSArray = \TYPO3\CMS\Core\Utility\GeneralUtility::resolveAllSheetsInDS($flexformDSArray);
+				$flexformDSArray = BackendUtility::getFlexFormDS($flexfieldTCAConfig, $row, $table);
+				$flexformDSArray = GeneralUtility::resolveAllSheetsInDS($flexformDSArray);
 				$flexformElement = $parts[count($parts) - 2];
 				$continue = TRUE;
 				foreach ($flexformDSArray as $sheet) {
@@ -155,7 +159,22 @@ class SuggestElement {
 		}
 		$wizardConfig = $fieldConfig['wizards']['suggest'];
 		if (isset($fieldConfig['allowed'])) {
-			$queryTables = \TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(',', $fieldConfig['allowed']);
+			if ($fieldConfig['allowed'] === '*') {
+				foreach ($GLOBALS['TCA'] as $tableName => $tableConfig) {
+					// TODO: Refactor function to BackendUtility
+					if (empty($tableConfig['ctrl']['hideTable'])
+						&& ($GLOBALS['BE_USER']->isAdmin()
+							|| (empty($tableConfig['ctrl']['adminOnly'])
+								&& (empty($tableConfig['ctrl']['rootLevel'])
+									|| !empty($tableConfig['ctrl']['security']['ignoreRootLevelRestriction']))))
+					) {
+						$queryTables[] = $tableName;
+					}
+				}
+				unset($tableName, $tableConfig);
+			} else {
+				$queryTables = \TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(',', $fieldConfig['allowed']);
+			}
 		} elseif (isset($fieldConfig['foreign_table'])) {
 			$queryTables = array($fieldConfig['foreign_table']);
 			$foreign_table_where = $fieldConfig['foreign_table_where'];
@@ -172,23 +191,23 @@ class SuggestElement {
 			}
 			$config = (array) $wizardConfig['default'];
 			if (is_array($wizardConfig[$queryTable])) {
-				$config = \TYPO3\CMS\Core\Utility\GeneralUtility::array_merge_recursive_overrule($config, $wizardConfig[$queryTable]);
+				$config = GeneralUtility::array_merge_recursive_overrule($config, $wizardConfig[$queryTable]);
 			}
 			// merge the configurations of different "levels" to get the working configuration for this table and
 			// field (i.e., go from the most general to the most special configuration)
 			if (is_array($TSconfig['TCEFORM.']['suggest.']['default.'])) {
-				$config = \TYPO3\CMS\Core\Utility\GeneralUtility::array_merge_recursive_overrule($config, $TSconfig['TCEFORM.']['suggest.']['default.']);
+				$config = GeneralUtility::array_merge_recursive_overrule($config, $TSconfig['TCEFORM.']['suggest.']['default.']);
 			}
 			if (is_array($TSconfig['TCEFORM.']['suggest.'][$queryTable . '.'])) {
-				$config = \TYPO3\CMS\Core\Utility\GeneralUtility::array_merge_recursive_overrule($config, $TSconfig['TCEFORM.']['suggest.'][$queryTable . '.']);
+				$config = GeneralUtility::array_merge_recursive_overrule($config, $TSconfig['TCEFORM.']['suggest.'][$queryTable . '.']);
 			}
 			// use $table instead of $queryTable here because we overlay a config
 			// for the input-field here, not for the queried table
 			if (is_array($TSconfig['TCEFORM.'][$table . '.'][$field . '.']['suggest.']['default.'])) {
-				$config = \TYPO3\CMS\Core\Utility\GeneralUtility::array_merge_recursive_overrule($config, $TSconfig['TCEFORM.'][$table . '.'][$field . '.']['suggest.']['default.']);
+				$config = GeneralUtility::array_merge_recursive_overrule($config, $TSconfig['TCEFORM.'][$table . '.'][$field . '.']['suggest.']['default.']);
 			}
 			if (is_array($TSconfig['TCEFORM.'][$table . '.'][$field . '.']['suggest.'][$queryTable . '.'])) {
-				$config = \TYPO3\CMS\Core\Utility\GeneralUtility::array_merge_recursive_overrule($config, $TSconfig['TCEFORM.'][$table . '.'][$field . '.']['suggest.'][$queryTable . '.']);
+				$config = GeneralUtility::array_merge_recursive_overrule($config, $TSconfig['TCEFORM.'][$table . '.'][$field . '.']['suggest.'][$queryTable . '.']);
 			}
 			//process addWhere
 			if (!isset($config['addWhere']) && $foreign_table_where) {
@@ -205,13 +224,13 @@ class SuggestElement {
 			if (!class_exists($receiverClassName)) {
 				$receiverClassName = 'TYPO3\\CMS\\Backend\\Form\\Element\\SuggestDefaultReceiver';
 			}
-			$receiverObj = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance($receiverClassName, $queryTable, $config);
+			$receiverObj = GeneralUtility::makeInstance($receiverClassName, $queryTable, $config);
 			$params = array('value' => $search);
 			$rows = $receiverObj->queryTable($params);
 			if (empty($rows)) {
 				continue;
 			}
-			$resultRows = \TYPO3\CMS\Core\Utility\GeneralUtility::array_merge($resultRows, $rows);
+			$resultRows = GeneralUtility::array_merge($resultRows, $rows);
 			unset($rows);
 		}
 		$listItems = array();
@@ -230,13 +249,13 @@ class SuggestElement {
 			for ($i = 0; $i < $maxItems; $i++) {
 				$row = $resultRows[$rowsSort[$i]];
 				$rowId = $row['table'] . '-' . $row['uid'] . '-' . $table . '-' . $uid . '-' . $field;
-				$listItems[] = '<li' . ($row['class'] != '' ? ' class="' . $row['class'] . '"' : '') . ' id="' . $rowId . '" style="' . $row['style'] . '">' . $row['text'] . '</li>';
+				$listItems[] = '<li' . ($row['class'] != '' ? ' class="' . $row['class'] . '"' : '') . ' id="' . $rowId . '"' . ($row['style'] != '' ? ' style="' . $row['style'] . '"' : '') . '>' . $row['sprite'] . $row['text'] . '</li>';
 			}
 		}
 		if (count($listItems) > 0) {
 			$list = implode('', $listItems);
 		} else {
-			$list = '<li class="suggest-noresults"><i>' . $GLOBALS['LANG']->sL('LLL:EXT:lang/locallang_core.xml:labels.noRecordFound') . '</i></li>';
+			$list = '<li class="suggest-noresults"><i>' . $GLOBALS['LANG']->sL('LLL:EXT:lang/locallang_core.xlf:labels.noRecordFound') . '</i></li>';
 		}
 		$list = '<ul class="' . $this->cssClass . '-resultlist">' . $list . '</ul>';
 		$ajaxObj->addContent(0, $list);

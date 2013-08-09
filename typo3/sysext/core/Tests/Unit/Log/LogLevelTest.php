@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Core\Tests\Unit\Log;
 /***************************************************************
  * Copyright notice
  *
- * (c) 2011-2012 Ingo Renner (ingo@typo3.org)
+ * (c) 2011-2013 Ingo Renner (ingo@typo3.org)
  * All rights reserved
  *
  * This script is part of the TYPO3 project. The TYPO3 project is
@@ -70,12 +70,26 @@ class LevelTest extends \TYPO3\CMS\Core\Tests\UnitTestCase {
 	/**
 	 * @test
 	 * @dataProvider isValidLevelThrowsExceptionOnInvalidLevelIfAskedToDoSoDataProvider
-	 * @expectedException \RangeException
+	 * @expectedException \Psr\Log\InvalidArgumentException
 	 */
 	public function isValidLevelThrowsExceptionOnInvalidLevelIfAskedToDoSo($inputValue) {
 		\TYPO3\CMS\Core\Log\LogLevel::validateLevel($inputValue);
 	}
 
+	/**
+	 * @test
+	 */
+	public function normalizeLevelConvertsValidLevelFromStringToInteger() {
+		$this->assertEquals(7, \TYPO3\CMS\Core\Log\LogLevel::normalizeLevel('debug'));
+	}
+
+	/**
+	 * @test
+	 */
+	public function normalizeLevelDoesNotConvertInvalidLevel() {
+		$levelString = 'invalid';
+		$this->assertEquals($levelString, \TYPO3\CMS\Core\Log\LogLevel::normalizeLevel($levelString));
+	}
 }
 
 ?>

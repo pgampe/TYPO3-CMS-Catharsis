@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Extbase\Mvc\Controller;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010-2012 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
+ *  (c) 2010-2013 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
  *  Extbase is a backport of TYPO3 Flow. All credits go to the TYPO3 Flow team.
  *  All rights reserved
  *
@@ -33,8 +33,31 @@ namespace TYPO3\CMS\Extbase\Mvc\Controller;
  *
  * @license http://www.gnu.org/licenses/lgpl.html GNU Lesser General Public License, version 3 or later
  * @api
+ *
+ * This object is deprecated as Extbase uses the FlashMessageService provided
+ * by the core from 6.1 on. Therefore please do not use this object but call
+ * (Abstract)Controller->controllerContext->getFlashMessageQueue() instead.
+ *
+ * For sure you are free to use TYPO3\CMS\Core\Messaging\FlashMessageService
+ * and fetch a custom FlashMessageQueue by calling
+ * FlashMessageQueue->getMessageQueueByIdentifier('customIdentifier')
+ *
+ * @deprecated since Extbase 6.1, will be removed 2 versions later
  */
 class FlashMessageContainer implements \TYPO3\CMS\Core\SingletonInterface {
+
+	/**
+	 * @var \TYPO3\CMS\Extbase\Mvc\Controller\ControllerContext
+	 */
+	protected $controllerContext;
+
+	/**
+	 * @param \TYPO3\CMS\Extbase\Mvc\Controller\ControllerContext $controllerContext
+	 * @deprecated since 6.1, will be removed 2 versions later
+	 */
+	public function setControllerContext(\TYPO3\CMS\Extbase\Mvc\Controller\ControllerContext $controllerContext) {
+		$this->controllerContext = $controllerContext;
+	}
 
 	/**
 	 * Add another flash message.
@@ -50,45 +73,48 @@ class FlashMessageContainer implements \TYPO3\CMS\Core\SingletonInterface {
 	 * @param integer $severity optional severity code. One of the \TYPO3\CMS\Core\Messaging\FlashMessage constants
 	 * @throws \InvalidArgumentException
 	 * @return void
-	 * @api
+	 * @deprecated since 6.1, will be removed 2 versions later
 	 */
 	public function add($message, $title = '', $severity = \TYPO3\CMS\Core\Messaging\FlashMessage::OK) {
+		\TYPO3\CMS\Core\Utility\GeneralUtility::logDeprecatedFunction();
 		if (!is_string($message)) {
-			throw new \InvalidArgumentException('The flash message must be string, ' . gettype($message) . ' given.', 1243258395);
+			throw new \InvalidArgumentException(
+				'The flash message must be string, ' . gettype($message) . ' given.',
+				1243258395
+			);
 		}
 		/** @var $flashMessage \TYPO3\CMS\Core\Messaging\FlashMessage */
-		$flashMessage = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Core\\Messaging\\FlashMessage', $message, $title, $severity, TRUE);
-		\TYPO3\CMS\Core\Messaging\FlashMessageQueue::addMessage($flashMessage);
+		$flashMessage = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
+			'TYPO3\\CMS\\Core\\Messaging\\FlashMessage', $message, $title, $severity, TRUE
+		);
+		$this->controllerContext->getFlashMessageQueue()->addMessage($flashMessage);
 	}
 
 	/**
-	 * Get all flash messages currently available.
-	 *
-	 * @return array<\TYPO3\CMS\Core\Messaging\FlashMessage> An array of flash messages
-	 * @api
+	 * @return array An array of flash messages: array<\TYPO3\CMS\Core\Messaging\FlashMessage>
+	 * @deprecated since 6.1, will be removed 2 versions later
 	 */
 	public function getAllMessages() {
-		return \TYPO3\CMS\Core\Messaging\FlashMessageQueue::getAllMessages();
+		\TYPO3\CMS\Core\Utility\GeneralUtility::logDeprecatedFunction();
+		return $this->controllerContext->getFlashMessageQueue()->getAllMessages();
 	}
 
 	/**
-	 * Reset all flash messages.
-	 *
 	 * @return void
-	 * @api
+	 * @deprecated since 6.1, will be removed 2 versions later
 	 */
 	public function flush() {
-		\TYPO3\CMS\Core\Messaging\FlashMessageQueue::getAllMessagesAndFlush();
+		\TYPO3\CMS\Core\Utility\GeneralUtility::logDeprecatedFunction();
+		$this->controllerContext->getFlashMessageQueue()->getAllMessagesAndFlush();
 	}
 
 	/**
-	 * Get all flash messages currently available. And removes them from the session.
-	 *
-	 * @return array<\TYPO3\CMS\Core\Messaging\FlashMessage> An array of flash messages
-	 * @api
+	 * @return array An array of flash messages: array<\TYPO3\CMS\Core\Messaging\FlashMessage>
+	 * @deprecated since 6.1, will be removed 2 versions later
 	 */
 	public function getAllMessagesAndFlush() {
-		return \TYPO3\CMS\Core\Messaging\FlashMessageQueue::getAllMessagesAndFlush();
+		\TYPO3\CMS\Core\Utility\GeneralUtility::logDeprecatedFunction();
+		return $this->controllerContext->getFlashMessageQueue()->getAllMessagesAndFlush();
 	}
 }
 

@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Extbase\Persistence\Generic\Storage;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010-2012 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
+ *  (c) 2010-2013 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
  *  Extbase is a backport of TYPO3 Flow. All credits go to the TYPO3 Flow team.
  *  All rights reserved
  *
@@ -44,6 +44,7 @@ class Typo3DbBackend implements \TYPO3\CMS\Extbase\Persistence\Generic\Storage\B
 
 	/**
 	 * @var \TYPO3\CMS\Extbase\Persistence\Generic\Mapper\DataMapper
+	 * @inject
 	 */
 	protected $dataMapper;
 
@@ -63,16 +64,19 @@ class Typo3DbBackend implements \TYPO3\CMS\Extbase\Persistence\Generic\Storage\B
 
 	/**
 	 * @var \TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface
+	 * @inject
 	 */
 	protected $configurationManager;
 
 	/**
 	 * @var \TYPO3\CMS\Extbase\Service\CacheService
+	 * @inject
 	 */
 	protected $cacheService;
 
 	/**
 	 * @var \TYPO3\CMS\Core\Cache\CacheManager
+	 * @inject
 	 */
 	protected $cacheManager;
 
@@ -82,25 +86,16 @@ class Typo3DbBackend implements \TYPO3\CMS\Extbase\Persistence\Generic\Storage\B
 	protected $tableColumnCache;
 
 	/**
+	 * @var \TYPO3\CMS\Extbase\Service\EnvironmentService
+	 * @inject
+	 */
+	protected $environmentService;
+
+	/**
 	 * Constructor. takes the database handle from $GLOBALS['TYPO3_DB']
 	 */
 	public function __construct() {
 		$this->databaseHandle = $GLOBALS['TYPO3_DB'];
-	}
-
-	/**
-	 * @param \TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface $configurationManager
-	 * @return void
-	 */
-	public function injectConfigurationManager(\TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface $configurationManager) {
-		$this->configurationManager = $configurationManager;
-	}
-
-	/**
-	 * @param \TYPO3\CMS\Core\Cache\CacheManager $cacheManager
-	 */
-	public function injectCacheManager(\TYPO3\CMS\Core\Cache\CacheManager $cacheManager) {
-		$this->cacheManager = $cacheManager;
 	}
 
 	/**
@@ -113,30 +108,12 @@ class Typo3DbBackend implements \TYPO3\CMS\Extbase\Persistence\Generic\Storage\B
 	}
 
 	/**
-	 * Injects the DataMapper to map nodes to objects
-	 *
-	 * @param \TYPO3\CMS\Extbase\Persistence\Generic\Mapper\DataMapper $dataMapper
-	 * @return void
-	 */
-	public function injectDataMapper(\TYPO3\CMS\Extbase\Persistence\Generic\Mapper\DataMapper $dataMapper) {
-		$this->dataMapper = $dataMapper;
-	}
-
-	/**
-	 * @param \TYPO3\CMS\Extbase\Service\CacheService $cacheService
-	 * @return void
-	 */
-	public function injectCacheService(\TYPO3\CMS\Extbase\Service\CacheService $cacheService) {
-		$this->cacheService = $cacheService;
-	}
-
-	/**
 	 * Adds a row to the storage
 	 *
 	 * @param string $tableName The database table name
 	 * @param array $row The row to be inserted
 	 * @param boolean $isRelation TRUE if we are currently inserting into a relation table, FALSE by default
-	 * @return int The uid of the inserted row
+	 * @return integer The uid of the inserted row
 	 */
 	public function addRow($tableName, array $row, $isRelation = FALSE) {
 		$fields = array();
@@ -169,7 +146,7 @@ class Typo3DbBackend implements \TYPO3\CMS\Extbase\Persistence\Generic\Storage\B
 	 * @param array $row The row to be updated
 	 * @param boolean $isRelation TRUE if we are currently inserting into a relation table, FALSE by default
 	 * @throws \InvalidArgumentException
-	 * @return bool
+	 * @return boolean
 	 */
 	public function updateRow($tableName, array $row, $isRelation = FALSE) {
 		if (!isset($row['uid'])) {
@@ -196,12 +173,48 @@ class Typo3DbBackend implements \TYPO3\CMS\Extbase\Persistence\Generic\Storage\B
 	}
 
 	/**
+	 * Updates a relation row in the storage.
+	 *
+	 * @param string $tableName The database relation table name
+	 * @param array $row The row to be updated
+	 * @throws \InvalidArgumentException
+	 * @return boolean
+	 */
+	public function updateRelationTableRow($tableName, array $row) {
+		if (!isset($row['uid_local']) && !isset($row['uid_foreign'])) {
+			throw new \InvalidArgumentException(
+				'The given row must contain a value for "uid_local" and "uid_foreign".', 1360500126
+			);
+		}
+		$uidLocal = (int) $row['uid_local'];
+		$uidForeign = (int) $row['uid_foreign'];
+		unset($row['uid_local']);
+		unset($row['uid_foreign']);
+		$fields = array();
+		$parameters = array();
+		foreach ($row as $columnName => $value) {
+			$fields[] = $columnName . '=?';
+			$parameters[] = $value;
+		}
+		$parameters[] = $uidLocal;
+		$parameters[] = $uidForeign;
+
+		$sqlString = 'UPDATE ' . $tableName . ' SET ' . implode(', ', $fields) . ' WHERE uid_local=? AND uid_foreign=?';
+		$this->replacePlaceholders($sqlString, $parameters);
+
+		$returnValue = $this->databaseHandle->sql_query($sqlString);
+		$this->checkSqlErrors($sqlString);
+
+		return $returnValue;
+	}
+
+	/**
 	 * Deletes a row in the storage
 	 *
 	 * @param string $tableName The database table name
 	 * @param array $identifier An array of identifier array('fieldname' => value). This array will be transformed to a WHERE clause
 	 * @param boolean $isRelation TRUE if we are currently manipulating a relation table, FALSE by default
-	 * @return bool
+	 * @return boolean
 	 */
 	public function removeRow($tableName, array $identifier, $isRelation = FALSE) {
 		$statement = 'DELETE FROM ' . $tableName . ' WHERE ' . $this->parseIdentifier($identifier);
@@ -213,6 +226,24 @@ class Typo3DbBackend implements \TYPO3\CMS\Extbase\Persistence\Generic\Storage\B
 		$returnValue = $this->databaseHandle->sql_query($statement);
 		$this->checkSqlErrors($statement);
 		return $returnValue;
+	}
+
+	/**
+	 * Fetches maximal value for given table column from database.
+	 *
+	 * @param string $tableName The database table name
+	 * @param array $identifier An array of identifier array('fieldname' => value). This array will be transformed to a WHERE clause
+	 * @param string $columnName column name to get the max value from
+	 * @return mixed the max value
+	 */
+	public function getMaxValueFromTable($tableName, $identifier, $columnName) {
+		$sqlString = 'SELECT ' . $columnName . ' FROM ' . $tableName . ' WHERE ' . $this->parseIdentifier($identifier) . ' ORDER BY  ' . $columnName . ' DESC LIMIT 1';
+		$this->replacePlaceholders($sqlString, $identifier);
+
+		$result = $this->databaseHandle->sql_query($sqlString);
+		$row = $this->databaseHandle->sql_fetch_assoc($result);
+		$this->checkSqlErrors($sqlString);
+		return $row[$columnName];
 	}
 
 	/**
@@ -266,14 +297,14 @@ class Typo3DbBackend implements \TYPO3\CMS\Extbase\Persistence\Generic\Storage\B
 			$sql = $this->buildQuery($statementParts, $parameters);
 		}
 		$tableName = 'foo';
-		if (is_array($statementParts && !empty($statementParts['tables'][0]))) {
+		if (is_array($statementParts) && !empty($statementParts['tables'][0])) {
 			$tableName = $statementParts['tables'][0];
 		}
 		$this->replacePlaceholders($sql, $parameters, $tableName);
 		// debug($sql,-2);
 		$result = $this->databaseHandle->sql_query($sql);
 		$this->checkSqlErrors($sql);
-		$rows = $this->getRowsFromResult($query->getSource(), $result);
+		$rows = $this->getRowsFromResult($result);
 		$this->databaseHandle->sql_free_result($result);
 		// Get language uid from querySettings.
 		// Ensure the backend handling is not broken (fallback to Get parameter 'L' if needed)
@@ -317,7 +348,7 @@ class Typo3DbBackend implements \TYPO3\CMS\Extbase\Persistence\Generic\Storage\B
 			$this->replacePlaceholders($statement, $parameters, current($statementParts['tables']));
 			$result = $this->databaseHandle->sql_query($statement);
 			$this->checkSqlErrors($statement);
-			$rows = $this->getRowsFromResult($query->getSource(), $result);
+			$rows = $this->getRowsFromResult($result);
 			$count = current(current($rows));
 		}
 		$this->databaseHandle->sql_free_result($result);
@@ -328,7 +359,7 @@ class Typo3DbBackend implements \TYPO3\CMS\Extbase\Persistence\Generic\Storage\B
 	 * Parses the query and returns the SQL statement parts.
 	 *
 	 * @param \TYPO3\CMS\Extbase\Persistence\QueryInterface $query The query
-	 * @param array $parameters
+	 * @param array &$parameters
 	 * @return array The SQL statement parts
 	 */
 	public function parseQuery(\TYPO3\CMS\Extbase\Persistence\QueryInterface $query, array &$parameters) {
@@ -631,10 +662,15 @@ class Typo3DbBackend implements \TYPO3\CMS\Extbase\Persistence\Generic\Storage\B
 		if ($input instanceof \DateTime) {
 			return $input->format('U');
 		} elseif (is_object($input)) {
-			if ($input instanceof \TYPO3\CMS\Extbase\DomainObject\DomainObjectInterface) {
-				return $input->getUid();
+			if ($input instanceof \TYPO3\CMS\Extbase\Persistence\Generic\LazyLoadingProxy) {
+				$realInput = $input->_loadRealInstance();
 			} else {
-				throw new \TYPO3\CMS\Extbase\Persistence\Generic\Exception\UnexpectedTypeException('An object of class "' . get_class($input) . '" could not be converted to a plain value.', 1274799934);
+				$realInput = $input;
+			}
+			if ($realInput instanceof \TYPO3\CMS\Extbase\DomainObject\DomainObjectInterface) {
+				return $realInput->getUid();
+			} else {
+				throw new \TYPO3\CMS\Extbase\Persistence\Generic\Exception\UnexpectedTypeException('An object of class "' . get_class($realInput) . '" could not be converted to a plain value.', 1274799934);
 			}
 		} elseif (is_bool($input)) {
 			return $input === TRUE ? 1 : 0;
@@ -685,10 +721,10 @@ class Typo3DbBackend implements \TYPO3\CMS\Extbase\Persistence\Generic\Storage\B
 	}
 
 	/**
-	 * @param $className
-	 * @param $tableName
-	 * @param $propertyPath
-	 * @param array $sql
+	 * @param string &$className
+	 * @param string &$tableName
+	 * @param array &$propertyPath
+	 * @param array &$sql
 	 * @throws \TYPO3\CMS\Extbase\Persistence\Generic\Exception
 	 * @throws \TYPO3\CMS\Extbase\Persistence\Generic\Exception\InvalidRelationConfigurationException
 	 * @throws \TYPO3\CMS\Extbase\Persistence\Generic\Exception\MissingColumnMapException
@@ -789,12 +825,11 @@ class Typo3DbBackend implements \TYPO3\CMS\Extbase\Persistence\Generic\Storage\B
 	 * Replace query placeholders in a query part by the given
 	 * parameters.
 	 *
-	 * @param string $sqlString The query part with placeholders
+	 * @param string &$sqlString The query part with placeholders
 	 * @param array $parameters The parameters
 	 * @param string $tableName
 	 *
 	 * @throws \TYPO3\CMS\Extbase\Persistence\Generic\Exception
-	 * @return string The query part with replaced placeholders
 	 */
 	protected function replacePlaceholders(&$sqlString, array $parameters, $tableName = 'foo') {
 		// TODO profile this method again
@@ -827,7 +862,7 @@ class Typo3DbBackend implements \TYPO3\CMS\Extbase\Persistence\Generic\Storage\B
 	 *
 	 * @param \TYPO3\CMS\Extbase\Persistence\Generic\QuerySettingsInterface $querySettings The TYPO3 CMS specific query settings
 	 * @param string $tableName The table name to add the additional where clause for
-	 * @param string $sql
+	 * @param string &$sql
 	 * @return void
 	 */
 	protected function addAdditionalWhereClause(\TYPO3\CMS\Extbase\Persistence\Generic\QuerySettingsInterface $querySettings, $tableName, &$sql) {
@@ -851,7 +886,7 @@ class Typo3DbBackend implements \TYPO3\CMS\Extbase\Persistence\Generic\Storage\B
 	protected function addEnableFieldsStatement($tableName, array &$sql) {
 		\TYPO3\CMS\Core\Utility\GeneralUtility::logDeprecatedFunction();
 		if (is_array($GLOBALS['TCA'][$tableName]['ctrl'])) {
-			if ($this->getTypo3Mode() === 'FE') {
+			if ($this->environmentService->isEnvironmentInFrontendMode()) {
 				$statement = $this->getPageRepository()->enableFields($tableName);
 			} else {
 				// TYPO3_MODE === 'BE'
@@ -879,7 +914,7 @@ class Typo3DbBackend implements \TYPO3\CMS\Extbase\Persistence\Generic\Storage\B
 			$ignoreEnableFields = $querySettings->getIgnoreEnableFields();
 			$enableFieldsToBeIgnored = $querySettings->getEnableFieldsToBeIgnored();
 			$includeDeleted = $querySettings->getIncludeDeleted();
-			if ($this->getTypo3Mode() === 'FE') {
+			if ($this->environmentService->isEnvironmentInFrontendMode()) {
 				$statement .= $this->getFrontendConstraintStatement($tableName, $ignoreEnableFields, $enableFieldsToBeIgnored, $includeDeleted);
 			} else {
 				// TYPO3_MODE === 'BE'
@@ -957,7 +992,7 @@ class Typo3DbBackend implements \TYPO3\CMS\Extbase\Persistence\Generic\Storage\B
 					&& $querySettings->getSysLanguageUid() > 0
 				) {
 					$additionalWhereClause .= ' OR (' . $tableName . '.' . $GLOBALS['TCA'][$tableName]['ctrl']['languageField'] . '=0' .
-						' AND ' . $tableName . '.uid NOT IN (' . 'SELECT ' . $tableName . '.' . $GLOBALS['TCA'][$tableName]['ctrl']['transOrigPointerField'] .
+						' AND ' . $tableName . '.uid NOT IN (SELECT ' . $tableName . '.' . $GLOBALS['TCA'][$tableName]['ctrl']['transOrigPointerField'] .
 						' FROM ' . $tableName .
 						' WHERE ' . $tableName . '.' . $GLOBALS['TCA'][$tableName]['ctrl']['transOrigPointerField'] . '>0' .
 						' AND ' . $tableName . '.' . $GLOBALS['TCA'][$tableName]['ctrl']['languageField'] . '>0';
@@ -988,7 +1023,17 @@ class Typo3DbBackend implements \TYPO3\CMS\Extbase\Persistence\Generic\Storage\B
 			$this->tableColumnCache->set($tableName, $tableColumns);
 		}
 		if (is_array($GLOBALS['TCA'][$tableName]['ctrl']) && array_key_exists('pid', $tableColumns)) {
-			$sql['additionalWhereClause'][] = $tableName . '.pid IN (' . implode(', ', $storagePageIds) . ')';
+			$rootLevel = (int)$GLOBALS['TCA'][$tableName]['ctrl']['rootLevel'];
+			if ($rootLevel) {
+				if ($rootLevel === 1) {
+					$sql['additionalWhereClause'][] = $tableName . '.pid = 0';
+				}
+			} else {
+				if (empty($storagePageIds)) {
+					throw new \TYPO3\CMS\Extbase\Persistence\Generic\Exception\InconsistentQuerySettingsException('Missing storage page ids.', 1365779762);
+				}
+				$sql['additionalWhereClause'][] = $tableName . '.pid IN (' . implode(', ', $storagePageIds) . ')';
+			}
 		}
 	}
 
@@ -1056,17 +1101,13 @@ class Typo3DbBackend implements \TYPO3\CMS\Extbase\Persistence\Generic\Storage\B
 	/**
 	 * Transforms a Resource from a database query to an array of rows.
 	 *
-	 * @param \TYPO3\CMS\Extbase\Persistence\Generic\Qom\SourceInterface $source The source (selector od join)
 	 * @param resource $result The result
 	 * @return array The result as an array of rows (tuples)
 	 */
-	protected function getRowsFromResult(\TYPO3\CMS\Extbase\Persistence\Generic\Qom\SourceInterface $source, $result) {
+	protected function getRowsFromResult($result) {
 		$rows = array();
 		while ($row = $this->databaseHandle->sql_fetch_assoc($result)) {
 			if (is_array($row)) {
-				// TODO Check if this is necessary, maybe the last line is enough
-				$arrayKeys = range(0, count($row));
-				array_fill_keys($arrayKeys, $row);
 				$rows[] = $row;
 			}
 		}
@@ -1152,7 +1193,7 @@ class Typo3DbBackend implements \TYPO3\CMS\Extbase\Persistence\Generic\Storage\B
 	 */
 	protected function getPageRepository() {
 		if (!$this->pageRepository instanceof \TYPO3\CMS\Frontend\Page\PageRepository) {
-			if ($this->getTypo3Mode() === 'FE' && is_object($GLOBALS['TSFE'])) {
+			if ($this->environmentService->isEnvironmentInFrontendMode() && is_object($GLOBALS['TSFE'])) {
 				$this->pageRepository = $GLOBALS['TSFE']->sys_page;
 			} else {
 				$this->pageRepository = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Frontend\\Page\\PageRepository');
@@ -1216,7 +1257,7 @@ class Typo3DbBackend implements \TYPO3\CMS\Extbase\Persistence\Generic\Storage\B
 			$this->pageTSConfigCache[$storagePage] = \TYPO3\CMS\Backend\Utility\BackendUtility::getPagesTSconfig($storagePage);
 		}
 		if (isset($this->pageTSConfigCache[$storagePage]['TCEMAIN.']['clearCacheCmd'])) {
-			$clearCacheCommands = \TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(',', strtolower($this->pageTSConfigCache[$storagePage]['TCEMAIN.']['clearCacheCmd']), 1);
+			$clearCacheCommands = \TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(',', strtolower($this->pageTSConfigCache[$storagePage]['TCEMAIN.']['clearCacheCmd']), TRUE);
 			$clearCacheCommands = array_unique($clearCacheCommands);
 			foreach ($clearCacheCommands as $clearCacheCommand) {
 				if (\TYPO3\CMS\Core\Utility\MathUtility::canBeInterpretedAsInteger($clearCacheCommand)) {
@@ -1228,16 +1269,6 @@ class Typo3DbBackend implements \TYPO3\CMS\Extbase\Persistence\Generic\Storage\B
 		foreach ($pageIdsToClear as $pageIdToClear) {
 			$this->cacheService->getPageIdStack()->push($pageIdToClear);
 		}
-	}
-
-	/**
-	 * Returns the TYPO3 Mode ("FE" for front-end or "BE" for back-end). This method is necessary to enable unit tests to
-	 * mock this constant.
-	 *
-	 * @return string
-	 */
-	protected function getTypo3Mode() {
-		return TYPO3_MODE;
 	}
 }
 

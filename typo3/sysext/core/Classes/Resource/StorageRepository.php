@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Core\Resource;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2011 Andreas Wolf <andreas.wolf@ikt-werk.de>
+ *  (c) 2011-2013 Andreas Wolf <andreas.wolf@ikt-werk.de>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -47,7 +47,12 @@ class StorageRepository extends AbstractRepository {
 	/**
 	 * @var string
 	 */
-	protected $typeField = 'type';
+	protected $typeField = 'driver';
+
+	/**
+	 * @var string
+	 */
+	protected $driverField = 'driver';
 
 	/**
 	 * @var \TYPO3\CMS\Core\Log\Logger
@@ -63,7 +68,7 @@ class StorageRepository extends AbstractRepository {
 	}
 
 	/**
-	 * Finds storages by type.
+	 * Finds storages by type, i.e. the driver used
 	 *
 	 * @param string $storageType
 	 * @return ResourceStorage[]
@@ -201,7 +206,7 @@ class StorageRepository extends AbstractRepository {
 	 * @return string the additional where clause, something like " AND deleted=0 AND hidden=0"
 	 */
 	protected function getWhereClauseForEnabledFields() {
-		if (is_object($GLOBALS['TSFE'])) {
+		if ($this->getEnvironmentMode() === 'FE') {
 			// frontend context
 			$whereClause = $GLOBALS['TSFE']->sys_page->enableFields($this->table);
 			$whereClause .= $GLOBALS['TSFE']->sys_page->deleteClause($this->table);
@@ -211,6 +216,16 @@ class StorageRepository extends AbstractRepository {
 			$whereClause .= \TYPO3\CMS\Backend\Utility\BackendUtility::deleteClause($this->table);
 		}
 		return $whereClause;
+	}
+
+	/**
+	 * Function to return the current TYPO3_MODE.
+	 * This function can be mocked in unit tests to be able to test frontend behaviour.
+	 *
+	 * @return string
+	 */
+	protected function getEnvironmentMode() {
+		return TYPO3_MODE;
 	}
 }
 

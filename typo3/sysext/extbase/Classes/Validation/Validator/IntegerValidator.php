@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Extbase\Validation\Validator;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010-2012 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
+ *  (c) 2010-2013 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
  *  Extbase is a backport of TYPO3 Flow. All credits go to the TYPO3 Flow team.
  *  All rights reserved
  *
@@ -27,26 +27,29 @@ namespace TYPO3\CMS\Extbase\Validation\Validator;
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
+
 /**
- * Validator for integers
+ * Validator for integers.
+ *
+ * @api
  */
-class IntegerValidator extends \TYPO3\CMS\Extbase\Validation\Validator\AbstractValidator {
+class IntegerValidator extends AbstractValidator {
 
 	/**
 	 * Checks if the given value is a valid integer.
 	 *
-	 * If at least one error occurred, the result is FALSE.
-	 *
 	 * @param mixed $value The value that should be validated
-	 * @return boolean TRUE if the value is valid, FALSE if an error occured
+	 * @return void
+	 * @api
 	 */
 	public function isValid($value) {
-		$this->errors = array();
-		if (filter_var($value, FILTER_VALIDATE_INT) !== FALSE) {
-			return TRUE;
+		if (filter_var($value, FILTER_VALIDATE_INT) === FALSE) {
+			$this->addError(
+				\TYPO3\CMS\Extbase\Utility\LocalizationUtility::translate(
+				'validator.integer.notvalid',
+				'extbase'
+				), 1221560494);
 		}
-		$this->addError('The given subject was not a valid integer.', 1221560494);
-		return FALSE;
 	}
 }
 

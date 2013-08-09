@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Rtehtmlarea\Hook;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2012 Stanislas Rolland <stanislas.rolland@typo3.org>
+ *  (c) 2012-2013 Stanislas Rolland <stanislas.rolland@typo3.org>
  *  All rights reserved
  *
  *  This script is part of the Typo3 project. The Typo3 project is
@@ -50,12 +50,11 @@ class SoftReferenceHook extends \TYPO3\CMS\Core\Database\SoftReferenceIndex {
 		$retVal = FALSE;
 		$this->tokenID_basePrefix = $table . ':' . $uid . ':' . $field . ':' . $structurePath . ':' . $spKey;
 		switch ($spKey) {
-		case 'rtehtmlarea_images':
-			$retVal = $this->findRef_rtehtmlarea_images($content, $spParams);
-			break;
-		default:
-			$retVal = FALSE;
-			break;
+			case 'rtehtmlarea_images':
+				$retVal = $this->findRef_rtehtmlarea_images($content, $spParams);
+				break;
+			default:
+				$retVal = FALSE;
 		}
 		return $retVal;
 	}

@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Extbase\DomainObject;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010-2012 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
+ *  (c) 2010-2013 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
  *  Extbase is a backport of TYPO3 Flow. All credits go to the TYPO3 Flow team.
  *  All rights reserved
  *
@@ -40,7 +40,7 @@ interface DomainObjectInterface {
 	/**
 	 * Getter for uid.
 	 *
-	 * @return int the uid or NULL if none set yet.
+	 * @return integer The uid or NULL if none set yet.
 	 */
 	public function getUid();
 
@@ -55,7 +55,7 @@ interface DomainObjectInterface {
 	/**
 	 * Getter for the pid.
 	 *
-	 * @return int The pid or NULL if none set yet.
+	 * @return integer The pid or NULL if none set yet.
 	 */
 	public function getPid();
 

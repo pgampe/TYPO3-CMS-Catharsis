@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Core\Utility;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2011 Susanne Moog <typo3@susanne-moog.de>
+ *  (c) 2011-2013 Susanne Moog <typo3@susanne-moog.de>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -182,18 +182,18 @@ class VersionNumberUtility {
 		$parts[1] = \TYPO3\CMS\Core\Utility\MathUtility::forceIntegerInRange($parts[1], 0, 999);
 		$parts[2] = \TYPO3\CMS\Core\Utility\MathUtility::forceIntegerInRange($parts[2], 0, 999);
 		switch ((string) $raise) {
-		case 'main':
-			$parts[0]++;
-			$parts[1] = 0;
-			$parts[2] = 0;
-			break;
-		case 'sub':
-			$parts[1]++;
-			$parts[2] = 0;
-			break;
-		case 'dev':
-			$parts[2]++;
-			break;
+			case 'main':
+				$parts[0]++;
+				$parts[1] = 0;
+				$parts[2] = 0;
+				break;
+			case 'sub':
+				$parts[1]++;
+				$parts[2] = 0;
+				break;
+			case 'dev':
+				$parts[2]++;
+				break;
 		}
 		return $parts[0] . '.' . $parts[1] . '.' . $parts[2];
 	}

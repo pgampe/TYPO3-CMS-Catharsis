@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Recycler\Controller;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2009-2011 Julian Kleinhans <typo3@kj187.de>
+ *  (c) 2009-2013 Julian Kleinhans <typo3@kj187.de>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -140,7 +140,7 @@ class RecyclerModuleController extends \TYPO3\CMS\Backend\Module\BaseScriptClass
 		$this->pageRenderer->addInlineLanguageLabelArray($this->getJavaScriptLabels());
 		// Load Recycler JavaScript:
 		// Load Plugins
-		$uxPath = $this->doc->backpath . '../t3lib/js/extjs/ux/';
+		$uxPath = $this->doc->backpath . 'js/extjs/ux/';
 		$this->pageRenderer->addJsFile($uxPath . 'Ext.grid.RowExpander.js');
 		$this->pageRenderer->addJsFile($uxPath . 'Ext.app.SearchField.js');
 		$this->pageRenderer->addJsFile($uxPath . 'Ext.ux.FitToParent.js');
@@ -178,15 +178,15 @@ class RecyclerModuleController extends \TYPO3\CMS\Backend\Module\BaseScriptClass
 	protected function getJavaScriptLabels() {
 		$coreLabels = array(
 			'title' => $GLOBALS['LANG']->getLL('title'),
-			'path' => $GLOBALS['LANG']->sL('LLL:EXT:lang/locallang_core.xml:labels.path'),
-			'table' => $GLOBALS['LANG']->sL('LLL:EXT:lang/locallang_core.xml:labels.table'),
-			'depth' => $GLOBALS['LANG']->sL('LLL:EXT:lang/locallang_mod_web_perm.xml:Depth'),
-			'depth_0' => $GLOBALS['LANG']->sL('LLL:EXT:lang/locallang_core.xml:labels.depth_0'),
-			'depth_1' => $GLOBALS['LANG']->sL('LLL:EXT:lang/locallang_core.xml:labels.depth_1'),
-			'depth_2' => $GLOBALS['LANG']->sL('LLL:EXT:lang/locallang_core.xml:labels.depth_2'),
-			'depth_3' => $GLOBALS['LANG']->sL('LLL:EXT:lang/locallang_core.xml:labels.depth_3'),
-			'depth_4' => $GLOBALS['LANG']->sL('LLL:EXT:lang/locallang_core.xml:labels.depth_4'),
-			'depth_infi' => $GLOBALS['LANG']->sL('LLL:EXT:lang/locallang_core.xml:labels.depth_infi')
+			'path' => $GLOBALS['LANG']->sL('LLL:EXT:lang/locallang_core.xlf:labels.path'),
+			'table' => $GLOBALS['LANG']->sL('LLL:EXT:lang/locallang_core.xlf:labels.table'),
+			'depth' => $GLOBALS['LANG']->sL('LLL:EXT:lang/locallang_mod_web_perm.xlf:Depth'),
+			'depth_0' => $GLOBALS['LANG']->sL('LLL:EXT:lang/locallang_core.xlf:labels.depth_0'),
+			'depth_1' => $GLOBALS['LANG']->sL('LLL:EXT:lang/locallang_core.xlf:labels.depth_1'),
+			'depth_2' => $GLOBALS['LANG']->sL('LLL:EXT:lang/locallang_core.xlf:labels.depth_2'),
+			'depth_3' => $GLOBALS['LANG']->sL('LLL:EXT:lang/locallang_core.xlf:labels.depth_3'),
+			'depth_4' => $GLOBALS['LANG']->sL('LLL:EXT:lang/locallang_core.xlf:labels.depth_4'),
+			'depth_infi' => $GLOBALS['LANG']->sL('LLL:EXT:lang/locallang_core.xlf:labels.depth_infi')
 		);
 		$extensionLabels = $this->getJavaScriptLabelsFromLocallang('js.', 'label_');
 		$javaScriptLabels = array_merge($coreLabels, $extensionLabels);

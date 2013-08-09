@@ -2,7 +2,7 @@
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2006-2011 Kasper Skårhøj (kasperYYYY@typo3.com)
+ *  (c) 2006-2013 Kasper Skårhøj (kasperYYYY@typo3.com)
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -30,7 +30,7 @@
  * @author Kasper Skårhøj <kasperYYYY@typo3.com>
  */
 unset($MCONF);
-require 'init.php';
+require __DIR__ . '/init.php';
 // Find module path:
 $temp_M = (string) \TYPO3\CMS\Core\Utility\GeneralUtility::_GET('M');
 $isDispatched = FALSE;

@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Core\Resource;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2011 Andreas Wolf <andreas.wolf@typo3.org>
+ *  (c) 2011-2013 Andreas Wolf <andreas.wolf@typo3.org>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -26,6 +26,9 @@ namespace TYPO3\CMS\Core\Resource;
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
+
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Utility\PathUtility;
 
 /**
  * A "mount point" inside the TYPO3 file handling.
@@ -343,7 +346,7 @@ class ResourceStorage {
 	/**
 	 * Returns TRUE if this storage has the given capability.
 	 *
-	 * @param int $capability A capability, as defined in a CAPABILITY_* constant
+	 * @param integer $capability A capability, as defined in a CAPABILITY_* constant
 	 * @return boolean
 	 */
 	protected function hasCapability($capability) {
@@ -401,7 +404,7 @@ class ResourceStorage {
 					$this->isOnline = TRUE;
 				} else {
 					// check if the storage is disabled temporary for now
-					$registryObject = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Core\\Registry');
+					$registryObject = GeneralUtility::makeInstance('TYPO3\\CMS\\Core\\Registry');
 					$offlineUntil = $registryObject->get('core', 'sys_file_storage-' . $this->getUid() . '-offline-until');
 					if ($offlineUntil && $offlineUntil > time()) {
 						$this->isOnline = FALSE;
@@ -438,7 +441,7 @@ class ResourceStorage {
 	 * @return void
 	 */
 	public function markAsTemporaryOffline() {
-		$registryObject = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Core\\Registry');
+		$registryObject = GeneralUtility::makeInstance('TYPO3\\CMS\\Core\\Registry');
 		$registryObject->set('core', 'sys_file_storage-' . $this->getUid() . '-offline-until', time() + 60 * 5);
 		$this->storageRecord['is_online'] = 0;
 		$this->isOnline = FALSE;
@@ -457,7 +460,7 @@ class ResourceStorage {
 	 * @throws Exception\FolderDoesNotExistException
 	 * @return void
 	 */
-	public function injectFileMount($folderIdentifier, $additionalData = array()) {
+	public function addFileMount($folderIdentifier, $additionalData = array()) {
 		// check for the folder before we add it as a filemount
 		if ($this->driver->folderExists($folderIdentifier) === FALSE) {
 			// if there is an error, this is important and should be handled
@@ -523,12 +526,12 @@ class ResourceStorage {
 	}
 
 	/**
-	 * Adds user permissions to the storage
+	 * Sets the user permissions of the storage
 	 *
 	 * @param array $userPermissions
 	 * @return void
 	 */
-	public function injectUserPermissions(array $userPermissions) {
+	public function setUserPermissions(array $userPermissions) {
 		$this->userPermissions = $userPermissions;
 	}
 
@@ -658,21 +661,21 @@ class ResourceStorage {
 	 * @return boolean TRUE if extension/filename is allowed
 	 */
 	protected function checkFileExtensionPermission($fileName) {
-		$isAllowed = \TYPO3\CMS\Core\Utility\GeneralUtility::verifyFilenameAgainstDenyPattern($fileName);
+		$isAllowed = GeneralUtility::verifyFilenameAgainstDenyPattern($fileName);
 		if ($isAllowed) {
-			$fileInfo = \TYPO3\CMS\Core\Utility\GeneralUtility::split_fileref($fileName);
+			$fileInfo = GeneralUtility::split_fileref($fileName);
 			// Set up the permissions for the file extension
 			$fileExtensionPermissions = $GLOBALS['TYPO3_CONF_VARS']['BE']['fileExtensions']['webspace'];
-			$fileExtensionPermissions['allow'] = \TYPO3\CMS\Core\Utility\GeneralUtility::uniqueList(strtolower($fileExtensionPermissions['allow']));
-			$fileExtensionPermissions['deny'] = \TYPO3\CMS\Core\Utility\GeneralUtility::uniqueList(strtolower($fileExtensionPermissions['deny']));
+			$fileExtensionPermissions['allow'] = GeneralUtility::uniqueList(strtolower($fileExtensionPermissions['allow']));
+			$fileExtensionPermissions['deny'] = GeneralUtility::uniqueList(strtolower($fileExtensionPermissions['deny']));
 			$fileExtension = strtolower($fileInfo['fileext']);
 			if ($fileExtension !== '') {
 				// If the extension is found amongst the allowed types, we return TRUE immediately
-				if ($fileExtensionPermissions['allow'] === '*' || \TYPO3\CMS\Core\Utility\GeneralUtility::inList($fileExtensionPermissions['allow'], $fileExtension)) {
+				if ($fileExtensionPermissions['allow'] === '*' || GeneralUtility::inList($fileExtensionPermissions['allow'], $fileExtension)) {
 					return TRUE;
 				}
 				// If the extension is found amongst the denied types, we return FALSE immediately
-				if ($fileExtensionPermissions['deny'] === '*' || \TYPO3\CMS\Core\Utility\GeneralUtility::inList($fileExtensionPermissions['deny'], $fileExtension)) {
+				if ($fileExtensionPermissions['deny'] === '*' || GeneralUtility::inList($fileExtensionPermissions['deny'], $fileExtension)) {
 					return FALSE;
 				}
 				// If no match we return TRUE
@@ -711,7 +714,7 @@ class ResourceStorage {
 			throw new \InvalidArgumentException('File "' . $localFilePath . '" does not exist.', 1319552745);
 		}
 		$targetFolder = $targetFolder ? $targetFolder : $this->getDefaultFolder();
-		$fileName = $fileName ? $fileName : basename($localFilePath);
+		$fileName = $fileName ? $fileName : PathUtility::basename($localFilePath);
 		if ($conflictMode === 'cancel' && $this->driver->fileExistsInFolder($fileName, $targetFolder)) {
 			throw new Exception\ExistingTargetFileNameException('File "' . $fileName . '" already exists in folder ' . $targetFolder->getIdentifier(), 1322121068);
 		} elseif ($conflictMode === 'changeName') {
@@ -877,7 +880,12 @@ class ResourceStorage {
 		}
 		$filters = $useFilters == TRUE ? $this->fileAndFolderNameFilters : array();
 		$items = $this->driver->getFileList($path, $start, $numberOfItems, $filters, $rows, $recursive);
-		uksort($items, 'strnatcasecmp');
+
+		// We should not sort when fetching a recursive list, as these are indexed numerically
+		if ($recursive === FALSE) {
+			uksort($items, 'strnatcasecmp');
+		}
+
 		return $items;
 	}
 
@@ -939,16 +947,15 @@ class ResourceStorage {
 		if (!$this->checkFileActionPermission('write', $file)) {
 			throw new Exception\InsufficientFileWritePermissionsException('Writing to file "' . $file->getIdentifier() . '" is not allowed.', 1330121088);
 		}
-			// Call driver method to update the file and update file properties afterwards
-		try {
-			$result = $this->driver->setFileContents($file, $contents);
-			$fileInfo = $this->driver->getFileInfo($file);
-			$fileInfo['sha1'] = $this->driver->hash($file, 'sha1');
-			$file->updateProperties($fileInfo);
-			$this->getFileRepository()->update($file);
-		} catch (\RuntimeException $e) {
-			throw $e;
+		if ($this->checkFileExtensionPermission($file->getName()) === FALSE) {
+			throw new Exception\IllegalFileExtensionException('You are not allowed to edit a file with extension "' . $file->getExtension() . '"', 1366711933);
 		}
+			// Call driver method to update the file and update file properties afterwards
+		$result = $this->driver->setFileContents($file, $contents);
+		$fileInfo = $this->driver->getFileInfo($file);
+		$fileInfo['sha1'] = $this->driver->hash($file, 'sha1');
+		$file->updateProperties($fileInfo);
+		$this->getFileRepository()->update($file);
 		return $result;
 	}
 
@@ -964,6 +971,9 @@ class ResourceStorage {
 	 * @return FileInterface The file object
 	 */
 	public function createFile($fileName, Folder $targetFolderObject) {
+		if ($this->checkFileExtensionPermission($fileName) === FALSE) {
+			throw new Exception\IllegalFileExtensionException('You are not allowed to create a file with this extension on storage "' . $targetFolderObject->getCombinedIdentifier() . '"', 1366711745);
+		}
 		if (!$this->checkFolderActionPermission('add', $targetFolderObject)) {
 			throw new Exception\InsufficientFolderWritePermissionsException('You are not allowed to create directories on this storage "' . $targetFolderObject->getIdentifier() . '"', 1323059807);
 		}
@@ -974,21 +984,26 @@ class ResourceStorage {
 	 * Previously in \TYPO3\CMS\Core\Utility\File\ExtendedFileUtility::deleteFile()
 	 *
 	 * @param $fileObject FileInterface
-	 *
 	 * @throws Exception\InsufficientFileAccessPermissionsException
 	 * @throws Exception\FileOperationErrorException
-	 * @return bool TRUE if deletion succeeded
+	 * @return boolean TRUE if deletion succeeded
 	 */
 	public function deleteFile($fileObject) {
 		if (!$this->checkFileActionPermission('remove', $fileObject)) {
 			throw new Exception\InsufficientFileAccessPermissionsException('You are not allowed to delete the file "' . $fileObject->getIdentifier() . '\'', 1319550425);
 		}
+
+		$this->emitPreFileDeleteSignal($fileObject);
+
 		$result = $this->driver->deleteFile($fileObject);
 		if ($result === FALSE) {
 			throw new Exception\FileOperationErrorException('Deleting the file "' . $fileObject->getIdentifier() . '\' failed.', 1329831691);
 		}
 		// Mark the file object as deleted
 		$fileObject->setDeleted();
+
+		$this->emitPostFileDeleteSignal($fileObject);
+
 		return TRUE;
 	}
 
@@ -1023,15 +1038,11 @@ class ResourceStorage {
 		$sourceStorage = $file->getStorage();
 		// Call driver method to create a new file from an existing file object,
 		// and return the new file object
-		try {
-			if ($sourceStorage == $this) {
-				$newFileObject = $this->driver->copyFileWithinStorage($file, $targetFolder, $targetFileName);
-			} else {
-				$tempPath = $file->getForLocalProcessing();
-				$newFileObject = $this->driver->addFile($tempPath, $targetFolder, $targetFileName);
-			}
-		} catch (Exception\AbstractFileOperationException $e) {
-			throw $e;
+		if ($sourceStorage === $this) {
+			$newFileObject = $this->driver->copyFileWithinStorage($file, $targetFolder, $targetFileName);
+		} else {
+			$tempPath = $file->getForLocalProcessing();
+			$newFileObject = $this->driver->addFile($tempPath, $targetFolder, $targetFileName);
 		}
 		$this->emitPostFileCopySignal($file, $targetFolder);
 		return $newFileObject;
@@ -1044,7 +1055,7 @@ class ResourceStorage {
 	 * @param string $localFilePath the temporary file name from $_FILES['file1']['tmp_name']
 	 * @param Folder $targetFolder
 	 * @param string $targetFileName the destination file name $_FILES['file1']['name']
-	 * @param int $uploadedFileSize
+	 * @param integer $uploadedFileSize
 	 *
 	 * @throws Exception\InsufficientFolderWritePermissionsException
 	 * @throws Exception\UploadException
@@ -1063,7 +1074,7 @@ class ResourceStorage {
 			throw new Exception\UploadException('The upload has failed, no uploaded file found!', 1322110455);
 		}
 		// Max upload size (kb) for files.
-		$maxUploadFileSize = \TYPO3\CMS\Core\Utility\GeneralUtility::getMaxUploadFileSize() * 1024;
+		$maxUploadFileSize = GeneralUtility::getMaxUploadFileSize() * 1024;
 		if ($uploadedFileSize >= $maxUploadFileSize) {
 			throw new Exception\UploadSizeException('The uploaded file exceeds the size-limit of ' . $maxUploadFileSize . ' bytes', 1322110041);
 		}
@@ -1147,7 +1158,7 @@ class ResourceStorage {
 		// Call driver method to move the file that also updates the file
 		// object properties
 		try {
-			if ($sourceStorage == $this) {
+			if ($sourceStorage === $this) {
 				$newIdentifier = $this->driver->moveFileWithinStorage($file, $targetFolder, $targetFileName);
 				$this->updateFile($file, $newIdentifier);
 			} else {
@@ -1246,6 +1257,10 @@ class ResourceStorage {
 		if ($file->getIdentifier() == $targetFileName) {
 			return $file;
 		}
+		// Check if file extension is allowed
+		if ($this->checkFileExtensionPermission($targetFileName) === FALSE) {
+			throw new Exception\IllegalFileExtensionException('You are not allowed to rename a file with to this extension', 1371466663);
+		}
 		// Check if user is allowed to rename
 		if (!$this->checkUserActionPermission('rename', 'File')) {
 			throw new Exception\InsufficientUserPermissionsException('You are not allowed to rename files."', 1319219349);
@@ -1258,6 +1273,9 @@ class ResourceStorage {
 		if (!$this->checkFileActionPermission('write', $file)) {
 			throw new Exception\InsufficientFileWritePermissionsException('You are not allowed to rename the file "' . $file->getIdentifier() . '\'', 1319219349);
 		}
+
+		$this->emitPreFileRenameSignal($file, $targetFileName);
+
 		// Call driver method to rename the file that also updates the file
 		// object properties
 		try {
@@ -1267,6 +1285,9 @@ class ResourceStorage {
 		} catch (\RuntimeException $e) {
 
 		}
+
+		$this->emitPostFileRenameSignal($file, $targetFileName);
+
 		return $file;
 	}
 
@@ -1362,22 +1383,18 @@ class ResourceStorage {
 		$this->emitPreFolderMoveSignal($folderToMove, $targetParentFolder, $newFolderName);
 		// Get all file objects now so we are able to update them after moving the folder
 		$fileObjects = $this->getAllFileObjectsInFolder($folderToMove);
-		try {
-			if ($sourceStorage == $this) {
-				$fileMappings = $this->driver->moveFolderWithinStorage($folderToMove, $targetParentFolder, $newFolderName);
-			} else {
-				$fileMappings = $this->moveFolderBetweenStorages($folderToMove, $targetParentFolder, $newFolderName);
-			}
-			// Update the identifier and storage of all file objects
-			foreach ($fileObjects as $oldIdentifier => $fileObject) {
-				$newIdentifier = $fileMappings[$oldIdentifier];
-				$fileObject->updateProperties(array('storage' => $this, 'identifier' => $newIdentifier));
-				$this->getFileRepository()->update($fileObject);
-			}
-			$returnObject = $this->getFolder($fileMappings[$folderToMove->getIdentifier()]);
-		} catch (\TYPO3\CMS\Core\Exception $e) {
-			throw $e;
+		if ($sourceStorage === $this) {
+			$fileMappings = $this->driver->moveFolderWithinStorage($folderToMove, $targetParentFolder, $newFolderName);
+		} else {
+			$fileMappings = $this->moveFolderBetweenStorages($folderToMove, $targetParentFolder, $newFolderName);
 		}
+		// Update the identifier and storage of all file objects
+		foreach ($fileObjects as $oldIdentifier => $fileObject) {
+			$newIdentifier = $fileMappings[$oldIdentifier];
+			$fileObject->updateProperties(array('storage' => $this, 'identifier' => $newIdentifier));
+			$this->getFileRepository()->update($fileObject);
+		}
+		$returnObject = $this->getFolder($fileMappings[$folderToMove->getIdentifier()]);
 		$this->emitPostFolderMoveSignal($folderToMove, $targetParentFolder, $newFolderName);
 		return $returnObject;
 	}
@@ -1389,14 +1406,10 @@ class ResourceStorage {
 	 * @param Folder $targetParentFolder
 	 * @param string $newFolderName
 	 *
-	 * @throws \BadMethodCallException
-	 * @return array Mapping of old file identifiers to new ones
+	 * @return boolean
 	 */
-	protected function moveFolderBetweenStorages(Folder $folderToMove, Folder $targetParentFolder, $newFolderName = NULL) {
-		// This is not implemented for now as moving files between storages might cause quite some headaches when
-		// something goes wrong. It is also not that common of a use case, so it does not hurt that much to leave it out
-		// for now.
-		throw new \BadMethodCallException('Moving folders between storages is not implemented.');
+	protected function moveFolderBetweenStorages(Folder $folderToMove, Folder $targetParentFolder, $newFolderName) {
+		return $this->getDriver()->moveFolderBetweenStorages($folderToMove, $targetParentFolder, $newFolderName);
 	}
 
 	/**
@@ -1418,7 +1431,7 @@ class ResourceStorage {
 		// call driver method to move the file
 		// that also updates the file object properties
 		try {
-			if ($sourceStorage == $this) {
+			if ($sourceStorage === $this) {
 				$this->driver->copyFolderWithinStorage($folderToCopy, $targetParentFolder, $newFolderName);
 				$returnObject = $this->getFolder($targetParentFolder->getSubfolder($newFolderName)->getIdentifier());
 			} else {
@@ -1432,17 +1445,16 @@ class ResourceStorage {
 	}
 
 	/**
-	 * Moves files between storages
+	 * Copy folders between storages
 	 *
-	 * @param Folder $folderToMove
+	 * @param Folder $folderToCopy
 	 * @param Folder $targetParentFolder
-	 * @param null $newFolderName
+	 * @param string $newFolderName
 	 *
-	 * @throws \RuntimeException
-	 * @return void
+	 * @return boolean
 	 */
-	protected function copyFolderBetweenStorages(Folder $folderToMove, Folder $targetParentFolder, $newFolderName = NULL) {
-		throw new \RuntimeException('Not yet implemented!', 1330262731);
+	protected function copyFolderBetweenStorages(Folder $folderToCopy, Folder $targetParentFolder, $newFolderName) {
+		return $this->getDriver()->copyFolderBetweenStorages($folderToCopy, $targetParentFolder, $newFolderName);
 	}
 
 	/**
@@ -1465,21 +1477,21 @@ class ResourceStorage {
 		if ($this->driver->folderExistsInFolder($newName, $folderObject)) {
 			throw new \InvalidArgumentException('The folder ' . $newName . ' already exists in folder ' . $folderObject->getIdentifier(), 1325418870);
 		}
+
 		$this->emitPreFolderRenameSignal($folderObject, $newName);
+
 		$fileObjects = $this->getAllFileObjectsInFolder($folderObject);
-		try {
-			$fileMappings = $this->driver->renameFolder($folderObject, $newName);
-			// Update the identifier of all file objects
-			foreach ($fileObjects as $oldIdentifier => $fileObject) {
-				$newIdentifier = $fileMappings[$oldIdentifier];
-				$fileObject->updateProperties(array('identifier' => $newIdentifier));
-				$this->getFileRepository()->update($fileObject);
-			}
-			$returnObject = $this->getFolder($fileMappings[$folderObject->getIdentifier()]);
-		} catch (\Exception $e) {
-			throw $e;
+		$fileMappings = $this->driver->renameFolder($folderObject, $newName);
+		// Update the identifier of all file objects
+		foreach ($fileObjects as $oldIdentifier => $fileObject) {
+			$newIdentifier = $fileMappings[$oldIdentifier];
+			$fileObject->updateProperties(array('identifier' => $newIdentifier));
+			$this->getFileRepository()->update($fileObject);
 		}
+		$returnObject = $this->getFolder($fileMappings[$folderObject->getIdentifier()]);
+
 		$this->emitPostFolderRenameSignal($folderObject, $newName);
+
 		return $returnObject;
 	}
 
@@ -1496,12 +1508,16 @@ class ResourceStorage {
 		if (!$this->checkFolderActionPermission('remove', $folderObject)) {
 			throw new Exception\InsufficientFileAccessPermissionsException('You are not allowed to access the folder "' . $folderObject->getIdentifier() . '\'', 1323423953);
 		}
-		if ($this->driver->isFolderEmpty($folderObject) && !$deleteRecursively) {
+		if (!$this->driver->isFolderEmpty($folderObject) && !$deleteRecursively) {
 			throw new \RuntimeException('Could not delete folder "' . $folderObject->getIdentifier() . '" because it is not empty.', 1325952534);
 		}
+
 		$this->emitPreFolderDeleteSignal($folderObject);
+
 		$result = $this->driver->deleteFolder($folderObject, $deleteRecursively);
+
 		$this->emitPostFolderDeleteSignal($folderObject);
+
 		return $result;
 	}
 
@@ -1521,24 +1537,30 @@ class ResourceStorage {
 
 	/**
 	 * @param $path
-	 * @param int $start
-	 * @param int $numberOfItems
+	 * @param integer $start
+	 * @param integer $numberOfItems
 	 * @param array $folderFilterCallbacks
 	 * @param boolean $recursive
 	 * @return array
 	 */
 	public function fetchFolderListFromDriver($path, $start = 0, $numberOfItems = 0, array $folderFilterCallbacks = array(), $recursive = FALSE) {
 		$items = $this->driver->getFolderList($path, $start, $numberOfItems, $folderFilterCallbacks, $recursive);
-		// Exclude the _processed_ folder, so it won't get indexed etc
-		$processingFolder = $this->getProcessingFolder();
-		if ($processingFolder && $path == '/') {
-			$processedFolderIdentifier = $this->processingFolder->getIdentifier();
-			$processedFolderIdentifier = trim($processedFolderIdentifier, '/');
-			if (isset($items[$processedFolderIdentifier])) {
-				unset($items[$processedFolderIdentifier]);
+		if (!empty($items)) {
+			// Exclude the _processed_ folder, so it won't get indexed etc
+			// The processed folder might be any sub folder in storage
+			$processingFolder = $this->getProcessingFolder();
+			if ($processingFolder) {
+				$processedFolderIdentifier = $this->processingFolder->getIdentifier();
+				$processedFolderIdentifier = trim($processedFolderIdentifier, '/');
+				$processedFolderIdentifierParts = explode('/', $processedFolderIdentifier);
+				$processedFolderName = array_pop($processedFolderIdentifierParts);
+				$processedFolderParent = implode('/', $processedFolderIdentifierParts);
+				if ($processedFolderParent === trim($path, '/') && isset($items[$processedFolderName])) {
+					unset($items[$processedFolderName]);
+				}
 			}
+			uksort($items, 'strnatcasecmp');
 		}
-		uksort($items, 'strnatcasecmp');
 		return $items;
 	}
 
@@ -1585,7 +1607,7 @@ class ResourceStorage {
 		if (!$this->checkFolderActionPermission('add', $parentFolder)) {
 			throw new Exception\InsufficientFolderWritePermissionsException('You are not allowed to create directories in the folder "' . $parentFolder->getIdentifier() . '"', 1323059807);
 		}
-		$folderParts = \TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode('/', $folderName, TRUE);
+		$folderParts = GeneralUtility::trimExplode('/', $folderName, TRUE);
 		foreach ($folderParts as $folder) {
 			// TODO check if folder creation succeeded
 			if ($this->hasFolderInFolder($folder, $parentFolder)) {
@@ -1884,7 +1906,7 @@ class ResourceStorage {
 	protected function getUniqueName(Folder $folder, $theFile, $dontCheckForUnique = FALSE) {
 		static $maxNumber = 99, $uniqueNamePrefix = '';
 		// Fetches info about path, name, extention of $theFile
-		$origFileInfo = \TYPO3\CMS\Core\Utility\GeneralUtility::split_fileref($theFile);
+		$origFileInfo = GeneralUtility::split_fileref($theFile);
 		// Adds prefix
 		if ($uniqueNamePrefix) {
 			$origFileInfo['file'] = $uniqueNamePrefix . $origFileInfo['file'];
@@ -1940,21 +1962,21 @@ class ResourceStorage {
 	 * @return \TYPO3\CMS\Extbase\Object\ObjectManager
 	 */
 	protected function getObjectManager() {
-		return \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Extbase\\Object\\ObjectManager');
+		return GeneralUtility::makeInstance('TYPO3\\CMS\\Extbase\\Object\\ObjectManager');
 	}
 
 	/**
 	 * @return ResourceFactory
 	 */
 	protected function getFileFactory() {
-		return \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Core\\Resource\\ResourceFactory');
+		return GeneralUtility::makeInstance('TYPO3\\CMS\\Core\\Resource\\ResourceFactory');
 	}
 
 	/**
 	 * @return \TYPO3\CMS\Core\Resource\FileRepository
 	 */
 	protected function getFileRepository() {
-		return \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Core\\Resource\\FileRepository');
+		return GeneralUtility::makeInstance('TYPO3\\CMS\\Core\\Resource\\FileRepository');
 	}
 
 	/**
@@ -1962,9 +1984,29 @@ class ResourceStorage {
 	 */
 	protected function getFileProcessingService() {
 		if (!$this->fileProcessingService) {
-			$this->fileProcessingService = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Core\\Resource\\Service\\FileProcessingService', $this, $this->driver);
+			$this->fileProcessingService = GeneralUtility::makeInstance('TYPO3\\CMS\\Core\\Resource\\Service\\FileProcessingService', $this, $this->driver);
 		}
 		return $this->fileProcessingService;
+	}
+
+	/**
+	 * Gets the role of a folder
+	 *
+	 * @param FolderInterface $folder Folder object to get the role from
+	 * @return string The role the folder has
+	 */
+	public function getRole(FolderInterface $folder) {
+		$folderRole = FolderInterface::ROLE_DEFAULT;
+
+		if (method_exists($this->driver, 'getRole')) {
+			$folderRole = $this->driver->getRole($folder);
+		}
+
+		if ($folder->getIdentifier() === $this->getProcessingFolder()->getIdentifier()) {
+			$folderRole = FolderInterface::ROLE_PROCESSING;
+		}
+
+		return $folderRole;
 	}
 
 	/**
@@ -1986,6 +2028,9 @@ class ResourceStorage {
 				$processingFolderParts = explode('/', $processingFolder);
 				$parentFolder = $this->driver->getRootLevelFolder();
 				foreach ($processingFolderParts as $folderPart) {
+					if ($folderPart === '') {
+						continue;
+					}
 					if (!$this->driver->folderExistsInFolder($folderPart, $parentFolder)) {
 						$parentFolder = $this->driver->createFolder($folderPart, $parentFolder);
 					} else {

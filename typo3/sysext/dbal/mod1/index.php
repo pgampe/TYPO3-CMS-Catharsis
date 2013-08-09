@@ -2,8 +2,8 @@
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2004-2009 Kasper Skårhøj (kasperYYYY@typo3.com)
- *  (c) 2004-2009 Karsten Dambekalns (karsten@typo3.org)
+ *  (c) 2004-2013 Kasper Skårhøj (kasperYYYY@typo3.com)
+ *  (c) 2004-2013 Karsten Dambekalns (karsten@typo3.org)
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -22,21 +22,16 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
+
 /**
  * Module 'DBAL Debug' for the 'dbal' extension.
  *
  * @author 	Kasper Skårhøj <kasperYYYY@typo3.com>
  * @author 	Karsten Dambekalns <karsten@typo3.org>
  */
-$LANG->includeLLFile('EXT:dbal/mod1/locallang.xml');
+$LANG->includeLLFile('EXT:dbal/mod1/locallang.xlf');
 $BE_USER->modAccess($MCONF, 1);
-/*
- * @deprecated since 6.0, the classname tx_dbal_module1 and this file is obsolete
- * and will be removed with 6.2. The class was renamed and is now located at:
- * typo3/sysext/dbal/Classes/Controller/ModuleController.php
- */
-require_once \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath('dbal') . 'Classes/Controller/ModuleController.php';
-// Make instance:
+
 $SOBE = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Dbal\\Controller\\ModuleController');
 $SOBE->init();
 $SOBE->main();

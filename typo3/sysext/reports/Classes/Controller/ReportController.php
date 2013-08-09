@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Reports\Controller;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2012 Georg Ringer <typo3@ringerge.org>
+ *  (c) 2012-2013 Georg Ringer <typo3@ringerge.org>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -35,7 +35,7 @@ class ReportController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionControlle
 	 * @return void
 	 */
 	public function initializeAction() {
-		$vars = \TYPO3\CMS\Core\Utility\GeneralUtility::_GET('tx_reports_tools_reportstxreportsm1');
+		$vars = \TYPO3\CMS\Core\Utility\GeneralUtility::_GET('tx_reports_system_reportstxreportsm1');
 		if (!isset($vars['redirect']) && $vars['action'] !== 'index' && !isset($vars['extension']) && is_array($GLOBALS['BE_USER']->uc['reports']['selection'])) {
 			$previousSelection = $GLOBALS['BE_USER']->uc['reports']['selection'];
 			if (!empty($previousSelection['extension']) && !empty($previousSelection['report'])) {

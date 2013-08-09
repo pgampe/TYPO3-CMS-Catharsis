@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Extensionmanager\Utility;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2012 Susanne Moog <susanne.moog@typo3.org>
+ *  (c) 2012-2013 Susanne Moog <susanne.moog@typo3.org>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -35,88 +35,53 @@ class InstallUtility implements \TYPO3\CMS\Core\SingletonInterface {
 
 	/**
 	 * @var \TYPO3\CMS\Extbase\Object\ObjectManager
+	 * @inject
 	 */
 	public $objectManager;
 
 	/**
-	 * @var \TYPO3\CMS\Install\Sql\SchemaMigrator
+	 * @var \TYPO3\CMS\Install\Service\SqlSchemaMigrationService
+	 * @inject
 	 */
 	public $installToolSqlParser;
 
 	/**
 	 * @var \TYPO3\CMS\Extensionmanager\Utility\DependencyUtility
+	 * @inject
 	 */
 	protected $dependencyUtility;
 
 	/**
 	 * @var \TYPO3\CMS\Extensionmanager\Utility\FileHandlingUtility
+	 * @inject
 	 */
 	protected $fileHandlingUtility;
 
 	/**
 	 * @var \TYPO3\CMS\Extensionmanager\Utility\ListUtility
+	 * @inject
 	 */
 	protected $listUtility;
 
 	/**
 	 * @var \TYPO3\CMS\Extensionmanager\Utility\DatabaseUtility
+	 * @inject
 	 */
 	protected $databaseUtility;
 
 	/**
 	 * @var \TYPO3\CMS\Extensionmanager\Domain\Repository\ExtensionRepository
+	 * @inject
 	 */
 	public $extensionRepository;
-
-	/**
-	 * @param \TYPO3\CMS\Extensionmanager\Utility\ListUtility $listUtility
-	 * @return void
-	 */
-	public function injectListUtility(\TYPO3\CMS\Extensionmanager\Utility\ListUtility $listUtility) {
-		$this->listUtility = $listUtility;
-	}
-
-	/**
-	 * @param \TYPO3\CMS\Extensionmanager\Utility\FileHandlingUtility $filehandlingUtility
-	 * @return void
-	 */
-	public function injectFileHandlingUtility(\TYPO3\CMS\Extensionmanager\Utility\FileHandlingUtility $fileHandlingUtility) {
-		$this->fileHandlingUtility = $fileHandlingUtility;
-	}
-
-	/**
-	 * @param \TYPO3\CMS\Extensionmanager\Utility\DependencyUtility $dependencyUtility
-	 * @return void
-	 */
-	public function injectDependencyUtility(\TYPO3\CMS\Extensionmanager\Utility\DependencyUtility $dependencyUtility) {
-		$this->dependencyUtility = $dependencyUtility;
-	}
-
-	/**
-	 * @param \TYPO3\CMS\Extensionmanager\Utility\DatabaseUtility $databaseUtility
-	 * @return void
-	 */
-	public function injectDatabaseUtility(\TYPO3\CMS\Extensionmanager\Utility\DatabaseUtility $databaseUtility) {
-		$this->databaseUtility = $databaseUtility;
-	}
-
-	/**
-	 * Inject emConfUtility
-	 *
-	 * @param \TYPO3\CMS\Extensionmanager\Domain\Repository\ExtensionRepository $extensionRepository
-	 * @return void
-	 */
-	public function injectExtensionRepository(\TYPO3\CMS\Extensionmanager\Domain\Repository\ExtensionRepository $extensionRepository) {
-		$this->extensionRepository = $extensionRepository;
-	}
 
 	/**
 	 * __construct
 	 */
 	public function __construct() {
 		$this->objectManager = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Extbase\\Object\\ObjectManager');
-		/** @var $installToolSqlParser \TYPO3\CMS\Install\Sql\SchemaMigrator */
-		$this->installToolSqlParser = $this->objectManager->get('TYPO3\\CMS\\Install\\Sql\\SchemaMigrator');
+		/** @var $installToolSqlParser \TYPO3\CMS\Install\Service\SqlSchemaMigrationService */
+		$this->installToolSqlParser = $this->objectManager->get('TYPO3\\CMS\\Install\\Service\\SqlSchemaMigrationService');
 		$this->dependencyUtility = $this->objectManager->get('TYPO3\\CMS\\Extensionmanager\\Utility\\DependencyUtility');
 	}
 
@@ -139,6 +104,7 @@ class InstallUtility implements \TYPO3\CMS\Core\SingletonInterface {
 			$this->loadExtension($extensionKey);
 		}
 		$this->reloadCaches();
+		$this->processCachingFrameworkUpdates();
 		$this->saveDefaultConfiguration($extension['key']);
 	}
 
@@ -152,7 +118,14 @@ class InstallUtility implements \TYPO3\CMS\Core\SingletonInterface {
 	public function uninstall($extensionKey) {
 		$dependentExtensions = $this->dependencyUtility->findInstalledExtensionsThatDependOnMe($extensionKey);
 		if (is_array($dependentExtensions) && count($dependentExtensions) > 0) {
-			throw new \TYPO3\CMS\Extensionmanager\Exception\ExtensionManagerException('Cannot deactivate extension ' . $extensionKey . ' - The extension(s) ' . implode(',', $dependentExtensions) . ' depend on it', 1342554622);
+			throw new \TYPO3\CMS\Extensionmanager\Exception\ExtensionManagerException(
+				\TYPO3\CMS\Extbase\Utility\LocalizationUtility::translate(
+					'extensionList.uninstall.dependencyError',
+					'extensionmanager',
+					array($extensionKey, implode(',', $dependentExtensions))
+				),
+				1342554622
+			);
 		} else {
 			$this->unloadExtension($extensionKey);
 		}
@@ -235,17 +208,34 @@ class InstallUtility implements \TYPO3\CMS\Core\SingletonInterface {
 	 */
 	public function processDatabaseUpdates(array $extension) {
 		$extTablesSqlFile = PATH_site . $extension['siteRelPath'] . '/ext_tables.sql';
+		$extTablesSqlContent = '';
 		if (file_exists($extTablesSqlFile)) {
-			$extTablesSqlContent = \TYPO3\CMS\Core\Utility\GeneralUtility::getUrl($extTablesSqlFile);
-				// @TODO: This should probably moved to TYPO3\CMS\Core\Cache\Cache->getDatabaseTableDefinitions ?!
-			$GLOBALS['typo3CacheManager']->setCacheConfigurations($GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']['cacheConfigurations']);
-			$extTablesSqlContent .= \TYPO3\CMS\Core\Cache\Cache::getDatabaseTableDefinitions();
+			$extTablesSqlContent .= \TYPO3\CMS\Core\Utility\GeneralUtility::getUrl($extTablesSqlFile);
+		}
+		if ($extTablesSqlContent !== '') {
 			$this->updateDbWithExtTablesSql($extTablesSqlContent);
 		}
 		$extTablesStaticSqlFile = PATH_site . $extension['siteRelPath'] . '/ext_tables_static+adt.sql';
 		if (file_exists($extTablesStaticSqlFile)) {
 			$extTablesStaticSqlContent = \TYPO3\CMS\Core\Utility\GeneralUtility::getUrl($extTablesStaticSqlFile);
 			$this->importStaticSql($extTablesStaticSqlContent);
+		}
+	}
+
+	/**
+	 * Gets all registered caches and creates required caching framework tables.
+	 *
+	 * @return void
+	 */
+	protected function processCachingFrameworkUpdates() {
+		$extTablesSqlContent = '';
+
+		// @TODO: This should probably moved to TYPO3\CMS\Core\Cache\Cache->getDatabaseTableDefinitions ?!
+		$GLOBALS['typo3CacheManager']->setCacheConfigurations($GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']['cacheConfigurations']);
+		$extTablesSqlContent .= \TYPO3\CMS\Core\Cache\Cache::getDatabaseTableDefinitions();
+
+		if ($extTablesSqlContent !== '') {
+			$this->updateDbWithExtTablesSql($extTablesSqlContent);
 		}
 	}
 

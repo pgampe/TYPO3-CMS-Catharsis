@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Extbase\SignalSlot;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010-2012 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
+ *  (c) 2010-2013 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
  *  Extbase is a backport of TYPO3 Flow. All credits go to the TYPO3 Flow team.
  *  All rights reserved
  *
@@ -62,13 +62,14 @@ class Dispatcher implements \TYPO3\CMS\Core\SingletonInterface {
 	 * Since this dispatches is used very early when the ObjectManager
 	 * is not fully initialized (especially concerning caching framework),
 	 * this is the only way.
+	 *
+	 * @return void
 	 */
 	public function initializeObject() {
-		if ($this->isInitialized) {
-			return;
+		if (!$this->isInitialized) {
+			$this->objectManager = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Extbase\\Object\\ObjectManager');
+			$this->isInitialized = TRUE;
 		}
-		$this->objectManager = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Extbase\\Object\\ObjectManager');
-		$this->isInitialized = TRUE;
 	}
 
 	/**

@@ -2,7 +2,7 @@
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2004-2011 Robert Lemke (robert@typo3.org)
+ *  (c) 2004-2013 Robert Lemke (robert@typo3.org)
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -33,7 +33,7 @@ require $BACK_PATH . 'init.php';
 // Include ADODB library:
 require_once \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath('adodb') . 'adodb/adodb.inc.php';
 // Include language labels:
-$LANG->includeLLFile('EXT:adodb/locallang_wizard.xml');
+$LANG->includeLLFile('EXT:adodb/locallang_wizard.xlf');
 /*
  * @deprecated since 6.0, the classname tx_adodb_checkconnectionwizard and this file is obsolete
  * and will be removed with 6.2. The class was renamed and is now located at:

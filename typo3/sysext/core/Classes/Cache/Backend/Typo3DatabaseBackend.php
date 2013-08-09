@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Core\Cache\Backend;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2008-2011 Ingo Renner <ingo@typo3.org>
+ *  (c) 2008-2013 Ingo Renner <ingo@typo3.org>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -134,7 +134,10 @@ class Typo3DatabaseBackend extends \TYPO3\CMS\Core\Cache\Backend\AbstractBackend
 	public function set($entryIdentifier, $data, array $tags = array(), $lifetime = NULL) {
 		$this->throwExceptionIfFrontendDoesNotExist();
 		if (!is_string($data)) {
-			throw new \TYPO3\CMS\Core\Cache\Exception\InvalidDataException('The specified data is of type "' . gettype($data) . '" but a string is expected.', 1236518298);
+			throw new \TYPO3\CMS\Core\Cache\Exception\InvalidDataException(
+				'The specified data is of type "' . gettype($data) . '" but a string is expected.',
+				1236518298
+			);
 		}
 		if (is_null($lifetime)) {
 			$lifetime = $this->defaultLifetime;
@@ -175,15 +178,19 @@ class Typo3DatabaseBackend extends \TYPO3\CMS\Core\Cache\Backend\AbstractBackend
 	 */
 	public function get($entryIdentifier) {
 		$this->throwExceptionIfFrontendDoesNotExist();
-		$cacheEntry = FALSE;
-		$cacheEntry = $GLOBALS['TYPO3_DB']->exec_SELECTgetSingleRow('content', $this->cacheTable, 'identifier = ' . $GLOBALS['TYPO3_DB']->fullQuoteStr($entryIdentifier, $this->cacheTable) . ' AND ' . $this->notExpiredStatement);
+
+		$cacheEntry = $GLOBALS['TYPO3_DB']->exec_SELECTgetSingleRow(
+			'content',
+			$this->cacheTable,
+			'identifier = ' . $GLOBALS['TYPO3_DB']->fullQuoteStr($entryIdentifier, $this->cacheTable) . ' AND ' . $this->notExpiredStatement
+		);
 		if (is_array($cacheEntry)) {
 			$cacheEntry = $cacheEntry['content'];
 		}
 		if ($this->compression && strlen($cacheEntry)) {
 			$cacheEntry = gzuncompress($cacheEntry);
 		}
-		return $cacheEntry;
+		return $cacheEntry !== NULL ? $cacheEntry : FALSE;
 	}
 
 	/**
@@ -195,7 +202,11 @@ class Typo3DatabaseBackend extends \TYPO3\CMS\Core\Cache\Backend\AbstractBackend
 	public function has($entryIdentifier) {
 		$this->throwExceptionIfFrontendDoesNotExist();
 		$hasEntry = FALSE;
-		$cacheEntries = $GLOBALS['TYPO3_DB']->exec_SELECTcountRows('*', $this->cacheTable, 'identifier = ' . $GLOBALS['TYPO3_DB']->fullQuoteStr($entryIdentifier, $this->cacheTable) . ' AND ' . $this->notExpiredStatement);
+		$cacheEntries = $GLOBALS['TYPO3_DB']->exec_SELECTcountRows(
+			'*',
+			$this->cacheTable,
+			'identifier = ' . $GLOBALS['TYPO3_DB']->fullQuoteStr($entryIdentifier, $this->cacheTable) . ' AND ' . $this->notExpiredStatement
+		);
 		if ($cacheEntries >= 1) {
 			$hasEntry = TRUE;
 		}
@@ -212,8 +223,14 @@ class Typo3DatabaseBackend extends \TYPO3\CMS\Core\Cache\Backend\AbstractBackend
 	public function remove($entryIdentifier) {
 		$this->throwExceptionIfFrontendDoesNotExist();
 		$entryRemoved = FALSE;
-		$res = $GLOBALS['TYPO3_DB']->exec_DELETEquery($this->cacheTable, 'identifier = ' . $GLOBALS['TYPO3_DB']->fullQuoteStr($entryIdentifier, $this->cacheTable));
-		$GLOBALS['TYPO3_DB']->exec_DELETEquery($this->tagsTable, 'identifier = ' . $GLOBALS['TYPO3_DB']->fullQuoteStr($entryIdentifier, $this->tagsTable));
+		$res = $GLOBALS['TYPO3_DB']->exec_DELETEquery(
+			$this->cacheTable,
+			'identifier = ' . $GLOBALS['TYPO3_DB']->fullQuoteStr($entryIdentifier, $this->cacheTable)
+		);
+		$GLOBALS['TYPO3_DB']->exec_DELETEquery(
+			$this->tagsTable,
+			'identifier = ' . $GLOBALS['TYPO3_DB']->fullQuoteStr($entryIdentifier, $this->tagsTable)
+		);
 		if ($GLOBALS['TYPO3_DB']->sql_affected_rows($res) == 1) {
 			$entryRemoved = TRUE;
 		}
@@ -229,7 +246,12 @@ class Typo3DatabaseBackend extends \TYPO3\CMS\Core\Cache\Backend\AbstractBackend
 	public function findIdentifiersByTag($tag) {
 		$this->throwExceptionIfFrontendDoesNotExist();
 		$cacheEntryIdentifiers = array();
-		$cacheEntryIdentifierRows = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows($this->identifierField, $this->tableList, $this->tagsTable . '.tag = ' . $GLOBALS['TYPO3_DB']->fullQuoteStr($tag, $this->tagsTable) . ' AND ' . $this->tableJoin . ' AND ' . $this->notExpiredStatement, $this->identifierField);
+		$cacheEntryIdentifierRows = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows(
+			$this->identifierField,
+			$this->tableList,
+			$this->tagsTable . '.tag = ' . $GLOBALS['TYPO3_DB']->fullQuoteStr($tag, $this->tagsTable) . ' AND ' . $this->tableJoin . ' AND ' . $this->notExpiredStatement,
+			$this->identifierField
+		);
 		foreach ($cacheEntryIdentifierRows as $cacheEntryIdentifierRow) {
 			$cacheEntryIdentifiers[$cacheEntryIdentifierRow['identifier']] = $cacheEntryIdentifierRow['identifier'];
 		}
@@ -257,7 +279,6 @@ class Typo3DatabaseBackend extends \TYPO3\CMS\Core\Cache\Backend\AbstractBackend
 		$this->throwExceptionIfFrontendDoesNotExist();
 		$tagsTableWhereClause = $this->tagsTable . '.tag = ' . $GLOBALS['TYPO3_DB']->fullQuoteStr($tag, $this->tagsTable);
 		$this->deleteCacheTableRowsByTagsTableWhereClause($tagsTableWhereClause);
-		$GLOBALS['TYPO3_DB']->exec_DELETEquery($this->tagsTable, $tagsTableWhereClause);
 	}
 
 	/**
@@ -372,10 +393,10 @@ class Typo3DatabaseBackend extends \TYPO3\CMS\Core\Cache\Backend\AbstractBackend
 		$GLOBALS['TYPO3_DB']->sql_free_result($cacheEntryIdentifierRowsResource);
 		if (count($cacheEntryIdentifiers)) {
 			$GLOBALS['TYPO3_DB']->exec_DELETEquery($this->cacheTable, 'identifier IN (' . implode(', ', $cacheEntryIdentifiers) . ')');
+			$GLOBALS['TYPO3_DB']->exec_DELETEquery($this->tagsTable, 'identifier IN (' . implode(', ', $cacheEntryIdentifiers) . ')');
 		}
 	}
 
 }
-
 
 ?>

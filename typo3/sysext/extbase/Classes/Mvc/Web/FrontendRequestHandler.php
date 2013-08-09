@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Extbase\Mvc\Web;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010-2012 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
+ *  (c) 2010-2013 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
  *  Extbase is a backport of TYPO3 Flow. All credits go to the TYPO3 Flow team.
  *  All rights reserved
  *
@@ -34,29 +34,15 @@ class FrontendRequestHandler extends \TYPO3\CMS\Extbase\Mvc\Web\AbstractRequestH
 
 	/**
 	 * @var \TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface
+	 * @inject
 	 */
 	protected $configurationManager;
 
 	/**
 	 * @var \TYPO3\CMS\Extbase\Service\ExtensionService
+	 * @inject
 	 */
 	protected $extensionService;
-
-	/**
-	 * @param \TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface $configurationManager
-	 * @return void
-	 */
-	public function injectConfigurationManager(\TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface $configurationManager) {
-		$this->configurationManager = $configurationManager;
-	}
-
-	/**
-	 * @param \TYPO3\CMS\Extbase\Service\ExtensionService $extensionService
-	 * @return void
-	 */
-	public function injectExtensionService(\TYPO3\CMS\Extbase\Service\ExtensionService $extensionService) {
-		$this->extensionService = $extensionService;
-	}
 
 	/**
 	 * Handles the web request. The response will automatically be sent to the client.
@@ -91,7 +77,7 @@ class FrontendRequestHandler extends \TYPO3\CMS\Extbase\Mvc\Web\AbstractRequestH
 	 * @return boolean If the request is a web request, TRUE otherwise FALSE
 	 */
 	public function canHandleRequest() {
-		return TYPO3_MODE === 'FE';
+		return $this->environmentService->isEnvironmentInFrontendMode();
 	}
 }
 

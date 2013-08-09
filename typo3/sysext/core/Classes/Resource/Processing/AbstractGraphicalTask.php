@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Core\Resource\Processing;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2012 Andreas Wolf <andreas.wolf@typo3.org>
+ *  (c) 2012-2013 Andreas Wolf <andreas.wolf@typo3.org>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -40,6 +40,11 @@ use \TYPO3\CMS\Core\Resource, \TYPO3\CMS\Core\Utility;
 abstract class AbstractGraphicalTask extends AbstractTask {
 
 	/**
+	 * @var string
+	 */
+	protected $targetFileExtension;
+
+	/**
 	 * Sets parameters needed in the checksum. Can be overridden to add additional parameters to the checksum.
 	 * This should include all parameters that could possibly vary between different task instances, e.g. the
 	 * TYPO3 image configuration in TYPO3_CONF_VARS[GFX] for graphic processing tasks.
@@ -54,22 +59,68 @@ abstract class AbstractGraphicalTask extends AbstractTask {
 	}
 
 	/**
-	 * Returns the filename
+	 * Returns the name the processed file should have
+	 * in the filesystem.
 	 *
 	 * @return string
 	 */
 	public function getTargetFilename() {
-		if ($this->targetFile->getOriginalFile()->getExtension() === 'jpg') {
-			$targetFileExtension = 'jpg';
-		} else {
-			$targetFileExtension = 'png';
-		}
-
-		return $this->targetFile->getOriginalFile()->getNameWithoutExtension()
+		return $this->getSourceFile()->getNameWithoutExtension()
 			. '_' . $this->getConfigurationChecksum()
-			. '.' . $targetFileExtension;
+			. '.' . $this->getTargetFileExtension();
 	}
 
+	/**
+	 * Determines the file extension the processed file
+	 * should have in the filesystem.
+	 *
+	 * @return string
+	 */
+	public function getTargetFileExtension() {
+		if (!isset($this->targetFileExtension)) {
+			$this->targetFileExtension = $this->determineTargetFileExtension();
+		}
+
+		return $this->targetFileExtension;
+	}
+
+	/**
+	 * Gets the file extension the processed file should
+	 * have in the filesystem by either using the configuration
+	 * setting, or the extension of the original file.
+	 *
+	 * @return string
+	 */
+	protected function determineTargetFileExtension() {
+		if (!empty($this->configuration['fileExtension'])) {
+			$targetFileExtension = $this->configuration['fileExtension'];
+		} else {
+			// explanation for "thumbnails_png"
+			// Bit0: If set, thumbnails from non-jpegs will be 'png', otherwise 'gif' (0=gif/1=png).
+			// Bit1: Even JPG's will be converted to png or gif (2=gif/3=png)
+
+			$targetFileExtensionConfiguration = $GLOBALS['TYPO3_CONF_VARS']['GFX']['thumbnails_png'];
+			if ($this->getSourceFile()->getExtension() === 'jpg') {
+				if ($targetFileExtensionConfiguration == 2) {
+					$targetFileExtension = 'gif';
+				} elseif ($targetFileExtensionConfiguration == 3) {
+					$targetFileExtension = 'png';
+				} else {
+					$targetFileExtension = 'jpg';
+				}
+			} else {
+				// check if a png or a gif should be created
+				if ($targetFileExtensionConfiguration == 1 || $this->getSourceFile()->getExtension() === 'png') {
+					$targetFileExtension = 'png';
+				} else {
+					// thumbnails_png is "0"
+					$targetFileExtension = 'gif';
+				}
+			}
+		}
+
+		return $targetFileExtension;
+	}
 
 }
 

@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Extensionmanager\Utility\Parser;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010 Marcus Krause <marcus#exp2010@t3sec.info>
+ *  (c) 2010-2013 Marcus Krause <marcus#exp2010@t3sec.info>
  *		   Steffen Kamper <info@sk-typo3.de>
  *  All rights reserved
  *
@@ -51,9 +51,15 @@ class ExtensionXmlPullParser extends \TYPO3\CMS\Extensionmanager\Utility\Parser\
 	 */
 	public function __construct() {
 		$this->requiredPhpExtensions = 'xmlreader';
-		if ($this->isAvailable()) {
-			$this->objXml = new \XMLReader();
-		}
+	}
+
+	/**
+	 * Create required parser
+	 *
+	 * @return  void
+	 */
+	protected function createParser() {
+		$this->objXml = new \XMLReader();
 	}
 
 	/**
@@ -64,6 +70,7 @@ class ExtensionXmlPullParser extends \TYPO3\CMS\Extensionmanager\Utility\Parser\
 	 * @throws \TYPO3\CMS\Extensionmanager\Exception\ExtensionManagerException in case of parser error
 	 */
 	public function parseXml($file) {
+		$this->createParser();
 		if (!(is_object($this->objXml) && get_class($this->objXml) == 'XMLReader')) {
 			throw new \TYPO3\CMS\Extensionmanager\Exception\ExtensionManagerException('Unable to create XML parser.', 1342640540);
 		}
@@ -92,60 +99,60 @@ class ExtensionXmlPullParser extends \TYPO3\CMS\Extensionmanager\Utility\Parser\
 	 */
 	protected function startElement($elementName) {
 		switch ($elementName) {
-		case 'extension':
-			$this->extensionKey = $this->objXml->getAttribute('extensionkey');
-			break;
-		case 'version':
-			$this->version = $this->objXml->getAttribute('version');
-			break;
-		case 'downloadcounter':
-			// downloadcounter could be a child node of
-			// extension or version
-			if ($this->version == NULL) {
-				$this->extensionDownloadCounter = $this->getElementValue($elementName);
-			} else {
-				$this->versionDownloadCounter = $this->getElementValue($elementName);
-			}
-			break;
-		case 'title':
-			$this->title = $this->getElementValue($elementName);
-			break;
-		case 'description':
-			$this->description = $this->getElementValue($elementName);
-			break;
-		case 'state':
-			$this->state = $this->getElementValue($elementName);
-			break;
-		case 'reviewstate':
-			$this->reviewstate = $this->getElementValue($elementName);
-			break;
-		case 'category':
-			$this->category = $this->getElementValue($elementName);
-			break;
-		case 'lastuploaddate':
-			$this->lastuploaddate = $this->getElementValue($elementName);
-			break;
-		case 'uploadcomment':
-			$this->uploadcomment = $this->getElementValue($elementName);
-			break;
-		case 'dependencies':
-			$this->dependencies = $this->convertDependencies($this->getElementValue($elementName));
-			break;
-		case 'authorname':
-			$this->authorname = $this->getElementValue($elementName);
-			break;
-		case 'authoremail':
-			$this->authoremail = $this->getElementValue($elementName);
-			break;
-		case 'authorcompany':
-			$this->authorcompany = $this->getElementValue($elementName);
-			break;
-		case 'ownerusername':
-			$this->ownerusername = $this->getElementValue($elementName);
-			break;
-		case 't3xfilemd5':
-			$this->t3xfilemd5 = $this->getElementValue($elementName);
-			break;
+			case 'extension':
+				$this->extensionKey = $this->objXml->getAttribute('extensionkey');
+				break;
+			case 'version':
+				$this->version = $this->objXml->getAttribute('version');
+				break;
+			case 'downloadcounter':
+				// downloadcounter could be a child node of
+				// extension or version
+				if ($this->version == NULL) {
+					$this->extensionDownloadCounter = $this->getElementValue($elementName);
+				} else {
+					$this->versionDownloadCounter = $this->getElementValue($elementName);
+				}
+				break;
+			case 'title':
+				$this->title = $this->getElementValue($elementName);
+				break;
+			case 'description':
+				$this->description = $this->getElementValue($elementName);
+				break;
+			case 'state':
+				$this->state = $this->getElementValue($elementName);
+				break;
+			case 'reviewstate':
+				$this->reviewstate = $this->getElementValue($elementName);
+				break;
+			case 'category':
+				$this->category = $this->getElementValue($elementName);
+				break;
+			case 'lastuploaddate':
+				$this->lastuploaddate = $this->getElementValue($elementName);
+				break;
+			case 'uploadcomment':
+				$this->uploadcomment = $this->getElementValue($elementName);
+				break;
+			case 'dependencies':
+				$this->dependencies = $this->convertDependencies($this->getElementValue($elementName));
+				break;
+			case 'authorname':
+				$this->authorname = $this->getElementValue($elementName);
+				break;
+			case 'authoremail':
+				$this->authoremail = $this->getElementValue($elementName);
+				break;
+			case 'authorcompany':
+				$this->authorcompany = $this->getElementValue($elementName);
+				break;
+			case 'ownerusername':
+				$this->ownerusername = $this->getElementValue($elementName);
+				break;
+			case 't3xfilemd5':
+				$this->t3xfilemd5 = $this->getElementValue($elementName);
+				break;
 		}
 	}
 
@@ -157,13 +164,13 @@ class ExtensionXmlPullParser extends \TYPO3\CMS\Extensionmanager\Utility\Parser\
 	 */
 	protected function endElement($elementName) {
 		switch ($elementName) {
-		case 'extension':
-			$this->resetProperties(TRUE);
-			break;
-		case 'version':
-			$this->notify();
-			$this->resetProperties();
-			break;
+			case 'extension':
+				$this->resetProperties(TRUE);
+				break;
+			case 'version':
+				$this->notify();
+				$this->resetProperties();
+				break;
 		}
 	}
 

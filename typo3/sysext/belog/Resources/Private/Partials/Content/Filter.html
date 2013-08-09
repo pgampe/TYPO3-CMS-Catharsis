@@ -1,7 +1,7 @@
 {namespace belog=TYPO3\CMS\Belog\ViewHelpers}
 
-<belog:be.addJsFile file="../t3lib/js/extjs/tceforms.js" />
-<belog:be.addJsFile file="../t3lib/js/extjs/ux/Ext.ux.DateTimePicker.js" />
+<belog:be.addJsFile file="sysext/backend/Resources/Public/JavaScript/tceforms.js" />
+<belog:be.addJsFile file="js/extjs/ux/Ext.ux.DateTimePicker.js" />
 
 <belog:be.inlineSettingsArray
 	settings="{
@@ -115,7 +115,7 @@
 					<f:if condition="{constraint.timeFrame} == 30">
 						<br />
 
-						<label for="tceforms-datetimefield-manualDateStart"><f:translate key="LLL:EXT:lang/locallang_common.xml:from" /></label>&nbsp;
+						<label for="tceforms-datetimefield-manualDateStart"><f:translate key="LLL:EXT:lang/locallang_common.xlf:from" /></label>&nbsp;
 						<f:form.textfield
 							property="manualDateStart"
 							value="{constraint.manualDateStart -> f:format.date(format:'{settings.dateFormat} {settings.timeFormat}')}"
@@ -130,7 +130,7 @@
 							&nbsp;
 						</span>
 
-						<label for="tceforms-datetimefield-manualDateStop"><f:translate key="LLL:EXT:lang/locallang_common.xml:to" /></label>&nbsp;
+						<label for="tceforms-datetimefield-manualDateStop"><f:translate key="LLL:EXT:lang/locallang_common.xlf:to" /></label>&nbsp;
 						<f:form.textfield
 							property="manualDateStop"
 							value="{constraint.manualDateStop -> f:format.date(format:'{settings.dateFormat} {settings.timeFormat}')}"

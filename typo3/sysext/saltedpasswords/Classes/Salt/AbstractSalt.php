@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Saltedpasswords\Salt;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2009-2011 Marcus Krause <marcus#exp2009@t3sec.info>
+ *  (c) 2009-2013 Marcus Krause <marcus#exp2009@t3sec.info>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -26,16 +26,12 @@ namespace TYPO3\CMS\Saltedpasswords\Salt;
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
-/**
- * Contains abstract class "tx_saltedpasswords_abstract_salts"
- * to be used in classes that provide salted hashing.
- */
+
 /**
  * Abtract class with methods needed to be extended
  * in a salted hashing class.
  *
  * @author Marcus Krause <marcus#exp2009@t3sec.info>
- * @since 2009-09-06
  */
 abstract class AbstractSalt {
 

@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Core\FormProtection;
 /***************************************************************
  * Copyright notice
  *
- * (c) 2010-2011 Oliver Klee <typo3-coding@oliverklee.de>
+ * (c) 2010-2013 Oliver Klee <typo3-coding@oliverklee.de>
  * All rights reserved
  *
  * This script is part of the TYPO3 project. The TYPO3 project is
@@ -91,16 +91,16 @@ class FormProtectionFactory {
 	 */
 	static protected function getClassNameByState() {
 		switch (TRUE) {
-		case self::isInstallToolSession():
-			$className = 'TYPO3\\CMS\\Core\\FormProtection\\InstallToolFormProtection';
-			break;
-		case self::isBackendSession():
-			$className = 'TYPO3\\CMS\\Core\\FormProtection\\BackendFormProtection';
-			break;
-		case self::isFrontendSession():
+			case self::isInstallToolSession():
+				$className = 'TYPO3\\CMS\\Core\\FormProtection\\InstallToolFormProtection';
+				break;
+			case self::isBackendSession():
+				$className = 'TYPO3\\CMS\\Core\\FormProtection\\BackendFormProtection';
+				break;
+			case self::isFrontendSession():
 
-		default:
-			$className = 'TYPO3\\CMS\\Core\\FormProtection\\DisabledFormProtection';
+			default:
+				$className = 'TYPO3\\CMS\\Core\\FormProtection\\DisabledFormProtection';
 		}
 		return $className;
 	}

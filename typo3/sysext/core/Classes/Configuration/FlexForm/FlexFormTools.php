@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Core\Configuration\FlexForm;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2006-2011 Kasper Skårhøj (kasperYYYY@typo3.com)
+ *  (c) 2006-2013 Kasper Skårhøj (kasperYYYY@typo3.com)
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -111,7 +111,7 @@ class FlexFormTools {
 		}
 		$this->callBackObj = $callBackObj;
 		// Get Data Structure:
-		$dataStructArray = \TYPO3\CMS\Backend\Utility\BackendUtility::getFlexFormDS($GLOBALS['TCA'][$table]['columns'][$field]['config'], $row, $table);
+		$dataStructArray = \TYPO3\CMS\Backend\Utility\BackendUtility::getFlexFormDS($GLOBALS['TCA'][$table]['columns'][$field]['config'], $row, $table, $field);
 		// If data structure was ok, proceed:
 		if (is_array($dataStructArray)) {
 			// Get flexform XML data:

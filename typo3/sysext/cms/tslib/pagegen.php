@@ -2,7 +2,7 @@
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 1999-2011 Kasper Skårhøj (kasperYYYY@typo3.com)
+ *  (c) 1999-2013 Kasper Skårhøj (kasperYYYY@typo3.com)
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -27,7 +27,6 @@
 /**
  * Generating the TypoScript based page.
  * Must be included from index_ts.php
- * Revised for TYPO3 3.6 June/2003 by Kasper Skårhøj
  *
  * @author Kasper Skårhøj <kasperYYYY@typo3.com>
  */

@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Sv;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2004-2011 René Fritz <r.fritz@colorcube.de>
+ *  (c) 2004-2013 René Fritz <r.fritz@colorcube.de>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -44,27 +44,27 @@ class AuthenticationService extends \TYPO3\CMS\Sv\AbstractAuthenticationService 
 	 *
 	 * @param array $loginData Credentials that are submitted and potentially modified by other services
 	 * @param string $passwordTransmissionStrategy Keyword of how the password has been hashed or encrypted before submission
-	 * @return bool
+	 * @return boolean
 	 */
 	public function processLoginData(array &$loginData, $passwordTransmissionStrategy) {
 		$isProcessed = TRUE;
 		// Processing data according to the state it was submitted in.
 		switch ($passwordTransmissionStrategy) {
-		case 'normal':
-			$loginData['uident_text'] = $loginData['uident'];
-			break;
-		case 'challenged':
-			$loginData['uident_text'] = '';
-			$loginData['uident_challenged'] = $loginData['uident'];
-			$loginData['uident_superchallenged'] = '';
-			break;
-		case 'superchallenged':
-			$loginData['uident_text'] = '';
-			$loginData['uident_challenged'] = '';
-			$loginData['uident_superchallenged'] = $loginData['uident'];
-			break;
-		default:
-			$isProcessed = FALSE;
+			case 'normal':
+				$loginData['uident_text'] = $loginData['uident'];
+				break;
+			case 'challenged':
+				$loginData['uident_text'] = '';
+				$loginData['uident_challenged'] = $loginData['uident'];
+				$loginData['uident_superchallenged'] = '';
+				break;
+			case 'superchallenged':
+				$loginData['uident_text'] = '';
+				$loginData['uident_challenged'] = '';
+				$loginData['uident_superchallenged'] = $loginData['uident'];
+				break;
+			default:
+				$isProcessed = FALSE;
 		}
 		if (!empty($loginData['uident_text'])) {
 			$loginData['uident_challenged'] = (string) md5(($loginData['uname'] . ':' . $loginData['uident_text'] . ':' . $loginData['chalvalue']));

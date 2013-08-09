@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Extbase\Object;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010-2012 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
+ *  (c) 2010-2013 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
  *  Extbase is a backport of TYPO3 Flow. All credits go to the TYPO3 Flow team.
  *  All rights reserved
  *
@@ -27,6 +27,9 @@ namespace TYPO3\CMS\Extbase\Object;
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
+
+use \TYPO3\CMS\Extbase\Object\Container\Container;
+
 /**
  * Implementation of the default Extbase Object Manager
  */
@@ -105,6 +108,21 @@ class ObjectManager implements ObjectManagerInterface {
 			$instance = $this->objectContainer->getInstance($objectName, $arguments);
 		}
 		return $instance;
+	}
+
+	/**
+	 * Returns the scope of the specified object.
+	 *
+	 * @param string $objectName The object name
+	 * @return integer One of the Container::SCOPE_ constants
+	 * @throws \TYPO3\CMS\Extbase\Object\Container\Exception\UnknownObjectException
+	 * @api
+	 */
+	public function getScope($objectName) {
+		if (!$this->isRegistered($objectName)) {
+			throw new \TYPO3\CMS\Extbase\Object\Container\Exception\UnknownObjectException('Object "' . $objectName . '" is not registered.', 1265367590);
+		}
+		return $this->objectContainer->isSingleton($objectName) ? Container::SCOPE_SINGLETON : Container::SCOPE_PROTOTYPE;
 	}
 
 	/**

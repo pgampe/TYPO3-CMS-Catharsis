@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Core\Tests\Unit\Log\Writer;
 /***************************************************************
  * Copyright notice
  *
- * (c) 2011-2012 Steffen Gebert (steffen.gebert@typo3.org)
+ * (c) 2011-2013 Steffen Gebert (steffen.gebert@typo3.org)
  * All rights reserved
  *
  * This script is part of the TYPO3 project. The TYPO3 project is
@@ -24,6 +24,10 @@ namespace TYPO3\CMS\Core\Tests\Unit\Log\Writer;
  * This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
+use \org\bovigo\vfs\vfsStream;
+use \org\bovigo\vfs\vfsStreamDirectory;
+use \org\bovigo\vfs\vfsStreamWrapper;
+
 /**
  * Testcase for \TYPO3\CMS\Core\Log\Writer\FileWriter
  *
@@ -42,10 +46,10 @@ class FileTest extends \TYPO3\CMS\Core\Tests\UnitTestCase {
 	protected $logFileName = 'test.log';
 
 	protected function setUpVfsStream() {
-		if (!class_exists('vfsStream')) {
+		if (!class_exists('org\\bovigo\\vfs\\vfsStream')) {
 			$this->markTestSkipped('File backend tests are not available with this phpunit version.');
 		}
-		\vfsStream::setup('LogRoot');
+		vfsStream::setup('LogRoot');
 	}
 
 	/**
@@ -68,18 +72,19 @@ class FileTest extends \TYPO3\CMS\Core\Tests\UnitTestCase {
 	/**
 	 * Creates a file writer
 	 *
+	 * @param string $prependName
 	 * @return \TYPO3\CMS\Core\Log\Writer\FileWriter
 	 */
-	protected function createWriter() {
+	protected function createWriter($prependName = '') {
 		/** @var \TYPO3\CMS\Core\Log\Writer\FileWriter $writer */
 		$writer = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Core\\Log\\Writer\\FileWriter', array(
-			'logFile' => 'vfs://LogRoot/' . $this->logFileDirectory . '/' . $this->logFileName
+			'logFile' => $this->getDefaultFileName($prependName)
 		));
 		return $writer;
 	}
 
-	protected function getDefaultFileName() {
-		return 'vfs://LogRoot/' . $this->logFileDirectory . '/' . $this->logFileName;
+	protected function getDefaultFileName($prependName = '') {
+		return 'vfs://LogRoot/' . $this->logFileDirectory . '/' . $prependName . $this->logFileName;
 	}
 
 	/**
@@ -87,7 +92,7 @@ class FileTest extends \TYPO3\CMS\Core\Tests\UnitTestCase {
 	 */
 	public function setLogFileSetsLogFile() {
 		$this->setUpVfsStream();
-		\vfsStream::newFile($this->logFileName)->at(\vfsStreamWrapper::getRoot());
+		vfsStream::newFile($this->logFileName)->at(vfsStreamWrapper::getRoot());
 		$writer = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Core\\Log\\Writer\\FileWriter');
 		$writer->setLogFile($this->getDefaultFileName());
 		$this->assertAttributeEquals($this->getDefaultFileName(), 'logFile', $writer);
@@ -108,7 +113,7 @@ class FileTest extends \TYPO3\CMS\Core\Tests\UnitTestCase {
 	public function createsLogFileDirectory() {
 		$this->setUpVfsStream();
 		$this->createWriter();
-		$this->assertTrue(\vfsStreamWrapper::getRoot()->hasChild($this->logFileDirectory));
+		$this->assertTrue(vfsStreamWrapper::getRoot()->hasChild($this->logFileDirectory));
 	}
 
 	/**
@@ -117,7 +122,7 @@ class FileTest extends \TYPO3\CMS\Core\Tests\UnitTestCase {
 	public function createsLogFile() {
 		$this->setUpVfsStream();
 		$this->createWriter();
-		$this->assertTrue(\vfsStreamWrapper::getRoot()->getChild($this->logFileDirectory)->hasChild($this->logFileName));
+		$this->assertTrue(vfsStreamWrapper::getRoot()->getChild($this->logFileDirectory)->hasChild($this->logFileName));
 	}
 
 	/**
@@ -127,8 +132,8 @@ class FileTest extends \TYPO3\CMS\Core\Tests\UnitTestCase {
 		$simpleRecord = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Core\\Log\\LogRecord', uniqid('test.core.log.fileWriter.simpleRecord.'), \TYPO3\CMS\Core\Log\LogLevel::INFO, 'test record');
 		$recordWithData = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Core\\Log\\LogRecord', uniqid('test.core.log.fileWriter.recordWithData.'), \TYPO3\CMS\Core\Log\LogLevel::ALERT, 'test record with data', array('foo' => array('bar' => 'baz')));
 		return array(
-			'simple record' => array($simpleRecord, (string) $simpleRecord),
-			'record with data' => array($recordWithData, (string) $recordWithData)
+			'simple record' => array($simpleRecord, trim((string) $simpleRecord)),
+			'record with data' => array($recordWithData, trim((string) $recordWithData))
 		);
 	}
 
@@ -141,10 +146,46 @@ class FileTest extends \TYPO3\CMS\Core\Tests\UnitTestCase {
 	public function logsToFile(\TYPO3\CMS\Core\Log\LogRecord $record, $expectedResult) {
 		$this->setUpVfsStream();
 		$this->createWriter()->writeLog($record);
-		$logFileContents = file_get_contents($this->getDefaultFileName());
-		$logFileContents = trim($logFileContents);
-		$expectedResult = trim($expectedResult);
-		$this->assertEquals($logFileContents, $expectedResult);
+		$logFileContents = trim(file_get_contents($this->getDefaultFileName()));
+		$this->assertEquals($expectedResult, $logFileContents);
+	}
+
+	/**
+	 * @test
+	 * @param \TYPO3\CMS\Core\Log\LogRecord $record Record Test Data
+	 * @param string $expectedResult Needle
+	 * @dataProvider logsToFileDataProvider
+	 */
+	public function differentWritersLogToDifferentFiles(\TYPO3\CMS\Core\Log\LogRecord $record, $expectedResult) {
+		$this->setUpVfsStream();
+		$firstWriter = $this->createWriter();
+		$secondWriter = $this->createWriter('second-');
+
+		$firstWriter->writeLog($record);
+		$secondWriter->writeLog($record);
+
+		$firstLogFileContents = trim(file_get_contents($this->getDefaultFileName()));
+		$secondLogFileContents = trim(file_get_contents($this->getDefaultFileName('second-')));
+
+		$this->assertEquals($expectedResult, $firstLogFileContents);
+		$this->assertEquals($expectedResult, $secondLogFileContents);
+	}
+
+	/**
+	 * @test
+	 */
+	public function aSecondLogWriterToTheSameFileDoesNotOpenTheFileTwice() {
+		$this->setUpVfsStream();
+
+		$firstWriter = $this->getMock('TYPO3\\CMS\\Core\\Log\\Writer\\FileWriter', array('dummy'));
+		$secondWriter = $this->getMock('TYPO3\\CMS\\Core\\Log\\Writer\\FileWriter', array('createLogFile'));
+
+		$secondWriter->expects($this->never())->method('createLogFile');
+
+		$logFilePrefix = uniqid('unique');
+		$firstWriter->setLogFile($this->getDefaultFileName($logFilePrefix));
+		$secondWriter->setLogFile($this->getDefaultFileName($logFilePrefix));
+
 	}
 
 	/**
@@ -165,7 +206,7 @@ class FileTest extends \TYPO3\CMS\Core\Tests\UnitTestCase {
 		$this->setUpVfsStream();
 		$directory = uniqid('Log');
 			// create a directory
-		\vfsStreamWrapper::getRoot()->addChild(new \vfsStreamDirectory($directory));
+		vfsStreamWrapper::getRoot()->addChild(new vfsStreamDirectory($directory));
 		$logFile = 'vfs://LogRoot/' . $directory . '/' . $this->logFileName;
 		$this->assertTrue(is_dir('vfs://LogRoot/' . $directory));
 		$this->createWriter()->setLogFile($logFile);

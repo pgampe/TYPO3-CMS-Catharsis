@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Backend\Tree\View;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 1999-2011 Kasper Skårhøj (kasperYYYY@typo3.com)
+ *  (c) 1999-2013 Kasper Skårhøj (kasperYYYY@typo3.com)
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -26,6 +26,10 @@ namespace TYPO3\CMS\Backend\Tree\View;
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
+
+use TYPO3\CMS\Backend\Utility\IconUtility;
+use TYPO3\CMS\Core\Resource\FolderInterface;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
  * Generate a folder tree,
@@ -83,7 +87,7 @@ class FolderTreeView extends \TYPO3\CMS\Backend\Tree\View\AbstractTreeView {
 	public function PMicon(\TYPO3\CMS\Core\Resource\Folder $folderObject, $subFolderCounter, $totalSubFolders, $nextCount, $isExpanded) {
 		$PM = $nextCount ? ($isExpanded ? 'minus' : 'plus') : 'join';
 		$BTM = $subFolderCounter == $totalSubFolders ? 'bottom' : '';
-		$icon = '<img' . \TYPO3\CMS\Backend\Utility\IconUtility::skinImg($this->backPath, ('gfx/ol/' . $PM . $BTM . '.gif'), 'width="18" height="16"') . ' alt="" />';
+		$icon = '<img' . IconUtility::skinImg($this->backPath, ('gfx/ol/' . $PM . $BTM . '.gif'), 'width="18" height="16"') . ' alt="" />';
 		if ($nextCount) {
 			$cmd = $this->generateExpandCollapseParameter($this->bank, !$isExpanded, $folderObject);
 			$icon = $this->PMiconATagWrap($icon, $cmd, !$isExpanded);
@@ -123,7 +127,10 @@ class FolderTreeView extends \TYPO3\CMS\Backend\Tree\View\AbstractTreeView {
 		$theFolderIcon = $this->addTagAttributes($icon, $this->titleAttrib ? $this->titleAttrib . '="' . $this->getTitleAttrib($folderObject) . '"' : '');
 		// Wrap icon in click-menu link.
 		if (!$this->ext_IconMode) {
-			$theFolderIcon = $GLOBALS['TBE_TEMPLATE']->wrapClickMenuOnIcon($theFolderIcon, $folderObject->getCombinedIdentifier(), '', 0);
+			// Check storage access to wrap with click menu
+			if ($folderObject->getStorage()->hasFolder('/')) {
+				$theFolderIcon = $GLOBALS['TBE_TEMPLATE']->wrapClickMenuOnIcon($theFolderIcon, $folderObject->getCombinedIdentifier(), '', 0);
+			}
 		} elseif (!strcmp($this->ext_IconMode, 'titlelink')) {
 			$aOnClick = 'return jumpTo(\'' . $this->getJumpToParam($folderObject) . '\',this,\'' . $this->domIdPrefix . $this->getId($folderObject) . '\',' . $this->bank . ');';
 			$theFolderIcon = '<a href="#" onclick="' . htmlspecialchars($aOnClick) . '">' . $theFolderIcon . '</a>';
@@ -141,8 +148,13 @@ class FolderTreeView extends \TYPO3\CMS\Backend\Tree\View\AbstractTreeView {
 	 * @internal
 	 */
 	public function wrapTitle($title, \TYPO3\CMS\Core\Resource\Folder $folderObject, $bank = 0) {
+		// Check storage access to wrap with click menu
+		if (!$folderObject->getStorage()->hasFolder('/')) {
+			return $title;
+		}
 		$aOnClick = 'return jumpTo(\'' . $this->getJumpToParam($folderObject) . '\', this, \'' . $this->domIdPrefix . $this->getId($folderObject) . '\', ' . $bank . ');';
 		$CSM = ' oncontextmenu="' . htmlspecialchars($GLOBALS['TBE_TEMPLATE']->wrapClickMenuOnIcon('', $folderObject->getCombinedIdentifier(), '', 0, ('&bank=' . $this->bank), '', TRUE)) . '"';
+
 		return '<a href="#" title="' . htmlspecialchars($title) . '" onclick="' . htmlspecialchars($aOnClick) . '"' . $CSM . '>' . $title . '</a>';
 	}
 
@@ -153,7 +165,7 @@ class FolderTreeView extends \TYPO3\CMS\Backend\Tree\View\AbstractTreeView {
 	 * @return integer The "uid" field value.
 	 */
 	public function getId(\TYPO3\CMS\Core\Resource\Folder $folderObject) {
-		return \TYPO3\CMS\Core\Utility\GeneralUtility::md5Int($folderObject->getCombinedIdentifier());
+		return GeneralUtility::md5Int($folderObject->getCombinedIdentifier());
 	}
 
 	/**
@@ -244,7 +256,7 @@ class FolderTreeView extends \TYPO3\CMS\Backend\Tree\View\AbstractTreeView {
 			/** @var $rootLevelFolder \TYPO3\CMS\Core\Resource\Folder */
 			$rootLevelFolder = $rootLevelFolderInfo['folder'];
 			$rootLevelFolderName = $rootLevelFolderInfo['name'];
-			$folderHashSpecUID = \TYPO3\CMS\Core\Utility\GeneralUtility::md5int($rootLevelFolder->getCombinedIdentifier());
+			$folderHashSpecUID = GeneralUtility::md5int($rootLevelFolder->getCombinedIdentifier());
 			$this->specUIDmap[$folderHashSpecUID] = $rootLevelFolder->getCombinedIdentifier();
 			// Hash key
 			$storageHashNumber = $this->getShortHashNumberForStorage($storageObject, $rootLevelFolder);
@@ -260,8 +272,13 @@ class FolderTreeView extends \TYPO3\CMS\Backend\Tree\View\AbstractTreeView {
 			} else {
 				$rootIcon = 'minusonly';
 			}
-			$icon = '<img' . \TYPO3\CMS\Backend\Utility\IconUtility::skinImg($this->backPath, ('gfx/ol/' . $rootIcon . '.gif')) . ' alt="" />';
-			$firstHtml = $this->PM_ATagWrap($icon, $cmd);
+			$icon = '<img' . IconUtility::skinImg($this->backPath, ('gfx/ol/' . $rootIcon . '.gif')) . ' alt="" />';
+			// Only link icon if storage is browseable
+			if (in_array($rootIcon, array('minusonly', 'plusonly'))) {
+				$firstHtml = $this->PM_ATagWrap($icon, $cmd);
+			} else {
+				$firstHtml = $icon;
+			}
 			// @todo: create sprite icons for user/group mounts etc
 			if ($storageObject->isBrowsable() === FALSE) {
 				$icon = 'apps-filetree-folder-locked';
@@ -274,7 +291,7 @@ class FolderTreeView extends \TYPO3\CMS\Backend\Tree\View\AbstractTreeView {
 				$rootLevelFolderName .= ' (' . $GLOBALS['LANG']->sL('LLL:EXT:lang/locallang_mod_file.xlf:sys_file_storage.isOffline') . ')';
 			}
 			// Preparing rootRec for the mount
-			$firstHtml .= $this->wrapIcon(\TYPO3\CMS\Backend\Utility\IconUtility::getSpriteIcon($icon), $rootLevelFolder);
+			$firstHtml .= $this->wrapIcon(IconUtility::getSpriteIcon($icon), $rootLevelFolder);
 			$row = array(
 				'uid' => $folderHashSpecUID,
 				'title' => $rootLevelFolderName,
@@ -308,25 +325,29 @@ class FolderTreeView extends \TYPO3\CMS\Backend\Tree\View\AbstractTreeView {
 	 */
 	public function getFolderTree(\TYPO3\CMS\Core\Resource\Folder $folderObject, $depth = 999, $type = '') {
 		$depth = intval($depth);
+
 		// This generates the directory tree
+		/* array of \TYPO3\CMS\Core\Resource\Folder */
 		$subFolders = $folderObject->getSubfolders();
-		sort($subFolders);
+		$subFolders = \TYPO3\CMS\Core\Resource\Utility\ListUtility::resolveSpecialFolderNames($subFolders);
+		uksort($subFolders, 'strnatcasecmp');
+
 		$totalSubFolders = count($subFolders);
 		$HTML = '';
 		$subFolderCounter = 0;
-		foreach ($subFolders as $subFolder) {
+		foreach ($subFolders as $subFolderName => $subFolder) {
 			$subFolderCounter++;
 			// Reserve space.
 			$this->tree[] = array();
 			// Get the key for this space
 			end($this->tree);
 			$treeKey = key($this->tree);
-			$specUID = \TYPO3\CMS\Core\Utility\GeneralUtility::md5int($subFolder->getCombinedIdentifier());
+			$specUID = GeneralUtility::md5int($subFolder->getCombinedIdentifier());
 			$this->specUIDmap[$specUID] = $subFolder->getCombinedIdentifier();
 			$row = array(
 				'uid' => $specUID,
 				'path' => $subFolder->getCombinedIdentifier(),
-				'title' => $subFolder->getName(),
+				'title' => $subFolderName,
 				'folder' => $subFolder
 			);
 			// Make a recursive call to the next level
@@ -354,17 +375,16 @@ class FolderTreeView extends \TYPO3\CMS\Backend\Tree\View\AbstractTreeView {
 				} else {
 					$icon = 'apps-filetree-folder-default';
 				}
-				if ($subFolder->getIdentifier() == '_temp_') {
+				$role = $subFolder->getRole();
+				if ($role !== FolderInterface::ROLE_DEFAULT) {
+					$row['_title'] = '<strong>' . $subFolderName . '</strong>';
+				}
+				if ($role === FolderInterface::ROLE_TEMPORARY) {
 					$icon = 'apps-filetree-folder-temp';
-					$row['title'] = $GLOBALS['LANG']->sL('LLL:EXT:lang/locallang_mod_file_list.xml:temp', TRUE);
-					$row['_title'] = '<strong>' . $row['title'] . '</strong>';
-				}
-				if ($subFolder->getIdentifier() == '_recycler_') {
+				} elseif ($role === FolderInterface::ROLE_RECYCLER) {
 					$icon = 'apps-filetree-folder-recycler';
-					$row['title'] = $GLOBALS['LANG']->sL('LLL:EXT:lang/locallang_mod_file_list.xml:recycler', TRUE);
-					$row['_title'] = '<strong>' . $row['title'] . '</strong>';
 				}
-				$icon = \TYPO3\CMS\Backend\Utility\IconUtility::getSpriteIcon($icon, array('title' => $subFolder->getIdentifier()), $overlays);
+				$icon = IconUtility::getSpriteIcon($icon, array('title' => $subFolderName), $overlays);
 				$HTML .= $this->wrapIcon($icon, $subFolder);
 			}
 			// Finally, add the row/HTML content to the ->tree array in the reserved key.
@@ -422,7 +442,7 @@ class FolderTreeView extends \TYPO3\CMS\Backend\Tree\View\AbstractTreeView {
 			$classAttr = $treeItem['row']['_CSSCLASS'];
 			$folderIdentifier = $folderObject->getCombinedIdentifier();
 			// this is set if the AJAX request has just opened this folder (via the PM command)
-			$isExpandedFolderIdentifier = $expandedFolderHash == \TYPO3\CMS\Core\Utility\GeneralUtility::md5int($folderIdentifier);
+			$isExpandedFolderIdentifier = $expandedFolderHash == GeneralUtility::md5int($folderIdentifier);
 			$idAttr = htmlspecialchars($this->domIdPrefix . $this->getId($folderObject) . '_' . $treeItem['bank']);
 			$itemHTML = '';
 			// If this item is the start of a new level,
@@ -496,9 +516,9 @@ class FolderTreeView extends \TYPO3\CMS\Backend\Tree\View\AbstractTreeView {
 	 * @deprecated since TYPO3 6.0, as the folder objects do the counting automatically
 	 */
 	public function getCount($file) {
-		\TYPO3\CMS\Core\Utility\GeneralUtility::logDeprecatedFunction();
+		GeneralUtility::logDeprecatedFunction();
 		// This generates the directory tree
-		$dirs = \TYPO3\CMS\Core\Utility\GeneralUtility::get_dirs($file);
+		$dirs = GeneralUtility::get_dirs($file);
 		$c = 0;
 		if (is_array($dirs)) {
 			$c = count($dirs);
@@ -563,12 +583,12 @@ class FolderTreeView extends \TYPO3\CMS\Backend\Tree\View\AbstractTreeView {
 				$fileMounts = $storage->getFileMounts();
 				if (count($fileMounts)) {
 					foreach ($fileMounts as $fileMount) {
-						$nkey = hexdec(substr(\TYPO3\CMS\Core\Utility\GeneralUtility::md5int($fileMount['folder']->getCombinedIdentifier()), 0, 4));
+						$nkey = hexdec(substr(GeneralUtility::md5int($fileMount['folder']->getCombinedIdentifier()), 0, 4));
 						$this->storageHashNumbers[$storageUid . $fileMount['folder']->getCombinedIdentifier()] = $nkey;
 					}
 				} else {
 					$folder = $storage->getRootLevelFolder();
-					$nkey = hexdec(substr(\TYPO3\CMS\Core\Utility\GeneralUtility::md5int($folder->getCombinedIdentifier()), 0, 4));
+					$nkey = hexdec(substr(GeneralUtility::md5int($folder->getCombinedIdentifier()), 0, 4));
 					$this->storageHashNumbers[$storageUid . $folder->getCombinedIdentifier()] = $nkey;
 				}
 			}
@@ -597,7 +617,7 @@ class FolderTreeView extends \TYPO3\CMS\Backend\Tree\View\AbstractTreeView {
 	 */
 	protected function evaluateExpandCollapseParameter($PM = NULL) {
 		if ($PM === NULL) {
-			$PM = \TYPO3\CMS\Core\Utility\GeneralUtility::_GP('PM');
+			$PM = GeneralUtility::_GP('PM');
 			// IE takes anchor as parameter
 			if (($PMpos = strpos($PM, '#')) !== FALSE) {
 				$PM = substr($PM, 0, $PMpos);
@@ -606,7 +626,7 @@ class FolderTreeView extends \TYPO3\CMS\Backend\Tree\View\AbstractTreeView {
 		// Take the first three parameters
 		list($mountKey, $doExpand, $folderIdentifier) = explode('_', $PM, 3);
 		// In case the folder identifier contains "_", we just need to get the fourth/last parameter
-		list($folderIdentifier, $treeName) = \TYPO3\CMS\Core\Utility\GeneralUtility::revExplode('_', $folderIdentifier, 2);
+		list($folderIdentifier, $treeName) = GeneralUtility::revExplode('_', $folderIdentifier, 2);
 		return array(
 			$mountKey,
 			$doExpand,
@@ -628,7 +648,7 @@ class FolderTreeView extends \TYPO3\CMS\Backend\Tree\View\AbstractTreeView {
 		$parts = array(
 			$mountKey !== NULL ? $mountKey : $this->bank,
 			$doExpand == 1 ? 1 : 0,
-			$folderObject !== NULL ? \TYPO3\CMS\Core\Utility\GeneralUtility::md5int($folderObject->getCombinedIdentifier()) : '',
+			$folderObject !== NULL ? GeneralUtility::md5int($folderObject->getCombinedIdentifier()) : '',
 			$treeName !== NULL ? $treeName : $this->treeName
 		);
 		return implode('_', $parts);

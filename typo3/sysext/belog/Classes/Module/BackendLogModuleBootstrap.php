@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Belog\Module;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2012 Christian Kuhn <lolli@schwarzbu.ch>
+ *  (c) 2012-2013 Christian Kuhn <lolli@schwarzbu.ch>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -64,14 +64,14 @@ class BackendLogModuleBootstrap {
 	public function main() {
 		$configuration = array(
 			'extensionName' => 'Belog',
-			'pluginName' => 'tools_BelogLog',
-			'vendorName' => 'TYPO3\CMS',
+			'pluginName' => 'system_BelogLog',
+			'vendorName' => 'TYPO3\\CMS',
 		);
 		// Yeah, this is ugly. But currently, there is no other direct way
 		// in extbase to force a specific controller in backend mode.
 		// Overwriting $_GET was the most simple solution here until extbase
 		// provides a clean way to solve this.
-		$_GET['tx_belog_tools_beloglog']['controller'] = 'WebInfo';
+		$_GET['tx_belog_system_beloglog']['controller'] = 'WebInfo';
 		/** @var $extbaseBootstrap \TYPO3\CMS\Extbase\Core\Bootstrap */
 		$extbaseBootstrap = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Extbase\\Core\\Bootstrap');
 		return $extbaseBootstrap->run('', $configuration);

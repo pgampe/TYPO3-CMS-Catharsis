@@ -37,10 +37,10 @@ class DataMapperTest extends \TYPO3\CMS\Extbase\Tests\Unit\BaseTestCase {
 	public function mapMapsArrayToObjectByCallingmapToObject() {
 		$rows = array(array('uid' => '1234'));
 		$object = new \stdClass();
-		$dataMapper = $this->getMock('TYPO3\\CMS\\Extbase\\Persistence\\Generic\\Mapper\\DataMapper', array('mapSingleRow', 'getTargetType'));
+		$dataMapper = $this->getAccessibleMock('TYPO3\\CMS\\Extbase\\Persistence\\Generic\\Mapper\\DataMapper', array('mapSingleRow', 'getTargetType'));
 		$dataMapper->expects($this->any())->method('getTargetType')->will($this->returnArgument(1));
 		$dataMapFactory = $this->getMock('TYPO3\\CMS\\Extbase\\Persistence\\Generic\\Mapper\\DataMapFactory');
-		$dataMapper->injectDataMapFactory($dataMapFactory);
+		$dataMapper->_set('dataMapFactory', $dataMapFactory);
 		$dataMapper->expects($this->once())->method('mapSingleRow')->with($rows[0])->will($this->returnValue($object));
 		$dataMapper->map(get_class($object), $rows);
 	}
@@ -55,7 +55,7 @@ class DataMapperTest extends \TYPO3\CMS\Extbase\Tests\Unit\BaseTestCase {
 		$identityMap->expects($this->once())->method('hasIdentifier')->with('1234')->will($this->returnValue(TRUE));
 		$identityMap->expects($this->once())->method('getObjectByIdentifier')->with('1234')->will($this->returnValue($object));
 		$dataMapper = $this->getAccessibleMock('TYPO3\\CMS\\Extbase\\Persistence\\Generic\\Mapper\\DataMapper', array('dummy'));
-		$dataMapper->injectIdentityMap($identityMap);
+		$dataMapper->_set('identityMap', $identityMap);
 		$dataMapper->_call('mapSingleRow', get_class($object), $row);
 	}
 
@@ -64,8 +64,9 @@ class DataMapperTest extends \TYPO3\CMS\Extbase\Tests\Unit\BaseTestCase {
 	 */
 	public function thawPropertiesSetsPropertyValues() {
 		$className = 'Class' . md5(uniqid(mt_rand(), TRUE));
-		eval('class ' . $className . ' extends TYPO3\\CMS\\Extbase\\DomainObject\\AbstractEntity { public $firstProperty; public $secondProperty; public $thirdProperty; public $fourthProperty; }');
-		$object = new $className();
+		$classNameWithNS = __NAMESPACE__ . '\\' . $className;
+		eval('namespace ' . __NAMESPACE__ . '; class ' . $className . ' extends \\TYPO3\\CMS\\Extbase\\DomainObject\\AbstractEntity { public $firstProperty; public $secondProperty; public $thirdProperty; public $fourthProperty; }');
+		$object = new $classNameWithNS();
 		$row = array(
 			'uid' => '1234',
 			'firstProperty' => 'firstValue',
@@ -83,10 +84,11 @@ class DataMapperTest extends \TYPO3\CMS\Extbase\Tests\Unit\BaseTestCase {
 		$dataMap = $this->getAccessibleMock('TYPO3\\CMS\\Extbase\\Persistence\\Generic\\Mapper\\DataMap', array('dummy'), array($className, $className));
 		$dataMap->_set('columnMaps', $columnMaps);
 		$dataMaps = array(
-			$className => $dataMap
+			$classNameWithNS => $dataMap
 		);
-		$classSchema = new \TYPO3\CMS\Extbase\Reflection\ClassSchema($className);
-		$classSchema->injectTypeHandlingService(new \TYPO3\CMS\Extbase\Service\TypeHandlingService());
+		/** @var \TYPO3\CMS\Core\Tests\AccessibleObjectInterface|\TYPO3\CMS\Extbase\Reflection\ClassSchema $classSchema */
+		$classSchema = $this->getAccessibleMock('TYPO3\CMS\Extbase\Reflection\ClassSchema', array('dummy'), array($classNameWithNS));
+		$classSchema->_set('typeHandlingService', new \TYPO3\CMS\Extbase\Service\TypeHandlingService());
 		$classSchema->addProperty('pid', 'integer');
 		$classSchema->addProperty('uid', 'integer');
 		$classSchema->addProperty('firstProperty', 'string');
@@ -97,7 +99,7 @@ class DataMapperTest extends \TYPO3\CMS\Extbase\Tests\Unit\BaseTestCase {
 		$mockReflectionService->expects($this->any())->method('getClassSchema')->will($this->returnValue($classSchema));
 		$dataMapper = $this->getAccessibleMock('TYPO3\\CMS\\Extbase\\Persistence\\Generic\\Mapper\\DataMapper', array('dummy'));
 		$dataMapper->_set('dataMaps', $dataMaps);
-		$dataMapper->injectReflectionService($mockReflectionService);
+		$dataMapper->_set('reflectionService', $mockReflectionService);
 		$dataMapper->_call('thawProperties', $object, $row);
 		$this->assertAttributeEquals('firstValue', 'firstProperty', $object);
 		$this->assertAttributeEquals(1234, 'secondProperty', $object);
@@ -135,6 +137,46 @@ class DataMapperTest extends \TYPO3\CMS\Extbase\Tests\Unit\BaseTestCase {
 		$dataMapper->expects($this->any())->method('getDataMap')->will($this->returnValue($dataMap));
 		$result = $dataMapper->_call('fetchRelatedEager', $this->getMock('TYPO3\\CMS\\Extbase\\DomainObject\\AbstractEntity'), 'SomeName', '');
 		$this->assertEquals(array(), $result);
+	}
+
+	/**
+	 * Data provider for date checks. Date will be stored based on UTC in
+	 * the database. That's why it's not possible to check for explicit date
+	 * strings but using the date('c') conversion instead, which considers the
+	 * current local timezone setting.
+	 *
+	 * @return array
+	 */
+	public function mapDateTimeHandlesDifferentFieldEvaluationsDataProvider() {
+		return array(
+			'nothing' => array(NULL, NULL, NULL),
+			'timestamp' => array(1, NULL, date('c', 1)),
+			'empty date' => array('0000-00-00', 'date', NULL),
+			'valid date' => array('2013-01-01', 'date', date('c', strtotime('2013-01-01T00:00:00+00:00'))),
+			'empty datetime' => array('0000-00-00 00:00:00', 'datetime', NULL),
+			'valid datetime' => array('2013-01-01 01:02:03', 'datetime', date('c', strtotime('2013-01-01T01:02:03+00:00'))),
+		);
+	}
+
+	/**
+	 * @param NULL|string|integer $value
+	 * @param NULL|string $storageFormat
+	 * @param NULL|string $expectedValue
+	 * @test
+	 * @dataProvider mapDateTimeHandlesDifferentFieldEvaluationsDataProvider
+	 */
+	public function mapDateTimeHandlesDifferentFieldEvaluations($value, $storageFormat, $expectedValue) {
+		$accessibleClassName = $this->buildAccessibleProxy('TYPO3\\CMS\\Extbase\\Persistence\\Generic\\Mapper\\DataMapper');
+		$accessibleDataMapFactory = new $accessibleClassName();
+
+		/** @var $dateTime NULL|\DateTime */
+		$dateTime = $accessibleDataMapFactory->_callRef('mapDateTime', $value, $storageFormat);
+
+		if ($expectedValue === NULL) {
+			$this->assertNull($dateTime);
+		} else {
+			$this->assertEquals($expectedValue, $dateTime->format('c'));
+		}
 	}
 }
 

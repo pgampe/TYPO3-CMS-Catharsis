@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Backend\ContextMenu\Pagetree\Extdirect;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010-2011 TYPO3 Tree Team <http://forge.typo3.org/projects/typo3v4-extjstrees>
+ *  (c) 2010-2013 TYPO3 Tree Team <http://forge.typo3.org/projects/typo3v4-extjstrees>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -26,6 +26,7 @@ namespace TYPO3\CMS\Backend\ContextMenu\Pagetree\Extdirect;
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
+
 /**
  * Context Menu of the Page Tree
  *
@@ -64,6 +65,5 @@ class ContextMenuConfiguration extends \TYPO3\CMS\Backend\ContextMenu\Extdirect\
 	}
 
 }
-
 
 ?>

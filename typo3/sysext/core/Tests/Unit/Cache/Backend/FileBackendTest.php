@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Core\Tests\Unit\Cache\Backend;
 /***************************************************************
 *  Copyright notice
 *
-*  (c) 2009-2011 Ingo Renner <ingo@typo3.org>
+*  (c) 2009-2013 Ingo Renner <ingo@typo3.org>
 *  All rights reserved
 *
 *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -24,6 +24,9 @@ namespace TYPO3\CMS\Core\Tests\Unit\Cache\Backend;
 *  This copyright notice MUST APPEAR in all copies of the script!
 ***************************************************************/
 
+use \org\bovigo\vfs\vfsStreamDirectory;
+use \org\bovigo\vfs\vfsStreamWrapper;
+
 /**
  * Testcase for the File cache backend
  *
@@ -35,24 +38,17 @@ namespace TYPO3\CMS\Core\Tests\Unit\Cache\Backend;
 class FileBackendTest extends \TYPO3\CMS\Core\Tests\UnitTestCase {
 
 	/**
-	 * Enable backup of global and system variables
-	 *
-	 * @var boolean
-	 */
-	protected $backupGlobals = TRUE;
-
-	/**
 	 * Sets up this testcase
 	 *
 	 * @return void
 	 */
 	public function setUp() {
-		if (!class_exists('\vfsStreamWrapper')) {
+		if (!class_exists('org\\bovigo\\vfs\\vfsStreamWrapper')) {
 			$this->markTestSkipped('File backend tests are not available with this phpunit version.');
 		}
 
-		\vfsStreamWrapper::register();
-		\vfsStreamWrapper::setRoot(new \vfsStreamDirectory('Foo'));
+		vfsStreamWrapper::register();
+		vfsStreamWrapper::setRoot(new vfsStreamDirectory('Foo'));
 	}
 
 	/**

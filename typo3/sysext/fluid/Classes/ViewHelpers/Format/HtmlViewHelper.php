@@ -97,13 +97,14 @@ class HtmlViewHelper extends \TYPO3\CMS\Fluid\Core\ViewHelper\AbstractViewHelper
 
 	/**
 	 * Copies the specified parseFunc configuration to $GLOBALS['TSFE']->tmpl->setup in Backend mode
-	 * This somewhat hacky work around is currently needed because the parseFunc() function of tslib_cObj relies on those variables to be set
+	 * This somewhat hacky work around is currently needed because the parseFunc() function of \TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer relies on those variables to be set
 	 *
 	 * @return void
 	 */
 	protected function simulateFrontendEnvironment() {
 		$this->tsfeBackup = isset($GLOBALS['TSFE']) ? $GLOBALS['TSFE'] : NULL;
 		$GLOBALS['TSFE'] = new \stdClass();
+		$GLOBALS['TSFE']->tmpl = new \stdClass();
 		$GLOBALS['TSFE']->tmpl->setup = $this->configurationManager->getConfiguration(\TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface::CONFIGURATION_TYPE_FULL_TYPOSCRIPT);
 	}
 

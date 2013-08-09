@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Workspaces\ExtDirect;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010-2011 Workspaces Team (http://forge.typo3.org/projects/show/typo3v4-workspaces)
+ *  (c) 2010-2013 Workspaces Team (http://forge.typo3.org/projects/show/typo3v4-workspaces)
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -132,7 +132,7 @@ class ExtDirectServer extends \TYPO3\CMS\Workspaces\ExtDirect\AbstractHandler {
 		if ($GLOBALS['TCA'][$parameter->table]) {
 			if ($GLOBALS['TCA'][$parameter->table]['interface']['showRecordFieldList']) {
 				$fieldsOfRecords = $GLOBALS['TCA'][$parameter->table]['interface']['showRecordFieldList'];
-				$fieldsOfRecords = \TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(',', $fieldsOfRecords, 1);
+				$fieldsOfRecords = \TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(',', $fieldsOfRecords, TRUE);
 			}
 		}
 		foreach ($fieldsOfRecords as $fieldName) {

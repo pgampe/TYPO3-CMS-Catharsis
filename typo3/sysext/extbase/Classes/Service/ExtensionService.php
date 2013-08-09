@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Extbase\Service;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2010-2012 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
+ *  (c) 2010-2013 Extbase Team (http://forge.typo3.org/projects/typo3v4-mvc)
  *  Extbase is a backport of TYPO3 Flow. All credits go to the TYPO3 Flow team.
  *  All rights reserved
  *
@@ -28,7 +28,7 @@ namespace TYPO3\CMS\Extbase\Service;
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 /**
- * Utilities to process FlexForms
+ * Service for determining basic extension params
  */
 class ExtensionService implements \TYPO3\CMS\Core\SingletonInterface {
 
@@ -37,29 +37,21 @@ class ExtensionService implements \TYPO3\CMS\Core\SingletonInterface {
 
 	/**
 	 * @var \TYPO3\CMS\Extbase\Object\ObjectManagerInterface
+	 * @inject
 	 */
 	protected $objectManager;
 
 	/**
 	 * @var \TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface
+	 * @inject
 	 */
 	protected $configurationManager;
 
 	/**
-	 * @param \TYPO3\CMS\Extbase\Object\ObjectManagerInterface $objectManager
-	 * @return void
+	 * Cache of result for getTargetPidByPlugin()
+	 * @var array
 	 */
-	public function injectObjectManager(\TYPO3\CMS\Extbase\Object\ObjectManagerInterface $objectManager) {
-		$this->objectManager = $objectManager;
-	}
-
-	/**
-	 * @param \TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface $configurationManager
-	 * @return void
-	 */
-	public function injectConfigurationManager(\TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface $configurationManager) {
-		$this->configurationManager = $configurationManager;
-	}
+	protected $targetPidPluginCache = array();
 
 	/**
 	 * Determines the plugin namespace of the specified plugin (defaults to "tx_[extensionname]_[pluginname]")
@@ -160,11 +152,15 @@ class ExtensionService implements \TYPO3\CMS\Core\SingletonInterface {
 		}
 		$pluginSignature = strtolower($extensionName . '_' . $pluginName);
 		if ($frameworkConfiguration['view']['defaultPid'] === 'auto') {
-			$pages = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows('pid', 'tt_content', 'list_type=' . $GLOBALS['TYPO3_DB']->fullQuoteStr($pluginSignature, 'tt_content') . ' AND CType="list"' . $GLOBALS['TSFE']->sys_page->enableFields('tt_content') . ' AND sys_language_uid=' . $GLOBALS['TSFE']->sys_language_uid, '', '', 2);
-			if (count($pages) > 1) {
-				throw new \TYPO3\CMS\Extbase\Exception('There is more than one "' . $pluginSignature . '" plugin in the current page tree. Please remove one plugin or set the TypoScript configuration "plugin.tx_' . $pluginSignature . '.view.defaultPid" to a fixed page id', 1280773643);
+			if (!array_key_exists($pluginSignature, $this->targetPidPluginCache)) {
+				$pages = $GLOBALS['TYPO3_DB']->exec_SELECTgetRows('pid', 'tt_content', 'list_type=' . $GLOBALS['TYPO3_DB']->fullQuoteStr($pluginSignature, 'tt_content') . ' AND CType="list"' . $GLOBALS['TSFE']->sys_page->enableFields('tt_content') . ' AND sys_language_uid=' . $GLOBALS['TSFE']->sys_language_uid, '', '', 2);
+				if (count($pages) > 1) {
+					throw new \TYPO3\CMS\Extbase\Exception('There is more than one "' . $pluginSignature . '" plugin in the current page tree. Please remove one plugin or set the TypoScript configuration "plugin.tx_' . $pluginSignature . '.view.defaultPid" to a fixed page id', 1280773643);
+				}
+				$this->targetPidPluginCache[$pluginSignature] = count($pages) > 0 ? $pages[0]['pid'] : NULL;
 			}
-			return count($pages) > 0 ? $pages[0]['pid'] : NULL;
+			return $this->targetPidPluginCache[$pluginSignature];
+
 		}
 		return (integer) $frameworkConfiguration['view']['defaultPid'];
 	}
@@ -199,6 +195,24 @@ class ExtensionService implements \TYPO3\CMS\Core\SingletonInterface {
 		$actions = $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['extbase']['extensions'][$extensionName]['plugins'][$pluginName]['controllers'][$controllerName]['actions'];
 		return current($actions);
 	}
+
+	/**
+	 * Resolve the page type number to use for building a link for a specific format
+	 *
+	 * @param string $extensionName name of the extension that has defined the target page type
+	 * @param string $format The format for which to look up the page type
+	 * @return integer Page type number for target page
+	 */
+	public function getTargetPageTypeByFormat($extensionName, $format) {
+		$targetPageType = 0;
+		$settings = $this->configurationManager->getConfiguration(\TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface::CONFIGURATION_TYPE_SETTINGS, $extensionName);
+		$formatToPageTypeMapping = isset($settings['view']['formatToPageTypeMapping']) ? $settings['view']['formatToPageTypeMapping'] : array();
+		if (is_array($formatToPageTypeMapping) && array_key_exists($format, $formatToPageTypeMapping)) {
+			$targetPageType = (integer) $formatToPageTypeMapping[$format];
+		}
+		return $targetPageType;
+	}
+
 }
 
 ?>

@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Form\Domain\Model\Element;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2008 Patrick Broens (patrick@patrickbroens.nl)
+ *  (c) 2008-2013 Patrick Broens (patrick@patrickbroens.nl)
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -23,6 +23,7 @@ namespace TYPO3\CMS\Form\Domain\Model\Element;
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
+
 /**
  * Content model object
  *
@@ -73,8 +74,8 @@ class ContentElement extends \TYPO3\CMS\Form\Domain\Model\Element\AbstractElemen
 
 	/**
 	 * Return the value data of the content object
-	 * Calls tslib_cObj->cObjGetSingle which renders
-	 * configuration into html string
+	 * Calls \TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer->cObjGetSingle
+	 * which renders configuration into html string
 	 *
 	 * @return string
 	 */
@@ -84,6 +85,5 @@ class ContentElement extends \TYPO3\CMS\Form\Domain\Model\Element\AbstractElemen
 	}
 
 }
-
 
 ?>

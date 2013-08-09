@@ -5,7 +5,7 @@ use \TYPO3\CMS\Core\Utility\GeneralUtility;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2008-2011 Dmitry Dulepov <dmitry@typo3.org>
+ *  (c) 2008-2013 Dmitry Dulepov <dmitry@typo3.org>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -344,6 +344,13 @@ class ClassLoader {
 			$delimiter = '\\';
 		}
 		$classNameParts = explode($delimiter, $tempClassName, 4);
+
+		// we only handle classes that follow the convention Vendor\Product\Classname or is longer
+		// so we won't deal with class names that only have one or two parts
+		if (count($classNameParts) <= 2) {
+			return;
+		}
+
 		if (isset($classNameParts[0]) && $classNameParts[0] === 'TYPO3' && (isset($classNameParts[1]) && $classNameParts[1] === 'CMS')) {
 			$extensionKey = GeneralUtility::camelCaseToLowerCaseUnderscored($classNameParts[2]);
 			$classNameWithoutVendorAndProduct = $classNameParts[3];

@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Scheduler\Tests\Unit\Controller;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2011 Andy Grunwald <andreas.grunwald@wmdb.de>
+ *  (c) 2011-2013 Andy Grunwald <andreas.grunwald@wmdb.de>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -23,16 +23,15 @@ namespace TYPO3\CMS\Scheduler\Tests\Unit\Controller;
  *
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
+
 /**
- * Testcase for class "tx_scheduler_Module"
+ * Test case
  *
  * @author Andy Grunwald <andreas.grunwald@wmdb.de>
  */
 class SchedulerModuleControllerTest extends \TYPO3\CMS\Core\Tests\UnitTestCase {
 
 	/**
-	 * Object to Test: tx_scheduler_Module
-	 *
 	 * @var \TYPO3\CMS\Scheduler\Controller\SchedulerModuleController
 	 */
 	protected $testObject;

@@ -4,7 +4,7 @@ namespace TYPO3\CMS\Workspaces\ExtDirect;
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2011 Tolleiv Nietsch <typo3@tolleiv.de>
+ *  (c) 2011-2013 Tolleiv Nietsch <typo3@tolleiv.de>
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -36,8 +36,8 @@ class PagetreeCollectionsProcessor implements \TYPO3\CMS\Backend\Tree\Pagetree\C
 	/**
 	 * @abstract
 	 * @param \TYPO3\CMS\Backend\Tree\Pagetree\PagetreeNode $node
-	 * @param int $mountPoint
-	 * @param int $level
+	 * @param integer $mountPoint
+	 * @param integer $level
 	 * @param \TYPO3\CMS\Backend\Tree\Pagetree\PagetreeNodeCollection $nodeCollection
 	 * @return void
 	 */
@@ -52,7 +52,7 @@ class PagetreeCollectionsProcessor implements \TYPO3\CMS\Backend\Tree\Pagetree\C
 	 * @abstract
 	 * @param \TYPO3\CMS\Backend\Tree\Pagetree\PagetreeNode $node
 	 * @param string $searchFilter
-	 * @param int $mountPoint
+	 * @param integer $mountPoint
 	 * @param \TYPO3\CMS\Backend\Tree\Pagetree\PagetreeNodeCollection $nodeCollection
 	 * @return void
 	 */

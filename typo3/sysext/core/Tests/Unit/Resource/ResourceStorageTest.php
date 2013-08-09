@@ -1,10 +1,12 @@
 <?php
 namespace TYPO3\CMS\Core\Tests\Unit\Resource;
 
+use TYPO3\CMS\Core\Resource\ResourceStorage;
+
 /***************************************************************
  * Copyright notice
  *
- * (c) 2011 Andreas Wolf <andreas.wolf@ikt-werk.de>
+ * (c) 2011-2013 Andreas Wolf <andreas.wolf@ikt-werk.de>
  * All rights reserved
  *
  * This script is part of the TYPO3 project. The TYPO3 project is
@@ -23,8 +25,6 @@ namespace TYPO3\CMS\Core\Tests\Unit\Resource;
  *
  * This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
-
-require_once 'vfsStream/vfsStream.php';
 
 /**
  * Testcase for the VFS mount class
@@ -334,7 +334,7 @@ class ResourceStorageTest extends \TYPO3\CMS\Core\Tests\Unit\Resource\BaseTestCa
 	 */
 	public function checkUserActionPermissionReturnsFalseIfPermissionIsSetToZero() {
 		$this->prepareFixture(array());
-		$this->fixture->injectUserPermissions(array('readFolder' => TRUE, 'writeFile' => TRUE));
+		$this->fixture->setUserPermissions(array('readFolder' => TRUE, 'writeFile' => TRUE));
 		$this->assertTrue($this->fixture->checkUserActionPermission('read', 'folder'));
 	}
 
@@ -364,7 +364,7 @@ class ResourceStorageTest extends \TYPO3\CMS\Core\Tests\Unit\Resource\BaseTestCa
 	 */
 	public function checkUserActionPermissionAcceptsArbitrarilyCasedArguments($permissions, $action, $type) {
 		$this->prepareFixture(array());
-		$this->fixture->injectUserPermissions($permissions);
+		$this->fixture->setUserPermissions($permissions);
 		$this->assertTrue($this->fixture->checkUserActionPermission($action, $type));
 	}
 
@@ -373,7 +373,7 @@ class ResourceStorageTest extends \TYPO3\CMS\Core\Tests\Unit\Resource\BaseTestCa
 	 */
 	public function userActionIsDisallowedIfPermissionIsSetToFalse() {
 		$this->prepareFixture(array());
-		$this->fixture->injectUserPermissions(array('readFolder' => FALSE));
+		$this->fixture->setUserPermissions(array('readFolder' => FALSE));
 		$this->assertFalse($this->fixture->checkUserActionPermission('read', 'folder'));
 	}
 
@@ -382,7 +382,7 @@ class ResourceStorageTest extends \TYPO3\CMS\Core\Tests\Unit\Resource\BaseTestCa
 	 */
 	public function userActionIsDisallowedIfPermissionIsNotSet() {
 		$this->prepareFixture(array());
-		$this->fixture->injectUserPermissions(array('readFolder' => TRUE));
+		$this->fixture->setUserPermissions(array('readFolder' => TRUE));
 		$this->assertFalse($this->fixture->checkUserActionPermission('write', 'folder'));
 	}
 
@@ -476,7 +476,7 @@ class ResourceStorageTest extends \TYPO3\CMS\Core\Tests\Unit\Resource\BaseTestCa
 		$mockedDriver = $this->createDriverMock(array('basePath' => $this->getMountRootUrl()), NULL, NULL);
 		$this->initializeVfs();
 		$this->prepareFixture(array(), NULL, $mockedDriver);
-		$this->fixture->injectFileMount('/mountFolder');
+		$this->fixture->addFileMount('/mountFolder');
 		$this->assertEquals(1, count($this->fixture->getFileMounts()));
 		$this->fixture->isWithinFileMountBoundaries($mockedFile);
 	}
@@ -529,6 +529,23 @@ class ResourceStorageTest extends \TYPO3\CMS\Core\Tests\Unit\Resource\BaseTestCa
 		$this->prepareFixture(array(), TRUE);
 		$this->fixture->setDriver($mockedDriver);
 		$this->fixture->createFolder('newFolder', $mockedParentFolder);
+	}
+
+	/**
+	 * @test
+	 * @expectedException \RuntimeException
+	 */
+	public function deleteFolderThrowsExceptionIfFolderIsNotEmptyAndRecursiveDeleteIsDisabled() {
+		/** @var \TYPO3\CMS\Core\Resource\Folder|\PHPUnit_Framework_MockObject_MockObject $folderMock */
+		$folderMock = $this->getMock('TYPO3\\CMS\\Core\\Resource\\Folder', array(), array(), '', FALSE);
+		/** @var \TYPO3\CMS\Core\Resource\Driver\AbstractDriver|\PHPUnit_Framework_MockObject_MockObject $driverMock */
+		$driverMock = $this->getMock('TYPO3\\CMS\\Core\\Resource\\Driver\\AbstractDriver', array(), array(), '', FALSE);
+		$driverMock->expects($this->once())->method('isFolderEmpty')->will($this->returnValue(FALSE));
+		/** @var \TYPO3\CMS\Core\Resource\ResourceStorage|\PHPUnit_Framework_MockObject_MockObject|\TYPO3\CMS\Core\Tests\AccessibleObjectInterface $fixture */
+		$fixture = $this->getAccessibleMock('TYPO3\\CMS\\Core\\Resource\\ResourceStorage', array('checkFolderActionPermission'), array(), '', FALSE);
+		$fixture->expects($this->any())->method('checkFolderActionPermission')->will($this->returnValue(TRUE));
+		$fixture->_set('driver', $driverMock);
+		$fixture->deleteFolder($folderMock, FALSE);
 	}
 
 	/**
@@ -647,6 +664,139 @@ class ResourceStorageTest extends \TYPO3\CMS\Core\Tests\Unit\Resource\BaseTestCa
 		$this->fixture->getFileList('/', 0, 0, TRUE, TRUE, TRUE);
 	}
 
+	/**
+	 * @test
+	 */
+	public function getRoleReturnsDefaultForRegularFolders() {
+		$folderIdentifier = uniqid();
+		$this->addToMount(array(
+			$folderIdentifier => array()
+		));
+		$this->prepareFixture(array());
+
+		$role = $this->fixture->getRole($this->getSimpleFolderMock('/' . $folderIdentifier . '/'));
+
+		$this->assertSame(\TYPO3\CMS\Core\Resource\FolderInterface::ROLE_DEFAULT, $role);
+	}
+
+	/**
+	 * @test
+	 */
+	public function getRoleReturnsCorrectValueForDefaultProcessingFolder() {
+		$this->prepareFixture(array());
+
+		$role = $this->fixture->getRole($this->getSimpleFolderMock('/' . ResourceStorage::DEFAULT_ProcessingFolder . '/'));
+
+		$this->assertSame(\TYPO3\CMS\Core\Resource\FolderInterface::ROLE_PROCESSING, $role);
+	}
+
+	/**
+	 * @test
+	 */
+	public function getRoleReturnsCorrectValueForConfiguredProcessingFolder() {
+		$folderIdentifier = uniqid();
+		$this->addToMount(array(
+			$folderIdentifier => array()
+		));
+		$this->prepareFixture(array(), FALSE, NULL, array('processingfolder' => '/' . $folderIdentifier . '/'));
+
+		$role = $this->fixture->getRole($this->getSimpleFolderMock('/' . $folderIdentifier . '/'));
+
+		$this->assertSame(\TYPO3\CMS\Core\Resource\FolderInterface::ROLE_PROCESSING, $role);
+	}
+
+	/**
+	 * Data provider for fetchFolderListFromDriverReturnsFolderWithoutProcessedFolder function
+	 */
+	public function fetchFolderListFromDriverReturnsFolderWithoutProcessedFolderDataProvider() {
+		return array(
+			'Empty folderList returned' => array(
+				'path' => '/',
+				'processingFolder' => '_processed_',
+				'folderList' => array(),
+				'expectedItems' => array()
+			),
+			'Empty _processed_ folder' => array(
+				'path' => '/',
+				'processingFolder' => '',
+				'folderList' => array(
+					'_processed_' => array(),
+					'_temp_' => array(),
+					'user_upload' => array()
+				),
+				'expectedItems' => array(
+					'user_upload' => array(),
+					'_temp_' => array()
+				)
+			),
+			'_processed_ folder not in folder list' => array(
+				'path' => '/',
+				'processingFolder' => '_processed_',
+				'folderList' => array(
+					'_temp_' => array()
+				),
+				'expectedItems' => array(
+					'_temp_' => array()
+				)
+			),
+			'_processed_ folder on root level' => array(
+				'path' => '/',
+				'processingFolder' => '_processed_',
+				'folderList' => array(
+					'_processed_' => array(),
+					'_temp_' => array(),
+					'user_upload' => array()
+				),
+				'expectedItems' => array(
+					'user_upload' => array(),
+					'_temp_' => array()
+				)
+			),
+			'_processed_ folder on second level' => array(
+				'path' => 'Public/',
+				'processingFolder' => 'Public/_processed_',
+				'folderList' => array(
+					'_processed_' => array(),
+					'_temp_' => array(),
+					'user_upload' => array()
+				),
+				'expectedItems' => array(
+					'user_upload' => array(),
+					'_temp_' => array()
+				)
+			),
+			'_processed_ folder on third level' => array(
+				'path' => 'Public/Files/',
+				'processingFolder' => 'Public/Files/_processed_',
+				'folderList' => array(
+					'_processed_' => array(),
+					'_temp_' => array(),
+					'user_upload' => array()
+				),
+				'expectedItems' => array(
+					'user_upload' => array(),
+					'_temp_' => array()
+				)
+			)
+		);
+	}
+
+	/**
+	 * @test
+	 * @dataProvider fetchFolderListFromDriverReturnsFolderWithoutProcessedFolderDataProvider
+	 */
+	public function fetchFolderListFromDriverReturnsFolderWithoutProcessedFolder($path, $processingFolder, $folderList, $expectedItems) {
+		$driverMock = $this->createDriverMock(array(), NULL, array('getFolderList', 'folderExists'));
+		$driverMock->expects($this->once())->method('getFolderList')->will($this->returnValue($folderList));
+		if (!empty($expectedItems)) {
+			// This function is called only if there were any folders retrieved
+			$driverMock->expects($this->once())->method('folderExists')->will($this->returnValue(TRUE));
+		}
+
+		$this->prepareFixture(array(), FALSE, $driverMock, array('processingfolder' => $processingFolder));
+
+		$this->assertSame($expectedItems, $this->fixture->fetchFolderListFromDriver($path));
+	}
 }
 
 ?>

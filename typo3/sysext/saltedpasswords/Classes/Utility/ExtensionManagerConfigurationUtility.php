@@ -1,6 +1,32 @@
 <?php
 namespace TYPO3\CMS\Saltedpasswords\Utility;
 
+/***************************************************************
+ *  Copyright notice
+ *
+ *  (c) Steffen Ritter (info@rs-websystems.de)
+ *  All rights reserved
+ *
+ *  This script is part of the TYPO3 project. The TYPO3 project is
+ *  free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  The GNU General Public License can be found at
+ *  http://www.gnu.org/copyleft/gpl.html.
+ *  A copy is found in the textfile GPL.txt and important notices to the license
+ *  from the author is found in LICENSE.txt distributed with these scripts.
+ *
+ *
+ *  This script is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  This copyright notice MUST APPEAR in all copies of the script!
+ ***************************************************************/
+
 /**
  * class providing configuration checks for saltedpasswords.
  *
@@ -38,33 +64,33 @@ class ExtensionManagerConfigurationUtility {
 	 */
 	private function setErrorLevel($level) {
 		switch ($level) {
-		case 'error':
-			$this->errorType = \TYPO3\CMS\Core\Messaging\FlashMessage::ERROR;
-			$this->header = 'Errors found in your configuration';
-			$this->preText = 'SaltedPasswords will not work until these problems have been resolved:<br />';
-			break;
-		case 'warning':
-			if ($this->errorType < \TYPO3\CMS\Core\Messaging\FlashMessage::ERROR) {
-				$this->errorType = \TYPO3\CMS\Core\Messaging\FlashMessage::WARNING;
-				$this->header = 'Warnings about your configuration';
-				$this->preText = 'SaltedPasswords might behave different than expected:<br />';
-			}
-			break;
-		case 'info':
-			if ($this->errorType < \TYPO3\CMS\Core\Messaging\FlashMessage::WARNING) {
-				$this->errorType = \TYPO3\CMS\Core\Messaging\FlashMessage::INFO;
-				$this->header = 'Additional information';
-				$this->preText = '<br />';
-			}
-			break;
-		case 'ok':
-			// TODO: Remove INFO condition as it has lower importance
-			if ($this->errorType < \TYPO3\CMS\Core\Messaging\FlashMessage::WARNING && $this->errorType != \TYPO3\CMS\Core\Messaging\FlashMessage::INFO) {
-				$this->errorType = \TYPO3\CMS\Core\Messaging\FlashMessage::OK;
-				$this->header = 'No errors were found';
-				$this->preText = 'SaltedPasswords has been configured correctly and works as expected.<br />';
-			}
-			break;
+			case 'error':
+				$this->errorType = \TYPO3\CMS\Core\Messaging\FlashMessage::ERROR;
+				$this->header = 'Errors found in your configuration';
+				$this->preText = 'SaltedPasswords will not work until these problems have been resolved:<br />';
+				break;
+			case 'warning':
+				if ($this->errorType < \TYPO3\CMS\Core\Messaging\FlashMessage::ERROR) {
+					$this->errorType = \TYPO3\CMS\Core\Messaging\FlashMessage::WARNING;
+					$this->header = 'Warnings about your configuration';
+					$this->preText = 'SaltedPasswords might behave different than expected:<br />';
+				}
+				break;
+			case 'info':
+				if ($this->errorType < \TYPO3\CMS\Core\Messaging\FlashMessage::WARNING) {
+					$this->errorType = \TYPO3\CMS\Core\Messaging\FlashMessage::INFO;
+					$this->header = 'Additional information';
+					$this->preText = '<br />';
+				}
+				break;
+			case 'ok':
+				// TODO: Remove INFO condition as it has lower importance
+				if ($this->errorType < \TYPO3\CMS\Core\Messaging\FlashMessage::WARNING && $this->errorType != \TYPO3\CMS\Core\Messaging\FlashMessage::INFO) {
+					$this->errorType = \TYPO3\CMS\Core\Messaging\FlashMessage::OK;
+					$this->header = 'No errors were found';
+					$this->preText = 'SaltedPasswords has been configured correctly and works as expected.<br />';
+				}
+				break;
 		}
 	}
 
@@ -105,7 +131,7 @@ your TYPO3 installation and the usability of the backend.';
 		$extConf = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf']['saltedpasswords']);
 		$this->extConf['BE'] = array_merge((array) $extConf['BE.'], (array) $requestSetup['BE.']);
 		$this->extConf['FE'] = array_merge((array) $extConf['FE.'], (array) $requestSetup['FE.']);
-		$GLOBALS['LANG']->includeLLFile('EXT:saltedpasswords/locallang.xml');
+		$GLOBALS['LANG']->includeLLFile('EXT:saltedpasswords/locallang.xlf');
 	}
 
 	/**
